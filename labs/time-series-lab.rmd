@@ -18,21 +18,18 @@ knitr::opts_chunk$set(echo = TRUE, message=F, warning=F, fig.width = 10, fig.pos
 ```
 
 ```{r, echo=FALSE, results="hide"}
-library(stargazer)
+library( stargazer )
+library( dplyr )
+library( pander )
 ```
 
 
 # Instructions 
 
-For this lab you need to upload the TS_lab data available in the class R package. 
-
 There are **4 sets of questions** to be answered. You can earn up to 100 points + bonus questions. Points are indicated next to each question. 
 
 
 
-```{r, echo = T, results = "hide"}
-data = read.csv( "DATA/TS_lab.csv" )
-```
 
 ## The policy problem
 
@@ -52,8 +49,52 @@ Data on ridership were provided by the local transit agency. The variable "Passe
 ------------------------ | -----------------------------------------------------
 Passengers               |Daily passengers on the buses (in thousands)                      
 
-As policy analyst, you propose to utilize a time series model to analyze the data. 
 
+
+You can load the data by adding this chunk to your file: 
+
+```{r}
+passengers <- 
+c(1328, 1407, 1425, 1252, 1287, 1353, 1301, 1294, 1336, 1371, 
+1408, 1326, 1364, 1295, 1320, 1260, 1347, 1316, 1287, 1292, 1259, 
+1349, 1274, 1365, 1317, 1341, 1316, 1313, 1285, 1369, 1309, 1446, 
+1422, 1397, 1358, 1310, 1294, 1373, 1161, 1320, 1376, 1335, 1382, 
+1455, 1374, 1267, 1318, 1370, 1297, 1391, 1269, 1341, 1238, 1391, 
+1296, 1260, 1330, 1447, 1296, 1389, 1278, 1319, 1333, 1372, 1325, 
+1299, 1299, 1312, 1352, 1355, 1404, 1317, 1330, 1325, 1368, 1311, 
+1310, 1242, 1247, 1366, 1401, 1282, 1298, 1301, 1341, 1353, 1398, 
+1352, 1300, 1442, 1365, 1411, 1360, 1100, 1334, 1336, 1274, 1303, 
+1487, 1341, 1436, 1294, 1390, 1338, 1400, 1325, 1352, 1353, 1288, 
+1304, 1338, 1355, 1212, 1386, 1426, 1380, 1425, 1287, 1337, 1288, 
+1348, 1308, 1402, 1370, 1401, 1363, 1312, 1457, 1367, 1320, 1338, 
+1447, 1371, 1402, 1461, 1382, 1260, 1341, 1309, 1317, 1509, 1403, 
+1324, 1347, 1351, 1307, 1267, 1312, 1472, 1403, 1327, 1501, 1470, 
+1438, 1416, 1369, 1355, 1317, 1448, 1423, 1401, 1356, 1400, 1356, 
+1452, 1435, 1387, 1372, 1390, 1538, 1460, 1474, 1510, 1360, 1424, 
+1275, 1381, 1453, 1430, 1404, 1350, 1375, 1327, 1312, 1464, 1478, 
+1536, 1397, 1229, 1337, 1442, 1316, 1455, 1312, 1505, 1440, 1408, 
+1429, 1280, 1560, 1422, 1363, 1349, 1326, 1400, 1464, 1488, 1352, 
+1485, 1446, 1540, 1435, 1377, 1287, 1480, 1353, 1359, 1493, 1387, 
+1314, 1478, 1306, 1462, 1533, 1261, 1488, 1482, 1461, 1452, 1540, 
+1438, 1423, 1425, 1353, 1489, 1546, 1401, 1459, 1527, 1341, 1516, 
+1406, 1414, 1442, 1272, 1371, 1435, 1446, 1287, 1496, 1442, 1614, 
+1305, 1459, 1342, 1478, 1501, 1357, 1428, 1444, 1431, 1425, 1434, 
+1488, 1508, 1454, 1436, 1485, 1522, 1437, 1396, 1407, 1382, 1444, 
+1494, 1303, 1552, 1282, 1352, 1412, 1378, 1579, 1543, 1425, 1404, 
+1380, 1593, 1555, 1532, 1514, 1485, 1504, 1442, 1401, 1453, 1493, 
+1522, 1417, 1545, 1422, 1540, 1447, 1447, 1575, 1431, 1516, 1542, 
+1519, 1485, 1526, 1400, 1563, 1471, 1517, 1506, 1514, 1444, 1348, 
+1588, 1574, 1275, 1331, 1436, 1475, 1570, 1513, 1469, 1573, 1432, 
+1467, 1513, 1475, 1572, 1430, 1512, 1532, 1487, 1474, 1508, 1410, 
+1455, 1445, 1544, 1500, 1517, 1496, 1606, 1613, 1526, 1487, 1540, 
+1511, 1534, 1620, 1409, 1542, 1517, 1493, 1443, 1463, 1391, 1583, 
+1516, 1700, 1422)
+```
+
+
+
+
+Use a time series model to analyze the impact of the program. 
 
 
 # Lab Questions 
@@ -63,8 +104,19 @@ As policy analyst, you propose to utilize a time series model to analyze the dat
 
 **Q1: Prepare the data for the analysis.** 
 
-* **Q1a:** Create the three variables you will need to run a time series model: Time, TimeSince, and Treatment. (5 points for each variable)
-* **Q1b:** Provide a summary statistics table. (5 points)
+* **Q1a:** Create the three variables you will need to run a time series model: Time, TimeSince, and Treatment. Your dataset should look something like this: (5 points for each variable)
+
+ 
+
+```{r, echo=F}
+URL <- "https://raw.githubusercontent.com/DS4PS/pe4ps-textbook/master/labs/DATA/TS_lab.csv"
+dat <- read.csv( URL, stringsAsFactors=F )
+rbind( head(dat), tail(dat)) %>% pander()
+```
+
+
+
+* **Q1b:** Provide a table of summary statistics of passenger traffic. (5 points)
 
 
 
@@ -112,8 +164,67 @@ The mayor proposes to utilize city B as a control group. City B is a neighbor ci
 * **BQ2** Interpret only the new coefficients in the model. Indicate whether they are stastitically significant and what they represent. Can you confirm the results of the previous model? (5 points)
 
 
+```{r}
+URL <- "https://raw.githubusercontent.com/DS4PS/pe4ps-textbook/master/labs/DATA/TS_Groups_lab.csv"
+dat.grouped <- read.csv( URL, stringsAsFactors=F )
+```
 
 
+```{r, echo=F}
+head( dat.grouped ) %>% pander()
+```
+
+
+
+```{r}
+group <- 
+c(1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 
+1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 
+1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 
+1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 
+1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 
+1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 
+1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 
+1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 
+1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 
+1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 
+1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 
+1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 
+1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 
+1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 
+1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 
+1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 
+1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 
+1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 
+1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 
+1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 
+1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 
+1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 
+1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 0L, 0L, 
+0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 
+0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 
+0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 
+0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 
+0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 
+0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 
+0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 
+0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 
+0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 
+0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 
+0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 
+0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 
+0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 
+0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 
+0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 
+0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 
+0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 
+0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 
+0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 
+0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 
+0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 
+0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 
+0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L)
+```
 
 
 ---

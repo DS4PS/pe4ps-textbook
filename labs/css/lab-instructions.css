@@ -8,7 +8,7 @@ body{
      margin-right:20%} 
      
 
-h1, h2 { color: #25383C; }
+h1, h2 { color: #25383C; margin-top: 60px; }
 h3, h4, strong { color: #6D7B8D; }
 
 a { color:#AF7817; } 
