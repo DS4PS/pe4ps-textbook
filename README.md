@@ -2,6 +2,8 @@
 
 Open source textbook for Program Evaluation for the Public Sector
 
+![](https://raw.githubusercontent.com/DS4PS/pe4ps/master/docs/images/logo-red.png)
+
 
 #### Textbook 
 
