@@ -1,0 +1,843 @@
+---
+title: "Propensity Score Matching"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message=F, warning=F, fig.width = 10)
+```
+**Packages**
+
+Here are the packages we will use in this lecture. If you don't remember how to install them, you can have a look at the code. 
+
+* **kableExtra** for nice tables
+* **dplyr** to support formatting options in your table
+* **MatchIt** to perform matching algorithms in R
+* **ggplot2** for nice visualizations of covariates
+
+```{r, eval=F}
+
+install.packages( "dplyr" )
+library("dplyr")
+
+install.packages( "kableExtra" )
+library("kableExtra")
+
+
+```
+
+**What you will learn**
+
+* What are propensity scores?
+* How can you calculate propensity scores?
+* Which strategies can you use to match observations? What are pros and cons?
+* What are some limitations of using propensity scores?
+
+```{r, echo=FALSE, results="hide"}
+
+# install.packages( "scales", repos="https://cran.cnr.berkeley.edu" )
+library("scales")
+
+# install.packages( "dplyr", repos="https://cran.cnr.berkeley.edu" )
+library("dplyr")
+
+# install.packages( "kableExtra", repos="https://cran.cnr.berkeley.edu" )
+library("kableExtra")
+
+# install.packages( "MatchIt", repos="https://cran.cnr.berkeley.edu" )
+library("MatchIt")
+
+# install.packages( "ggplot2", repos="https://cran.cnr.berkeley.edu" )
+library("ggplot2")
+
+```
+
+```{r doppel, fig.cap="Doppelg?nger", out.width='80%', echo=F }
+knitr::include_graphics( "FIGURE/MatchScores/doppel.jpg" )
+```
+
+# The key concept
+
+We have learned that randomized controlled trials are the gold standard approach for evaluating program effectiveness. Yet in several cases, a randomized control trial is not a feasible option and we need to consider other methods, such as the quasi-experimental methodologies that we have seen so far. 
+
+Propensity score matching is another methodology that tries to replicate a randomized controlled trail by using observational data. In several circumstances, individuals self-select into the treatment or the control group because of "certain characteristics" that make them more likely to select into one group or the other. For instance, we might be interested in understanding whether government funding provided to small businesses to hire individuals from disadvantaged populations are actually effective. If we just consider the businesses that applied and received the funding, we might estimate a positive correlation... But to what extent were these businesses already planning to hire individuals from disadvantaged populations? In order words, what would have these businesses done had they not receive funding? In non randomized trailes we have self selection biases and we might lack an approprate counterfactual.
+
+The key idea behind **propensity scores** is to find individuals that are similar based on a given set of characteristics but that self-selected into the treatment and the control group. In order words, we are looking for two (or more) similar businesses, one of which applied and received funding (treatment), another which did not apply for funding (control or counterfactual). We can then compare their outcomes.
+
+In very simple terms, we are looking for **doppelg?nger** as the ones in the picture above. A [doppelg?nger](https://en.wikipedia.org/wiki/Doppelg%C3%A4nger) are two individuals that look identical even if they are not genetically related!
+
+
+## A simple example
+
+Let's see this with an example. Immagine you have 10 students. Some of these students participate into an after-school program aimed to increase social cohesion and interaction among students; some other students decide not to participate. We want to estimate what the effect of the program on students' social behavior. Social behavior is measured on a index from 0 to 7.
+
+```{r}
+
+tc =c("t", "c", "t", "c", "t", "c", "t", "c", "t", "c", "t", "c")
+n = c(1, 4, 10, 9, 7, 6, 11, 9, 3, 2, 5, 12)
+x = c(2, 2, 4.5, 4.5, 5.5, 5.5, 7, 7, 8, 8, 10, 3)
+y = c(7, 2, 6, 1.2, 6, 2.4, 5, 3, 6.4, 1.9, 3.7, 4.8)
+
+df = as.data.frame(cbind(n, x, y))
+
+df$tc = tc
+
+col_plot = c("darkred", "dodgerblue1")
+
+plot(df$n, df$y, xlab = "Observation", ylab = "Social Behavior Index", lwd = 5, col = col_plot, xaxt = "n")
+axis(1, at=1:12, labels=c("#1", "#2", "#3", "#4", "#5", "#6", "#7", "#8", "#9", "#10", "#11", "#12"))
+
+points(10.8, 2, col = "darkred", lwd = 5)
+text(11.5, 2, "Participants")
+points(10.6, 1.5, col = "dodgerblue1", lwd = 5)
+text(11.5, 1.5, "Non-Participants")
+
+```
+
+We cannot simply compare the two groups. For instance, students who already have many friends might be more likely to decide to participate in the program; therefore they would report greater social skills even without the program. We want to find pairs of students who have a similar number of friends but where one student enrolled in the program and the other did not. We could start by creating a graph plotting each student's number of friends and their social behavior index.
+
+```{r}
+
+plot(x,y, lwd = 5, ylab = "Social Behavior Indext", xlab = "# of friends", col = col_plot, xaxt = "n")
+
+axis(1, at=1:12)
+
+points(9, 2, col = "darkred", lwd = 5)
+text(9.5, 2, "Participants")
+points(8.8, 1.5, col = "dodgerblue1", lwd = 5)
+text(9.5, 1.5, "Non-Participants")
+
+
+```
+
+Some students are a perfect match because they have the same number of friends. Some others do not match with any obsevations and we decide to eliminate them.
+
+```{r}
+
+plot(x,y, lwd = 5, ylab = "Social Behavior Indext", xlab = "# of friends", col = col_plot)
+text(10, 3.7, "X", col = "black", font = 2, cex = 2)
+text(3, 4.8, "X", col = "black", font = 2, cex = 2)
+
+points(9, 2, col = "darkred", lwd = 5)
+text(9.5, 2, "Participants")
+points(8.8, 1.5, col = "dodgerblue1", lwd = 5)
+text(9.5, 1.5, "Non-Participants")
+
+```
+
+The remaining individuals are "matches" - same X score, but self selected in the treatment or the control group. In other words we have created a group of individuals who undergo the treatment and their counterfactuals so that we can estimate the effectiveness of the treatment.
+
+```{r}
+
+plot(x,y, lwd = 5, ylab = "Social Behavior Indext", xlab = "# of friends", col = col_plot)
+
+text(2.3, 7, "T1", col = "darkred", font = 2)
+text(2.3, 2, "C1", col = "dodgerblue1", font = 2)
+
+text(4.8, 6, "T2", col = "darkred", font = 2)
+text(4.8, 1.2, "C2", col = "dodgerblue1", font = 2)
+
+text(5.8, 6, "T3", col = "darkred", font = 2)
+text(5.8, 2.4, "C3", col = "dodgerblue1", font = 2)
+
+text(7.3, 5, "T4", col = "darkred", font = 2)
+text(7.3, 3, "C4", col = "dodgerblue1", font = 2)
+
+text(8.3, 6.4, "T5", col = "darkred", font = 2)
+text(8.3, 1.9, "C5", col = "dodgerblue1", font = 2)
+
+text(10, 3.7, "X", col = "black", font = 2, cex = 2)
+text(3, 4.8, "X", col = "black", font = 2, cex = 2)
+
+points(9, 2, col = "darkred", lwd = 5)
+text(9.5, 2, "Participants")
+points(8.8, 1.5, col = "dodgerblue1", lwd = 5)
+text(9.5, 1.5, "Non-Participants")
+
+
+segments(2, 7, 2, 2, lty = 3)
+segments(4.5, 6, 4.5, 1.2, lty = 3)
+segments(5.5, 6, 5.5, 2.4, lty = 3)
+segments(7, 5, 7, 3, lty = 3)
+segments(8, 6.4, 8, 1.9, lty = 3)
+
+```
+
+We can now use a simple t-test to calculate the difference in the outcome. Since the p-value < 0.05, we can reject the null hypothesis that the means of the two groups are equal. Students who participate in the program report a higher social behavior index score compared to students who did not participate in the program. 
+
+```{r}
+
+# We eliminate the two observations that have no match
+df = df[!df$x == 10,]
+df = df[!df$x == 3,]
+
+t.test(df$y[df$tc == "c"], df$y[df$tc == "t"])
+```
+
+This example considers only one covariate (# of friends), but we might want to use several ones to control for differences across gender, race, income, school grades and so on. Propensity score techniques allow us to do so.
+
+> A propensity score represents the probability of being assigned to the treatment or the control group based on a given set of characteristics. By matching observations in the treatment and in the control based on their propensity score, we can create artificial treatment and control groups that can be compared as we have reduced or eliminated the effects of confounding variables.
+
+# A matching score example
+
+```{r exampleCover, fig.cap="Source: https://pixabay.com/images/search/classroom/", out.width='60%', echo=F }
+knitr::include_graphics( "FIGURE/MatchScores/Picture1.jpg" )
+```
+
+```{r, echo = F}
+
+set.seed(503)
+income = rnorm(25)          
+occ_score = rnorm(25)
+y_educ = rnorm(25)
+z = 1 + 0.2*income + 0.8*occ_score + 1.1*y_educ            
+pr = 1/(1+exp(-z))        
+school = rbinom(25, 1, pr)    
+
+income = rescale(income, to = c(16000, 300000))
+income = log(income)
+
+occ_score = rescale(occ_score, to = c(0,100))
+
+y_educ = rescale(y_educ, to = c(12,25))
+
+df = data.frame(y = school, x1 = income, x2 = occ_score, x3 = y_educ)
+
+colnames(df) <- c("school", "income", "occ_score", "y_educ")
+
+df$student = as.numeric(rownames(df))
+```
+
+An area of research where propensity score matching has attracted a lot of attention is [education policy](https://www.coe.unt.edu/sites/default/files/1846/Forrest%20Lane%20-%20Propensity%20Score%20Matching.pdf). In education policy research is often difficult to use randomized trails as we cannot force families to randomly send their kids to private or public schools or to some programs rather than others. Nor can we observe the same individual under one condition or the other - a child can either attend a Catholic elementary school or a public one! [Propensity score matching is therefore a good technique](https://www.researchgate.net/publication/273061804_An_Illustrative_Example_of_Propensity_Score_Matching_with_Education_Research) to control for differences across groups of childrend and evaluate the impact of different types of school, programs, and policies.
+
+[Reardon, Cheadle, and Robinson (2008)](https://cepa.stanford.edu/sites/default/files/reardon_cheadle_robinson_catholic_schools_effects_SREE_march_7_2008.pdf), for instance, utilized propensity score matching to estimate the effect of attending a Catholic vs. a public elementary school on math and reading skills. The key idea is that characteristics (income or parents' occupation and education) that lead students to self-select into Catholic schools might also explain their better performance. As the authors say: "given that Catholic and public school students differ in many ways likely to affect their cognitive skills, a simple comparison of their mean test scores at subsequent waves is likely to yield substantially biased estimates of the effect of Catholic schooling."
+
+[Morgan, Frisco, Farkas, and Hibel (2010)](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3630079/) look at special education programs and compare students who were legally entitled to be enrolled vs students who did not attend these programs to establish their effectiveness on math and reading skills. Students who are legally entitled to these programs have generally higher scores even before being involved and attend better schools. Directly compare the two groups will lead to biased estimates.
+
+In this example, we use simulated data to evaluate the effect of attending a private vs a public high school on math skills. For convenience, we will work on a small sample of 25 students. We will walk through all the steps of a matching score approach.
+
+> **Research question**: 
+> Do students who attend private high schools have higher math skills than students who attend a public high school?
+>
+> **Hypothesis**: 
+> Students who attend a private high schools will not have higher math skills than students in public school.
+
+## Identify the covariates
+
+First of all, we need to determine the variables that might explain self-selection into private vs public school. It is important to match the two groups based on all possible covariates. Covariates can be identified by looking at previous literature or empirical diffrences across the two groups.
+
+We identify 3 covariates:
+
+ **Variable name   **   | **Description    **                                                                         | 
+----------------------- | ------------------------------------------------------------------------------------------- |
+$\text{income}$    |Family income                                                                                |
+$\text{occ_score}$          |Father's occupational score based on education, salary and prestige, from 0 to 100|
+$\text{y_educ}$ |Father's year of education          |
+
+We will use this three covariates to predict whether a student enrolls in a private school (=1) or in a public school (=0). 
+
+## Creating matching score
+
+A matching score describes an individual's probability to belong in the treatment or control group based on a set of covariates. In our case, the propensity scores are built based on the 3 covariates that we have just identified and will predict the likelihood that the child will attend a private or public school. Note that since we consider "going to a private school" to be our treatment, students in a private school are the "treament group" while students in a public school are the "control group".
+
+To estimate probability we can use a logit or a linear probability model that we discussed in the previous lecture. We chose to utilize a logit model in this example.
+
+```{r}
+
+## Estimate the logit model
+log = glm( school ~ income + occ_score + y_educ, data = df, family = "binomial")
+
+## Calculate the propensity score by estimating the probability for each child to attend a private or a public school.
+df$prop_score <- predict(log, newdata = df, type = "response")
+
+```
+
+We can have a look at the summary statistics of the propensity scores
+
+```{r}
+
+summary(df$prop_score)
+
+```
+
+We can also plot the propensity score for each student.
+
+```{r}
+
+palette(c("darkred", "dodgerblue1"))
+
+plot(df$student, df$prop_score, col = df$school+1, lwd = 3, ylab = "Predicted probabilities", xlab = "Observations", xaxt = "n")
+
+axis(1, at=1:25)
+
+#points(19, 0.3, col = "darkred", lwd = 3)
+#text(22.5, 0.3, "Treatment (Private School)", col = "darkred")
+
+#points(19, 0.25, col = "dodgerblue1", lwd = 3)
+#text(22.5, 0.25, "Control (Public School)", col = "dodgerblue1")
+
+for (i in 1:nrow(df)){
+  segments(df$student[i], 0, df$student[i], df$prop_score[i], lty = 2, col = "gray70")}
+
+```
+
+## Chose a matching strategy
+
+Now that we have our propensity scores we need to decide *how* to match individuals with one another. There are several choices to be made and each choice influences the final dataset. 
+
+### One-to-one vs one-to-many
+
+First, we need to decide whether we want a *one-to-one match or a one-to-many match*. In the first case, we match one student in a private school with only one student in a public school. In the second case, we want to match a single case in the treatment group (private school) with several students in public schools (control group). This second method allows us to get less precise matches but, potentially, to retain a large sample of observations. By contrast, a one-to-one match is more precise but potentially throws away several observations. 
+
+For example, let's take five random students from our dataset. We have only one student in the treatment group (#5, in bold). We could decide to match the student with multiple students from the control group or only one, throwing away the remaining 4 observations. 
+
+```{r}
+
+## We order our observations by propensity score, so that we can observations that are close to each other.
+df = as.data.frame(df[order(df$prop_score), ])
+
+## We just look at the top 5 observations
+df2 = round(df[5:9,], 2)
+```
+
+```{r kableExtra.html.bsTable = T}
+
+rownames(df2)<-NULL
+
+df2 = df2[,c(5,1,6)]
+
+df2 %>%
+  
+  kable(caption = "Top 5 observations with lowest propensity scores", format = "html", escape = F) %>%
+  
+  kable_styling(full_width = F, fixed_thead = T) %>%  
+  
+  row_spec(which(df2$school == 1), bold = T, col = "black")
+
+```
+
+### Nearest neighbor matching and caliper distance
+
+But how do we match? There are two common strategies. The first one is called *nearest neighbor matching*. It means that we will select the student(s) with the closest propensity score to our "treated" student #20. The second one is called *nearest neighbor matching within a specified caliper distance* - don't get scared by the name. It just means that you specify a maximum distance between two scores for them to be a match.
+
+Let's see this in practice. For each possible control observation, we calculate the distance from their propensity score to the propensity score of the treated student #20.
+
+```{r}
+
+## Note that we take the absolute value of the difference
+
+df2$distance = abs(df2$prop_score[df2$school==1] - df2$prop_score)
+
+```
+
+Now, if we use a nearest neighbor matching strategy, we would match student #5 with student #20 or student #4 (highlighted in yellow) because they are the ones at the closest distance. 
+
+If we decide for a one-to-one strategy, we would need to decide whether to match the student with #12 or #2 (we will discuss how to make this choice in a moment). With a many-to-many strategy we would match student #5 with both #12 and #2 and retain all three observations. 
+
+```{r}
+
+options(kableExtra.html.bsTable = T)
+
+df2 %>%
+  mutate(distance = cell_spec(distance, "html", background = ifelse(distance ==  min(distance[distance != 0]), "#FFCC00", "#FFFFFF"))) %>%
+  
+  kable(format = "html", escape = F, caption = "Distances from student #5") %>%
+  
+  kable_styling(full_width = F, fixed_thead = T) %>%
+  
+  row_spec(which(df2$school == 1), bold = T, col = "black")
+
+```
+
+If we use a nearest neighbor matching within a specified caliper distance strategy, then we first need to pick the maximum distance that we would allow between two observations. 
+
+Let's say we decide 0.1. If we take a look at the table below, we can see that up to three students match the required rule and are at less than 0.1 distance from the propensity score of the students admitted to law school.
+
+```{r}
+
+df2$Caliper_Distance = ifelse(df2$school == 1, " ", ifelse(df2$distance <0.1, "MATCH", "NO MATCH"))
+
+options(kableExtra.html.bsTable = T)
+
+df2 %>%
+  mutate(distance = cell_spec(
+        distance, "html", background = ifelse(distance ==  min(distance[distance != 0]), "#FFCC00", "#FFFFFF"))) %>%
+  
+  mutate(Caliper_Distance = cell_spec(
+        Caliper_Distance, "html", background = ifelse(Caliper_Distance == " ", "#FFFFFF", ifelse(Caliper_Distance ==  "MATCH", "#00CC00", "#FF0000")), bold = T)) %>%
+  
+  kable(format = "html", escape = F, caption = "Caliper Distance from student #5") %>%
+  
+  kable_styling(full_width = F, fixed_thead = T) %>%
+  
+  row_spec(which(df2$school == 1), bold = T, col = "black")
+```
+
+Let's now say we decide 0.03. In this case,there would be no match for student #20 as all other propensity scores are at more than 0.03 points of distance.
+
+```{r}
+
+df2$Caliper_Distance = ifelse(df2$school == 1, " ", ifelse(df2$distance <0.03, "MATCH", "NO MATCH"))
+
+options(kableExtra.html.bsTable = T)
+
+df2 %>%
+  mutate(distance = cell_spec(
+        distance, "html", background = ifelse(distance ==  min(distance[distance != 0]), "#FFCC00", "#FFFFFF"))) %>%
+  
+  mutate(Caliper_Distance = cell_spec(
+        Caliper_Distance, "html", background = ifelse(Caliper_Distance == " " , "#FFFFFF", ifelse(Caliper_Distance ==  "MATCH", "#00CC00", "#FF0000")), bold = T)) %>%
+  
+  kable(format = "html", escape = F, caption = "Caliper Distance from student #5") %>%
+  
+  kable_styling(full_width = F, fixed_thead = T) %>%
+  
+  row_spec(which(df2$school == 1), bold = T, col = "black")
+```
+
+### With or Without replacement
+
+Right now we are working with only one case. The situation might get more complicated when with have multiple observations with similar scores.
+
+Let's have a look some others observations in our dataset
+
+```{r}
+df3 = round(df[15:19,], 2)
+
+df3 = df3[,c(5,1,6)]
+
+df3 = as.data.frame(df3[order(df3$school, decreasing = T), ])
+
+#df3$distance = df3[3,6] - df3$prop_score
+```
+
+```{r}
+
+options(kableExtra.html.bsTable = T)
+
+df3 %>%
+ # mutate(distance = cell_spec(
+        #distance, "html", background = ifelse(distance ==  min(distance[distance != 0]), "#FFCC00", "#FFFFFF"))) %>%
+  
+  #mutate(Caliper_Distance = cell_spec(
+        #Caliper_Distance, "html", background = ifelse(Caliper_Distance ==  "MATCH", "#00CC00", "#FF0000"), bold = T)) %>%
+  
+  kable(format = "html", escape = F, caption = "Caliper Distance from student #5") %>%
+  
+  kable_styling(full_width = F, fixed_thead = T) %>%
+  
+  row_spec(which(df3$school == 1), bold = T, col = "black")
+```
+
+How do we match the different "treated" students (in bold)? First, we need to decide if we want to match **with or without replacement**. Matching without replacement means that once a student has been matched with another, it will be no longer available for another match. Vicecersa, in matching with replacement the same student is allowed to match with multiple other students. In the first case, observations will be independent from one another as they are matched with only one student at a time. In the second case, observations will be dependent from one another but we might have better matches, especially when there are only few individuals in the control group. 
+
+You can see in table 2.6. We have 3 treated students and 2 untreated students. We calculate the distance from each treated student to each untreated students (#14 and #6). You can see results in column "distance_14" and "distance_6". Let's assume we are matching according to the nearest neighbor matching rule (see \@ref:nearest-neighbor-matching-and-caliper-distance). 
+
+If we match with replacement, we can match the same untreated student to multiple treated students as in column "WithReplacement". In this way, we retain all 5 observations. But if we match withour replacement, then we will match each untreated student with only one treated student. As result, we lose one observation in our final dataset as shown in column "WithoutReplacement". 
+
+```{r}
+
+df3$distance_14 = ifelse(df3$school == 1, df3$prop_score - df3$prop_score[df3$student == "14"], NA)
+df3$distance_14 = round(abs(df3$distance_14), 2)
+
+df3$distance_6 = ifelse(df3$school == 1, df3$prop_score - df3$prop_score[df3$student == "6"], NA)
+df3$distance_6 = round(abs(df3$distance_6), 2)
+
+df3$WithReplacement = c(14, 6, 6, NA, NA)
+df3$WithoutReplacement = c( "", 6, 14, NA, NA)
+
+options(kableExtra.html.bsTable = T)
+
+
+df3 %>%
+ mutate(WithReplacement = cell_spec(
+        WithReplacement, "html", background = c("#FFCC00", "#00CC00", "#00CC00", "#FFFFFF", "#FFFFFF"))) %>%
+  
+  mutate(WithoutReplacement = cell_spec(
+        WithoutReplacement, "html", background = c("#FFFFFF", "#00CC00", "#FFCC00", "#FFFFFF", "#FFFFFF"))) %>%
+  
+  kable(format = "html", escape = F, caption = "Assignment with or without replacement") %>%
+  
+  kable_styling(full_width = F, fixed_thead = T) %>%
+  
+  row_spec(which(df3$school == 1), bold = T, col = "black")
+
+```
+
+### Greedy and optimal process
+
+Note that the assignment of treated and untreated students also depends on the process that we choose for matching observation. 
+
+In a **greedy process**, we select a random treated observation and we start the matching process from there. 
+
+Let's say we start from student #11 (see column "Start_11"). We would match it with student #14 as it is the nearest neighbor. Then, we look at student #8 and we would matched with student #6. No untreated student would be available to be matched with #9 in a without replacement process.
+
+While this seems trivial, the problem with a greedy process is that we might loose good matches. For instance, have a look at column "Start_9", where the greedy process selected student #9 as a starting point. In this case, the unmatched case is student #8, which has a perfect match with student #6!
+
+The problem with a greedy process is that it doesn't consider all observations together and does not try to maximize the end result. 
+
+```{r}
+
+df3$WithoutReplacement <- NULL
+df3$WithReplacement <- NULL
+
+df3$Start_11 = c(14, 6, " ", NA, NA)
+df3$Start_8 = c( " ", 6, 14, NA, NA)
+df3$Start_9 = c(14, " ", 6, NA, NA)
+
+options(kableExtra.html.bsTable = T)
+
+df3 %>%
+
+  kable(format = "html", escape = F, caption = "Greedy process, starting from student #9") %>%
+  
+  kable_styling(full_width = F, fixed_thead = T) %>%
+  
+  row_spec(which(df3$school == 1), bold = T, col = "black")
+```
+
+We can see this by looking at how the total distance change across the difference options. 
+
+If we start from student #11 the total distance is 0.03 (0.03 + 0). If we start from student #8 the total distance is 0.02 (0 + 0.02).  If we start from student #9 the total distance is 0.04 (0.03 + 0.01).
+
+Alternatively, we can use an optimal matching proceess in which we look at all observations at the same time and we try to minimize the difference between two scores based on previous rules.
+
+```{r}
+
+df3$OptimalProcess = c("", 14, 6, NA, NA)
+
+options(kableExtra.html.bsTable = T)
+
+df3 %>%
+
+   kable(format = "html", escape = F, caption = "Optimal process, one-to-one") %>%
+  
+  kable_styling(full_width = F, fixed_thead = T) %>%
+  
+  row_spec(which(df3$school == 1), bold = T, col = "black")
+```
+
+In this case, the outcome is different from the greedy process as we are try to minimize the difference for each observation. 
+
+### To summarize
+
+While you won't have to 'manually' account for all these options understand differences across them is important as some choices have more restringent criteria than others.
+
+
+ **Options   **   | **Description    **                                                                         | 
+----------------------- | ------------------------------------------------------------------------------------------- |
+One-to-one or One-to-Many    |One-to-one increases the precision of the match but a one-to-many approach allows to retain more observations |
+Nearest neighbor or caliper distance neighbor          |With the Caliper distance neighbor approach we can control "how different" two observations are. While with the nearest neighbor approach we might include more observations, but some of them might be very far apart.|
+With or Without Replacement |With replacement decreases the number of observations that we retain and might decrease precision, especially when combined with a greedy approach. Without replacement increases the precision and number of matches but create dependence across observation         |
+Greedy vs Optimal Process | An optimal process is generally preferred, as a greedy process is contigent upon the starting observation.
+
+
+## MatchIT function in R
+
+Now that we understand the basics of matching, we can use the *MatchIt* function to match propensity scores across all observations.
+
+We will use the same dataset as before, but we are going to enlarge into 10.000 observations. Propensity score matching generally works better with large dataset where few cases are "treated" and many of them are "untreated" - in this way, it it easy to find a doppelganger!
+
+```{r, echo = F}
+
+set.seed(503)
+income = rnorm(10000)          
+occ_score = rnorm(10000)
+y_educ = rnorm(10000)
+err = rnorm(10000)
+
+z = - 3.2 + 1.4*income + 0.5*occ_score + 0.95*y_educ + err             
+pr = 1/(1+exp(-z))        
+school = rbinom(10000, 1, pr)    
+
+income = rescale(income, to = c(16000, 300000))
+income = log(income)
+
+occ_score = rescale(occ_score, to = c(0,100))
+
+y_educ = rescale(y_educ, to = c(12,25))
+
+math_skills = 3.4 - 1.2 * school + err
+
+math_skills = rescale(math_skills, to = c(0,100))
+
+df = data.frame(y2 = math_skills, y = school, x1 = income, x2 = occ_score, x3 = y_educ)
+
+colnames(df) <- c("math_skills", "school", "income", "occ_score", "y_educ")
+
+df$student = as.numeric(rownames(df))
+
+
+
+```
+
+Before using the MatchIt function, let's have a look at the covariates between treated and untreated observations. We run a set of t-test for looking at differences across years of education, occupational scores, and income. As you can see, all three t-tests show a p-value < 0.001 suggesting that we cannot reject the null hypothesis that the two groups are equal. 
+
+```{r}
+
+t.test(df$y_educ[df$school==1], df$y_educ[df$school==0])
+t.test(df$occ_score[df$school==1], df$occ_score[df$school==0])
+t.test(df$income[df$school==1], df$income[df$school==0])
+
+```
+
+Graphically, we can represent the distribution density for each group and compare them. As you can see in the graphs below, the main difference is in the income level. 
+
+```{r}
+
+df$school2 = as.factor(df$school)
+
+ggplot(df, aes(x = df$y_educ, fill = df$school2)) +
+	geom_density(position="identity", alpha=0.6) +
+	scale_fill_brewer(palette="Dark2") +
+	ggtitle("Density plot of years of education, by group") +
+	scale_x_continuous(name = "Years of education",
+	breaks = seq(12, 25, 2),
+        limits=c(12, 25)) +
+	scale_y_continuous(name = "Density") +
+        theme(plot.title = element_text(size = 14, face = "bold"),
+              text = element_text(size = 12)) +
+	guides(fill=guide_legend(title=NULL))+ 
+	scale_fill_discrete(labels=c("Control - Public School", "Treatment - Private School"))
+
+ggplot(df, aes(x = df$income, fill = df$school2)) +
+	geom_density(position="identity", alpha=0.6) +
+	scale_fill_brewer(palette="Dark2") +
+	ggtitle("Density plot of income, by group") +
+	scale_x_continuous(name = "Income",
+	breaks = seq(9.5, 13, 0.5),
+        limits=c(9, 13)) +
+	scale_y_continuous(name = "Density") +
+        theme(plot.title = element_text(size = 14, face = "bold"),
+              text = element_text(size = 12)) +
+	guides(fill=guide_legend(title=NULL))+ 
+	scale_fill_discrete(labels=c("Control - Public School", "Treatment - Private School"))
+
+ggplot(df, aes(x = df$occ_score, fill = df$school2)) +
+	geom_density(position="identity", alpha=0.6) +
+	scale_fill_brewer(palette="Dark2") +
+	ggtitle("Density plot of occupational score, by group") +
+	scale_x_continuous(name = "Occupational score",
+	breaks = seq(0, 100, 20),
+        limits=c(0, 100)) +
+	scale_y_continuous(name = "Density") +
+        theme(plot.title = element_text(size = 14, face = "bold"),
+              text = element_text(size = 12)) +
+	guides(fill=guide_legend(title=NULL))+ 
+	scale_fill_discrete(labels=c("Control - Public School", "Treatment - Private School"))
+
+```
+
+
+From the package *MatchIt* we will use the function *matchit* to create the propensity scores and the new dataset with the matched observation.
+
+Note the function code. First, we specificy the logit model to calculate the propensity scores as we did before in section \@ref:creating-matching-score. We then specify the method to match the scores. We will use the *nearest neighbor* method (see \@ref:nearest-neighbor-matching-and-caliper-distance). The default method is "withour replacement".
+
+```{r}
+
+m1 = matchit(df$school ~ df$income + df$occ_score + df$y_educ, method = "nearest", data = df)
+
+```
+
+We can see the outcome of the process by using *summary*.
+
+Have a look at the column "Mean Diff" and compare results in the "Summary of balance for all data" vs "Summary of balance for matched data". You can see that the mean difference is drastically reduced in the matched data. 
+
+We can also look at the "Sample sizes" summary at the very end of the output. We started with 8841 control cases and 1159 treated cases. The algorithm matched all treated cases with only one control case, discarding 7682 observations. 
+
+```{r}
+
+summary(m1)
+
+```
+
+Once the algotrithm has calculated and matched the propensity scores, we can create a new dataset that contains all matched observations using the function *match.data*.
+
+```{r}
+
+m1data = match.data(m1)
+
+```
+
+Now that we have the dataset with the matched observations, we can have another look at the covariates and compare the treated and untreated cases.
+
+```{r}
+
+t.test(m1data$y_educ[m1data$school==1], m1data$y_educ[m1data$school==0], paired = T)
+t.test(m1data$occ_score[m1data$school==1], m1data$occ_score[m1data$school==0], paired = T)
+t.test(m1data$income[m1data$school==1], m1data$income[m1data$school==0], paired = T)
+
+```
+
+The t-tests show that the differences between treated and untreated cases in terms of years of education, occupational score, and income are no longer significant. The matching process has crated a balanced data set. 
+
+We can see this graphically by looking at the dentisy plots for each independent variables in the treated and untreated group.
+
+```{r}
+
+m1data$school = as.factor(m1data$school2)
+
+ggplot(m1data, aes(x = m1data$y_educ, fill = m1data$school2)) +
+	geom_density(position="identity", alpha=0.6) +
+	scale_fill_brewer(palette="Dark2") +
+	ggtitle("Density plot of years of education, by group") +
+	scale_x_continuous(name = "Years of education",
+	breaks = seq(14, 25, 2),
+        limits=c(14, 25)) +
+	scale_y_continuous(name = "Density") +
+        theme(plot.title = element_text(size = 14, face = "bold"),
+              text = element_text(size = 12)) +
+	guides(fill=guide_legend(title=NULL))+ 
+	scale_fill_discrete(labels=c("Control - Public School", "Treatment - Private School"))
+
+ggplot(m1data, aes(x = m1data$income, fill = m1data$school2)) +
+	geom_density(position="identity", alpha=0.6) +
+	scale_fill_brewer(palette="Dark2") +
+	ggtitle("Density plot of income, by group") +
+	scale_x_continuous(name = "Income",
+	breaks = seq(11, 13, 0.5),
+        limits=c(11, 13)) +
+	scale_y_continuous(name = "Density") +
+        theme(plot.title = element_text(size = 14, face = "bold"),
+              text = element_text(size = 12)) +
+	guides(fill=guide_legend(title=NULL))+ 
+	scale_fill_discrete(labels=c("Control - Public School", "Treatment - Private School"))
+
+ggplot(m1data, aes(x = m1data$occ_score, fill = m1data$school2)) +
+	geom_density(position="identity", alpha=0.6) +
+	scale_fill_brewer(palette="Dark2") +
+	ggtitle("Density plot of occupational score, by group") +
+	scale_x_continuous(name = "Occupational score",
+	breaks = seq(0, 100, 20),
+        limits=c(0, 100)) +
+	scale_y_continuous(name = "Density") +
+        theme(plot.title = element_text(size = 14, face = "bold"),
+              text = element_text(size = 12)) +
+	guides(fill=guide_legend(title=NULL))+ 
+	scale_fill_discrete(labels=c("Control - Public School", "Treatment - Private School"))
+```
+
+### Other options in matchit
+
+The *matchit* function has several options that you can explore in [Gary King's User guide](https://r.iq.harvard.edu/docs/matchit/2.4-15/User_s_Guide_to.html). You are familiar with some of them as we discussed them above in section XX:
+
+* replace - allows to implement with replacement and without replacement procedures. In other words, you can indicate if each control case can be matched with more than one treated case. The default is "without replacement". If you want to use "with replacement", you need to state replace = TRUE. 
+
+* ratio: if the matching is done "with replacement", you can specify the number of control matched with each treated case (one-to-many strategy). For instance, ratio = 3. 
+
+* caliper: you can indicate the caliper distance by specificy the number of standard deviations of the distance measure. You can also indicate if, when no matches are available within the caliper distance, the nearest neighbor should be considered using  calclosest = TRUE.
+
+ SHINY APP
+
+## Calculating the treatment effect
+
+Now that we have a matched dataset we can calculate the effect of treatment ( = being in a private school). As before, we can do a simple t-test across the two groups and compare the math skill scores between students in a private school and students in a public school.
+
+```{r}
+
+t.test(m1data$math_skills[m1data$school==1], m1data$math_skills[m1data$school==0], paired = T)
+
+summary(math_skills)
+
+```
+
+The t-test shows that there is a statistically significant difference across the two groups (p-value < 0.001). The difference is equal to -0.34, suggesting that students attending a private school report, on average, a math skills score that is 4.33 points lower that students in public schools.
+
+As before, we can look at results in a graphical form below. The treatment density curve (blue) tend more towards lower scores, marked on the left side of the graph, compared to the control (pink) curve. 
+
+```{r}
+
+ggplot(m1data, aes(x = m1data$math_skills, fill = m1data$school2)) +
+	geom_density(position="identity", alpha=0.6) +
+	scale_fill_brewer(palette="Dark2") +
+	ggtitle("Density plot of math skill score, by group") +
+	scale_x_continuous(name = "Math skill score",
+	breaks = seq(0, 100, 20),
+        limits=c(0, 100)) +
+	scale_y_continuous(name = "Density") +
+        theme(plot.title = element_text(size = 14, face = "bold"),
+              text = element_text(size = 12)) +
+	guides(fill=guide_legend(title=NULL))+ 
+	scale_fill_discrete(labels=c("Control - Public School", "Treatment - Private School"))
+
+```
+
+
+
+```{css, echo=F}
+p {
+color: black;
+margin: 0 0 20px 0;
+}
+
+td {
+    padding: 3px 10px 3px 10px;
+}
+
+p.caption {
+    text-align: center;
+    font-style: italic;
+}
+
+table
+{ 
+    margin-left: auto;
+    margin-right: auto;
+    margin-top:40px;
+    margin-bottom:100px;
+}
+
+caption {
+    caption-side: bottom;
+    color: black;
+    text-align: center;
+    font-style: italic;
+}
+
+h1, h2{
+  margin-top:100px;
+  margin-bottom:20px;
+}
+
+H5{
+    text-align: center;
+    color: gray;
+    font-size:0.8em;
+}
+
+img {
+    max-width: 90%;
+    display: block;
+    margin-right: auto;
+    margin-left: auto;
+    margin-top:30px;
+    margin-bottom:20px;
+}
+
+pre {
+  overflow-x: auto;
+}
+
+pre code {
+   display: block; 
+   padding: 0.5em;
+   margin-bottom:20px;
+}
+
+code {
+  font-size: 92%;
+  border: 10px solid #F8F8F8;
+  margin-bottom: 2px;
+}
+
+code[class] {
+  background-color: #F8F8F8;
+}
+
+
+caption {
+  font-style: bold;
+}
+
+```
+
+

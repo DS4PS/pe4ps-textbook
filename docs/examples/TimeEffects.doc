@@ -1,0 +1,13 @@
+
+<table style="text-align:center"><tr><td colspan="9" style="border-bottom: 1px solid black"></td></tr><tr><td style="text-align:left"></td><td colspan="2">Scenario 1</td><td colspan="2">Scenario 2</td><td colspan="2">Scenario 3</td><td></td><td></td></tr>
+<tr><td style="text-align:left"></td><td>(1)</td><td>(2)</td><td>(3)</td><td>(4)</td><td>(5)</td><td>(6)</td><td>(7)</td><td>(8)</td></tr>
+<tr><td colspan="9" style="border-bottom: 1px solid black"></td></tr><tr><td style="text-align:left">x</td><td>0.98<sup>***</sup></td><td>0.99<sup>***</sup></td><td>0.70<sup>***</sup></td><td>0.99<sup>***</sup></td><td>0.70<sup>***</sup></td><td>0.99<sup>***</sup></td><td>0.03</td><td>3.36<sup>***</sup></td></tr>
+<tr><td style="text-align:left"></td><td>(0.06)</td><td>(0.08)</td><td>(0.10)</td><td>(0.08)</td><td>(0.10)</td><td>(0.08)</td><td>(0.16)</td><td>(0.76)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td style="text-align:left">y.lagged</td><td></td><td></td><td></td><td></td><td></td><td></td><td>0.97<sup>***</sup></td><td>-0.11</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td><td></td><td></td><td>(0.06)</td><td>(0.25)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td colspan="9" style="border-bottom: 1px solid black"></td></tr><tr><td style="text-align:left">Org Fixed Effects?</td><td>YES</td><td>YES</td><td>YES</td><td>YES</td><td>YES</td><td>YES</td><td></td><td></td></tr>
+<tr><td style="text-align:left">Time Fixed Effects?</td><td>NO</td><td>YES</td><td>NO</td><td>YES</td><td>NO</td><td>YES</td><td></td><td></td></tr>
+<tr><td colspan="9" style="border-bottom: 1px solid black"></td></tr><tr><td style="text-align:left"><em>Note:</em></td><td colspan="8" style="text-align:right"><sup>*</sup>p<0.1; <sup>**</sup>p<0.05; <sup>***</sup>p<0.01</td></tr>
+</table>

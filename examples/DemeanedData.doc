@@ -1,0 +1,9 @@
+
+<table style="text-align:center"><tr><td colspan="4" style="border-bottom: 1px solid black"></td></tr><tr><td style="text-align:left"></td><td>OLS on Data <br> w No Groups</td><td>FE on Data <br> w Groups</td><td>OLS on <br> De-Meaned Data</td></tr>
+<tr><td style="text-align:left"></td><td>(1)</td><td>(2)</td><td>(3)</td></tr>
+<tr><td colspan="4" style="border-bottom: 1px solid black"></td></tr><tr><td style="text-align:left">x</td><td>0.98<sup>***</sup></td><td>0.98<sup>***</sup></td><td>0.98<sup>***</sup></td></tr>
+<tr><td style="text-align:left"></td><td>(0.06)</td><td>(0.05)</td><td>(0.05)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td></tr>
+<tr><td colspan="4" style="border-bottom: 1px solid black"></td></tr><tr><td style="text-align:left">True Slope</td><td>1</td><td>1</td><td>1</td></tr>
+<tr><td colspan="4" style="border-bottom: 1px solid black"></td></tr><tr><td style="text-align:left"><em>Note:</em></td><td colspan="3" style="text-align:right"><sup>*</sup>p<0.1; <sup>**</sup>p<0.05; <sup>***</sup>p<0.01</td></tr>
+</table>

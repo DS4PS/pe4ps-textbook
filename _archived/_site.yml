@@ -1,0 +1,38 @@
+name: "Program Eval III"
+output_dir: "../docs"
+navbar:
+  title: "Program Eval III"
+  type: inverse
+  left:
+    - text: "Home"
+      href: index.html
+    - text: "Data1"
+      href: Datasets_in_R.html 
+    - text: "Data2"
+      href: EvalDataPackage.html
+    - text: "TimeS"
+      href: TimeSeries.html
+    - text: "InstrumentalVs"
+      href: InstrumentalVariables.html 
+    - text: "Diff-in-Diff"
+      href: DiffInDiff.html
+    - text: "Matching"
+      href: MatchingScores.html
+    - text: "Logistic Reg"
+      href: LogisticReg.html
+    - text: "Fixed Effects"
+      href: FixedEffects.html
+    - text: "Panel Models"
+      href: panel-model-selection.html
+  right:
+    - icon: fa-github fa-2x
+      href: https://github.com/DS4PS/PROG-EVAL-III/tree/master/TEXTBOOK
+output:
+  bookdown::html_document2:
+    toc: yes
+    toc_depth: 3
+    code_folding: hide
+    css: custom.css
+    includes:
+      after_body: footer.html
+

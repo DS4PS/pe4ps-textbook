@@ -1,0 +1,26 @@
+---
+title: ""
+---
+
+
+<h1> FOUNDATIONS OF PROGRAM EVALUATION III<br>REGRESSION TOOLS FOR CAUSAL ANALYSIS </h1>
+
+
+<table style="width:100%">
+  <tr>
+    <th> <img src="FIGURE/Index/fixed-effects-logo.png" width="150" height="150"> </th>
+    <th><h2> Fixed Effect Models </h2></th> 
+  </tr>
+  <tr>
+    <th> <img src="FIGURE/Index/instrumental-variables-logo.png" width="150" height="150"> </th>
+    <th><h2> Instrumental Variables </h2></th> 
+  </tr>
+</table>
+
+* Instrumental Variables
+* Matching
+* Regression Discontinuity
+* Difference-in-Difference
+* Time Series
+* Logistic Regression
+* Duration Analysis

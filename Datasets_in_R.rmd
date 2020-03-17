@@ -1,0 +1,541 @@
+---
+title: "Dataset Examples"
+---
+
+```{r setup, include=FALSE}
+
+knitr::opts_chunk$set( echo = TRUE, message=F, warning=F )
+
+library( stargazer )
+library( AER )
+library( wooldridge )
+library( Ecdat )
+library( dplyr )
+library( memisc )
+library( pander )
+
+
+jplot <- function( x1, x2, cex=3.5, draw.line=T, ... )
+{
+
+	plot( x1, x2,
+	      pch=19, 
+	      col=gray(0.6, alpha = 0.2), 
+	      bty = "n",
+	      cex.lab=1.5,
+        ... )
+
+	if( draw.line==T ){ 
+		ok <- is.finite(x1) & is.finite(x2)
+		lines( lowess(x2[ok]~x1[ok]), col="red", lwd=3 ) }
+
+}
+
+
+
+panel.cor <- function(x, y, digits=2, prefix="", cex.cor)
+{
+    usr <- par("usr"); on.exit(par(usr))
+    par(usr = c(0, 1, 0, 1))
+    r <- abs(cor(x, y))
+    txt <- format(c(r, 0.123456789), digits=digits)[1]
+    txt <- paste(prefix, txt, sep="")
+    if( missing(cex.cor) ) cex <- 0.8/strwidth(txt)
+    
+    test <- cor.test(x,y)
+    # borrowed from printCoefmat
+    Signif <- symnum(test$p.value, corr = FALSE, na = FALSE,
+                  cutpoints = c(0, 0.001, 0.01, 0.05, 0.1, 1),
+                  symbols = c("***", "**", "*", ".", " "))
+    
+    text(0.5, 0.5, txt, cex = 1.5 )
+    text(.7, .8, Signif, cex=cex, col=2)
+}
+
+
+
+
+```
+
+
+```{r, eval=F, echo=F}
+
+
+# Stargazer Example
+
+stargazer( m.103, m.203, m.204, m.205, m.207, out="./Results/RegressionModel.doc",
+           dep.var.labels.include=FALSE, dep.var.caption="DV: Grant Recipient is Local [1,0]",
+           column.labels=c("Global","Asia","Africa","Latin America","Middle East"),
+           omit.stat = c("rsq", "f", "ser"), 
+           omit=c("GM_KEY","REGION_BY_SECTOR","GRANT_REGION_IMPUTED","PRIMARY_CODE_DESC"), 
+           add.lines = list(c("DV: Proportion Local",prop.local),
+                            c("Program Area Fixed Effects?","Yes","Yes","Yes","Yes","Yes","Yes")),
+           covariate.labels=c("Foundation Age",
+                              "Foundation Size (log of assets)", 
+                              "Foundation Size Squared",
+                              "Foundation Regional Experience",
+                              "Foundation Program Area Experience",
+                              #"Prior NGO Experience",
+                              "Grant Size (log of amount)",
+                              "Grant Length",
+                              "Prop Grants to Foreign NGOs",
+                              "Prop. of Grants Int.",
+                              "Intercept"),
+           digits=2, type="html" )
+
+```
+
+
+
+
+
+
+
+# Package *AES*
+
+Applied Econometrics with R
+
+Functions, data sets, examples, demos, and vignettes for the book Christian Kleiber and Achim Zeileis (2008),
+Applied Econometrics with R, Springer-Verlag, New York.
+
+
+```{r, eval=F}
+
+install.packages( "AER" )
+library( AER )
+
+vignette( "AER" )
+
+```
+
+## California Schools Data
+
+The data used here are from all 420 K-6 and K-8 districts in California with data available for 1998
+and 1999. 
+
+The dataset is used to address the question of whether 
+
+Test scores are on the Stanford 9 standardized test administered to 5th grade students.
+School characteristics (averaged across the district) include enrollment, number of teachers (measured
+as “full-time equivalents”, number of computers per classroom, and expenditures per student.
+Demographic variables for the students are averaged across the district. The demographic variables
+include the percentage of students in the public assistance program CalWorks (formerly AFDC),
+the percentage of students that qualify for a reduced price lunch, and the percentage of students that
+are English learners (that is, students for whom English is a second language).
+
+
+**Data Dictionary**
+ 
+* **district**: District code (character) 
+* **stratio**: Student-teacher ratio (calculated below) 
+* **score**: Average of two primary scores, math and reading 
+* **school**: School name (character) 
+* **county**: indicating county (factor) 
+* **grades**: indicating grade span of district (factor) 
+* **students**: Total enrollment 
+* **teachers**: Number of teachers 
+* **calworks**: Percent qualifying for CalWorks (income assistance) 
+* **lunch**: Percent qualifying for reduced-price lunch 
+* **computer**: Number of computers 
+* **expenditure**: Expenditure per student 
+* **income**: District average income (in USD 1,000) 
+* **english**: Percent of English learners 
+* **read**: Average reading score 
+* **math**: Average math score 
+  
+
+
+
+### Specification
+
+What happens to the significance of the student-teacher ratio variable once appropriate controls are added to the model? 
+
+
+
+```{r, echo=F}
+
+panel.cor <- function(x, y, digits=2, prefix="", cex.cor)
+{
+    usr <- par("usr"); on.exit(par(usr))
+    par(usr = c(0, 1, 0, 1))
+    r <- cor(x, y, use="pairwise.complete.obs")
+    txt <- format(c(r, 0.123456789), digits=digits)[1]
+    txt <- paste(prefix, txt, sep="")
+    if(missing(cex.cor)) cex <- 0.8/strwidth(txt)
+    
+    test <- cor.test(x,y)
+    # borrowed from printCoefmat
+    Signif <- symnum(test$p.value, corr = FALSE, na = FALSE,
+                  cutpoints = c(0, 0.001, 0.01, 0.05, 0.1, 1),
+                  symbols = c("***", "**", "*", ".", " "))
+    
+    text(0.5, 0.5, txt, cex = 2 )
+    text(.7, .8, Signif, cex=3, col=2)
+}
+
+
+panel.smooth <- function (x, y, col = par("col"), bg = NA, pch = par("pch"), 
+  cex = 1, col.smooth = "red", span = 2/3, iter = 3, ...) 
+{
+  points(x, y, pch = 19, col = gray(0.5,0.5), 
+         bg = bg, cex = 0.7)
+  ok <- is.finite(x) & is.finite(y)
+  if (any(ok)) 
+    lines(stats::lowess(x[ok], y[ok], f = span, iter = iter), 
+      col = col.smooth, lwd=2, ...)
+}
+
+
+
+```
+
+
+
+
+```{r, fig.width=10, fig.height=10}
+
+
+data( "CASchools" )
+
+## variable transformations
+CASchools$stratio <- with(CASchools, students/teachers)
+CASchools$score <- with(CASchools, (math + read)/2)
+
+
+dat <- dplyr::select( CASchools, score, stratio, expenditure, english, lunch, calworks )
+
+pairs( dat, lower.panel=panel.smooth, upper.panel=panel.cor)
+
+```
+
+
+```{r, results='asis'}
+
+## Stock and Watson (2007)
+## p. 152
+fm1 <- lm( score ~ stratio, data = CASchools )
+# coeftest(fm1, vcov = sandwich)
+
+## p. 159
+fm2 <- lm( score ~ I(stratio < 20), data = CASchools )
+
+## p. 199
+fm3 <- lm( score ~ stratio + english, data = CASchools )
+
+## p. 224
+fm4 <- lm( score ~ stratio + expenditure + english, data = CASchools )
+
+
+stargazer( fm1, fm2, fm3, fm4, type="html",
+           omit.stat = c("rsq", "f", "ser"),
+           digits=2)
+
+```
+
+
+
+
+### Additional Controls
+
+Control for non-native speakers and income level of students. 
+
+```{r}
+## Table 7.1, p. 242 (numbers refer to columns)
+fmc3 <- lm( score ~ stratio + english + lunch, data = CASchools )
+fmc4 <- lm( score ~ stratio + english + calworks, data = CASchools )
+fmc5 <- lm( score ~ stratio + english + lunch + calworks, data = CASchools )
+
+```
+
+
+```{r, results='asis'}
+
+stargazer( fmc3, fmc4, fmc5, type="html",
+           omit.stat = c("rsq", "f", "ser"),
+           digits=2 )
+
+```
+
+
+
+
+
+
+
+## Teacher Ratings
+
+```{r}
+
+data("TeachingRatings")
+
+TeachingRatings$response.rate <- TeachingRatings$students / TeachingRatings$allstudents
+
+TeachingRatings %>% head() %>% pander()
+
+```
+
+
+
+
+```{r, fig.width=10, fig.height=10}
+
+dat <- dplyr::select( TeachingRatings, eval, age, beauty, response.rate )
+
+pairs( dat, lower.panel=panel.smooth, upper.panel=panel.cor)
+
+```
+
+
+* Are beautiful people better teachers? 
+* What is the relationship between age and response rate? 
+* Are people content with a course more or less likely to submit evaluations? 
+
+
+
+```{r}
+
+par( mfrow=c(2,2) )
+plot( TeachingRatings$gender, TeachingRatings$eval, frame.plot=F, outline=F, main="Gender" )
+plot( TeachingRatings$minority, TeachingRatings$eval, frame.plot=F, outline=F, main="Minority" )
+plot( TeachingRatings$tenure, TeachingRatings$eval, frame.plot=F, outline=F, main="Tenure Status" )
+plot( TeachingRatings$credits, TeachingRatings$eval, frame.plot=F, outline=F, main="Credits" )
+
+
+```
+
+
+
+
+
+```{r}
+
+group.structure <- formula( TeachingRatings$eval ~ TeachingRatings$minority * TeachingRatings$gender )
+
+boxplot( group.structure, ylim=c(3,5),
+         las=0, frame.plot=F, outline=F, 
+         main="Performance by Gender & Minority Status",
+         col=c("steelblue4","steelblue3","firebrick4","firebrick3"), 
+         staplewex=0, whisklty=0, border="gray90", lwd=2 )
+
+abline( h=seq(3,5,0.25), col="gray", lty=3, lwd=0.25 )
+
+```
+
+
+
+```{r}
+
+group.structure <- formula( TeachingRatings$eval ~ TeachingRatings$gender * TeachingRatings$tenure )
+
+boxplot( group.structure, ylim=c(3,5),
+         las=0, frame.plot=F, outline=F, 
+         main="Performance by Gender and Tenure Status of the Professor",
+         col=c("steelblue","firebrick","steelblue","firebrick" ), 
+         staplewex=0, whisklty=0, border="gray90", lwd=2 )
+
+abline( h=seq(3,5,0.25), col="gray", lty=3, lwd=0.25 )
+
+```
+
+
+
+```{r}
+
+## evaluation score vs. beauty
+jplot( TeachingRatings$beauty, TeachingRatings$eval, xlab="Beauty", ylab="Student Evaluations" )
+fm <- lm(eval ~ beauty, data = TeachingRatings)
+abline(fm)
+summary(fm)
+## prediction of Stock & Watson's evaluation score
+sw <- with(TeachingRatings, mean(beauty) + c(0, 1) * sd(beauty))
+names(sw) <- c("Watson", "Stock")
+predict(fm, newdata = data.frame(beauty = sw))
+
+## Hamermesh and Parker, 2005, Table 3
+
+fmw <- lm(eval ~ beauty + gender + minority + native + tenure + division + credits,
+weights = students, data = TeachingRatings)
+coeftest(fmw, vcov = sandwich)
+## (same coefficients but with different covariances)
+```
+
+
+
+
+```{r, results='asis'}
+
+stargazer( fmc3, fmc4, fmc5, type="html",
+           omit.stat = c("rsq", "f", "ser"),
+           digits=2 )
+
+```
+
+
+
+
+
+# Package 'woolridge'
+
+Read directly from the website:
+
+```{r, eval=F}
+
+library( foreign )
+
+dat <- read.dta( "http://fmwww.bc.edu/ec-p/data/wooldridge/meap01.dta" )
+
+dat <- read.dta( "http://fmwww.bc.edu/ec-p/data/wooldridge/affairs.dta" )
+
+
+
+```
+
+R package:
+
+```{r, eval=F}
+
+install.packages( "wooldridge" )
+library( wooldridge )
+
+```
+
+
+
+
+## Affairs Dataset
+
+```{r}
+
+data( "affairs" )
+head( affairs ) %>% pander()
+
+```
+
+
+* id: identifier 
+* male: =1 if male 
+* age: in years 
+* yrsmarr: years married 
+* kids: =1 if have kids 
+* relig: 5 = very relig., 4 = somewhat, 3 = slightly, 2 = not at all, 1 = anti 
+* educ: years schooling 
+* occup: occupation, reverse Hollingshead scale 
+* ratemarr: 5 = vry hap marr, 4 = hap than avg, 3 = avg, 2 = smewht unhap, 1 = vry unhap 
+* naffairs: number of affairs within last year 
+* affair: =1 if had at least one affair 
+* vryhap: ratemarr == 5 
+* hapavg: ratemarr == 4 
+* avgmarr: ratemarr == 3 
+* unhap: ratemarr == 2 
+* vryrel: relig == 5 
+* smerel: relig == 4 
+* slghtrel: relig == 3 
+* notrel: relig == 2 
+
+
+### Models
+
+Insert model exammples here...
+
+
+
+
+## School Voucher Dataset
+
+```{r, eval=T}
+
+data( 'voucher' )
+head( voucher ) %>% pander()
+
+```
+
+
+
+
+
+
+# Package 'Ecdat'
+
+```{r, eval=F}
+
+install.packages( "Ecdat" )
+library( Ecdat )
+
+```
+
+
+## Star Dataset
+
+* tmathssk total math scaled score 
+* treadssk total reading scaled score 
+* classk type of class, a factor with levels (regular,small.class,regular.with.aide) 
+* totexpk years of total teaching experience 
+* sex a factor with levels (boy,girl) 
+* freelunk qualified for free lunch ? 
+* race a factor with levels (white,black,other) 
+* schidkn school indicator variable 
+
+```{r, fig.width=10, fig.height=10 }
+
+data( Star )
+head( Star ) %>% pander()
+
+dat <- dplyr::select( Star, tmathssk,treadssk, totexpk ) %>% 
+  dplyr::rename( Math_Score=tmathssk, Reading_Score=treadssk, Teacher_Experience=totexpk )
+
+pairs( dat, lower.panel=panel.smooth, upper.panel=panel.cor)
+
+
+
+```
+
+
+
+```{r}
+
+par( mfrow=c(2,2) )
+plot( Star$class, Star$tmathssk, frame.plot=F, outline=F, main="Class Type" )
+plot( Star$sex, Star$tmathssk, frame.plot=F, outline=F, main="Gender" )
+plot( Star$freelunk, Star$tmathssk, frame.plot=F, outline=F, main="Free Lunch" )
+plot( Star$race, Star$tmathssk, frame.plot=F, outline=F, main="Race" )
+
+
+```
+
+
+```{r}
+
+group.structure <- formula( Star$tmathssk ~ Star$freelunk * Star$totexpk )
+
+boxplot( group.structure, 
+         las=2, frame.plot=F, outline=F, main="Age Group by Gender",
+         col=c("firebrick","steelblue"), xaxt="n",
+         staplewex=0, whisklty=0, ylim=c(400,600) )
+
+```
+
+
+
+```{r, results='asis'}
+
+
+m1 <- lm( tmathssk ~ classk, data=Star )
+m2 <- lm( tmathssk ~ classk + totexpk + sex + race + freelunk, data=Star )
+m3 <- lm( treadssk ~ classk, data=Star )
+m4 <- lm( treadssk ~ classk + totexpk + sex + race + freelunk, data=Star )
+
+stargazer( m1, m2, m3, m4, type="html" )
+
+
+```
+
+
+## Dataset 'Treatment'
+
+```{r}
+
+data( 'Treatment' )
+head( Treatment ) %>% pander()
+
+```
+

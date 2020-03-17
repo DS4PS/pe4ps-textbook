@@ -1,0 +1,20 @@
+name: "Prog Eval III: Regression Tools for Impact Analysis"
+output_dir: "docs"
+navbar:
+  title: "HOME"
+  type: inverse
+  left:
+    - text: "TimeSeries"
+      href: p-020-time-series.html
+  right:
+    - icon: fa-github fa-2x
+      href: https://github.com/DS4PS/pe4ps-textbook
+output:
+  bookdown::html_document2:
+    toc: yes
+    toc_depth: 3
+    code_folding: show
+    css: 'assets/custom.css'
+    includes:
+      after_body: footer.html
+

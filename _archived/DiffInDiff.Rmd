@@ -1,0 +1,1142 @@
+---
+title: "Difference in Difference"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message=F, warning=F, fig.width = 10)
+```
+**Packages**
+
+Here are the packages we will use in this lecture. If you don't remember how to install them, you can have a look at the code. 
+
+* **stargazer** for nice tables
+
+```{r, eval=F}
+install.packages( stargazer )
+library( "stargazer" )
+```
+
+**Learning objectives**
+
+* What is the scope of a difference-in-difference model?
+* What is the right design to apply a difference-in-difference model? 
+* How should you organize your data before using a difference-in-difference model?
+* What are the key coefficients of a difference-in-difference model? How do you interpret each of them? 
+* What is the parallel trend assumption?
+* Applying a difference-in-difference model to data in R
+
+```{r, echo=FALSE, results="hide"}
+install.packages("stargazer", repos="https://cran.cnr.berkeley.edu")
+install.packages("scales", repos="https://cran.cnr.berkeley.edu")
+```
+
+```{r, echo=FALSE, results="hide"}
+library("stargazer")
+library("scales")
+```
+
+# The key concept
+
+The difference-in-difference (diff-in-diff) is a powerful model which allows us to look at the effect of a policy intervention by taking into consideration:
+
+1. how a group mean changes **before and after a policy intervention** (treatment group)  AND
+2. compare this change with the mean over time of a similar group **which did not undergo the treatment** (control group). 
+
+We can see a representation of the model in figure \@ref(fig:diffindiff). We have two groups, one which underwent the treatment and one which did not undergo the treatment (control group). For both groups we observe the **average outcome** before and after the intervention.  
+
+```{r diffindiff, fig.cap="Difference in difference model", echo=F }
+T1 <- 50
+T2 <- 85
+CF <- 75
+C1 <- 35
+C2 <- 55
+
+palette( c( adjustcolor( "steelblue", alpha.f = 1), adjustcolor( "darkred", alpha.f = 1)  ) )
+
+plot( c(0, 1, 0, 1), c(T1, T2, C1, C2), bty = "n",
+      xlim = c(-0.5, 2), ylim = c(30, 90),
+      col = c(1,1,2,2), pch=19, cex=6, 
+      xaxt = "n", yaxt = "n",
+      xlab = "", ylab = "" 
+      #main = "Difference in Difference model" 
+      )
+
+segments( x0=0, x1=1, y0=C1, y1=C2, col=2, lwd=2 )
+segments( x0=0, x1=1, y0=T1, y1=T2, col=1, lwd=2 )
+
+text( c(0, 1, 0, 1), c(T1, T2, C1, C2), c(T1, T2, C1, C2), cex = 1.5, col =" white" )
+
+axis( side = 1, at=c(0, 1), 
+      labels=c("Pre-intervention",
+      "Post-intervention" ) )
+
+text( 1.1, T2, "Treatment Group", col = "Steelblue", pos = 4, cex = 1.5 )
+text( 1.1, C2, "Control Group", col = "darkred", pos = 4, cex = 1.5 )
+
+```
+
+As suggested by the name, the diff-in-diff estimator is the **difference of their mean differences**. More clearly, the diff-in-diff estimator takes
+
+* the difference in the treatment group before and after the treatment (the *treatment effect*) 
+
+and substracts:
+
+* the difference in the control group before and after the treatment (the *trend* over time)
+
+as in the following formula:
+
+\begin{equation} 
+\text{(Treatment_post - Treatment_pre) - (Control_post - Control_pre) = Diff-in-Diff estimate}
+  (\#eq:didtable)
+\end{equation}
+
+We can calculate the difference-in-difference based on graph \@ref(fig:diffindiff), as below:
+
+\begin{equation*} 
+\text{(85 - 50) - (55 - 35) = 15}
+\end{equation*}
+<br>
+A more detailed calculation can be seen in table \@ref(fig:didtable), the red number in the right down corner is the diff-in-diff estimator - the key parameter we will estimate in our model. When the difference-in-difference estimate is different from 0, then the treatment has had an effect.
+
+```{r didtable, fig.cap="Difference in difference, an example", out.width='60%', echo=F }
+knitr::include_graphics( "FIGURE/DiffInDiff/Picture1.1.png" )
+```
+
+It is important to note that in a diff-in-diff model:
+
+> * We are going to look at grouped data, as we will always compare a treatment and a control group.
+>
+> * The coefficients will represent group means and their differences. The diff-in-diff model does not include a slope.
+
+
+## The statistical model
+
+In mathematical terms, we are interested in estimating 3 coefficients, as in the following equation: 
+
+\begin{equation} 
+\text{Y} = \beta_0 + \beta_1*Treatment + \beta_2*Post + \beta_3 * Treatment * Post + \text{e}
+  (\#eq:did)
+\end{equation}
+
+Where:
+<br>
+<br>
+$\text{Y}$ is our outcome variable;
+<br>
+<br>
+$\text{Treatment}$ is a dummy variable indicating the treatment (=1) and control (=0) group; 
+<br>
+<br>
+$\text{Post}$ is a dummy variable indicating pre (=0) and post (=1) treatment;
+<br>
+<br>
+$\text{Treatment * Post}$ is a dummy variable indicating whether the outcome was observed in the treatment group AND it was observed after the intervention (=1), or any other case (=0).
+
+Our dataset will look like this, where two subjects undergo the treatment and two subjects did not undergo the treatment. For each subject we registered post and pre treatment outcomes, such that we have two observations for each subject:
+
+```{r dataset, fig.cap="Diff-in-Diff dataset", out.width='60%', echo=F }
+knitr::include_graphics( "FIGURE/DiffInDiff/Picture3.1.png" )
+```
+
+To recap, we have two group - a treatment and a control group - and half of the observations in each group will be before the treatment and half of them after the treatment. 
+
+### The coefficients
+
+We can estimate a simple diff-in-diff model based on figure \@ref(fig:diffindiff) to look at the various coefficients.
+
+```{r, echo = F}
+T = c(1,1,1,1,0,0,0,0)
+P = c(1,0,1,0,1,0,1,0)
+Y = 35 + 15*T + 20 * P + 15 *T*P
+```
+
+```{r, results='asis'}
+
+reg = lm(Y ~ T + P + T*P)
+
+stargazer( reg, 
+           type = "html", 
+           dep.var.labels = ("Outcome"),
+           column.labels = c(""),
+           covariate.labels = c("Intercept (B0)", "Treatment (B1)", "Post-treatment (B2)", "Diff in Diff (B3)"),
+           omit.stat = "all", 
+           digits = 2, intercept.bottom = FALSE )
+```
+
+Each coefficient represents a group mean or a difference between two means. To facilitate the understanding of each coefficient, we can use the following graphs of our equation \@ref(eq:did) and look at each coefficient individually (you can see the values of the coefficients on the left side of the graph). 
+
+$\beta_0$ represents the average outcome of the control group before the treatment.
+
+```{r beta0, fig.cap="Difference in difference, beta 0", echo=F }
+
+T1 <- 50
+T2 <- 85
+CF <- 75
+C1 <- 35
+C2 <- 55
+
+palette( c( adjustcolor( "steelblue", alpha.f=1), adjustcolor( "darkred", alpha.f=1)  ) )
+
+plot( c(0,1,0,1), c(T1,T2,C1,C2), bty="n",
+      xlim=c(-1,2), ylim=c(30,95),
+      col=c("gray","gray","darkred","gray"), pch=19, cex=6, 
+      xaxt="n", yaxt="n",
+      xlab="", ylab=""
+      #main = bquote("Diff-in-Diff" ~ beta[0]), cex.main = 2,
+      )
+
+segments( x0=0.08, x1=1, y0=C1, y1=C2, col="gray", lwd=2 )
+segments( x0=0, x1=1, y0=T1, y1=T2, col="gray", lwd=2 )
+
+text( c(0,1,0,1), c(T1,T2,C1,C2), c(T1,T2,C1,C2), cex=1.5, col="white" )
+
+axis( side=1, at=c(0,1), 
+      labels=c("Pre-intervention",
+      "Post-intervention" ) )
+
+text( 1.1, T2-5, "Treatment Group", col="gray54", pos=4, cex=1 )
+text( 1.1, C2-5, "Control Group", col="darkred", pos=4, cex=1 )
+text( -0.1, C1, expression(paste(beta[0])), col="darkred", pos=2, cex=2 )
+text( -0.1, C1-5, "= 35", col="darkred", pos=2, cex=1 )
+
+text(-1, 95, expression(paste(beta[0], "=35")), col = "black", cex = 1.5)
+text(-1, 88, expression(paste(beta[1], "=15")), col = "gray54", cex = 1.5)
+text(-1, 81, expression(paste(beta[2], "=20")), col = "gray54", cex = 1.5)
+text(-1, 74, expression(paste(beta[3], "=15")), col = "gray54", cex = 1.5)
+```
+
+$\beta_1$ represents the difference between the treatment and the control group before the treatment In this case, $\beta_1$ is be equal to 15, such that $\beta_0$ + $\beta_1$ = 50, the average outcome of the treatment group before the treatment. 
+
+```{r beta1, fig.cap="Difference in difference, beta 1", echo=F }
+
+T1 <- 50
+T2 <- 85
+CF <- 75
+C1 <- 35
+C2 <- 55
+
+palette( c( adjustcolor( "steelblue", alpha.f=1), adjustcolor( "darkred", alpha.f=1)  ) )
+
+plot( c(0,1,0,1), c(T1,T2,C1,C2), bty="n",
+      xlim=c(-1,2), ylim=c(30,95),
+      col=c("steelblue","gray","darkred","gray"), pch=19, cex=6, 
+      xaxt="n", yaxt="n",
+      xlab="", ylab=""
+      #main = bquote("Diff-in-Diff" ~ beta[1]), cex.main = 2,
+      )
+
+segments( x0=0.08, x1=1, y0=C1, y1=C2, col="gray", lwd=2 )
+segments( x0=0.08, x1=1, y0=T1, y1=T2, col="gray", lwd=2 )
+
+text( c(0,1,0,1), c(T1,T2,C1,C2), c(T1,T2,C1,C2), cex=1.5, col="white" )
+
+axis( side=1, at=c(0,1), 
+      labels=c("Pre-intervention",
+      "Post-intervention" ) )
+
+text( 1.1, T2-5, "Treatment Group", col="Steelblue", pos=4, cex=1 )
+text( 1.1, C2-5, "Comparison Group", col="darkred", pos=4, cex=1 )
+text( -0.1, C1, expression(paste(beta[0])), col="darkred", pos=2, cex=2)
+text( -0.1, T1, expression(paste(beta[0] + beta[1])), col="steelblue", pos=2, cex=2)
+
+text( -0.1, C1-5, "= 35", col="darkred", pos=2, cex=1)
+text( -0.1, T1-5, "= 35 + 15", col="steelblue", pos=2, cex=1)
+
+text(-1, 95, expression(paste(beta[0], "=35")), col = "gray54", cex = 1.5)
+text(-1, 88, expression(paste(beta[1], "=15")), col = "black", cex = 1.5)
+text(-1, 81, expression(paste(beta[2], "=20")), col = "gray54", cex = 1.5)
+text(-1, 74, expression(paste(beta[3], "=15")), col = "gray54", cex = 1.5)
+```
+
+$\beta_2$ represents how much the average outcome of the control group has changed in the post-treatment period. The average outcome of the control group in the post-treatment period will be equal to the initial (pre-treatment) mean - $\beta_0$ in figure\@ref(fig:beta0) - plus $\beta_2$. 
+
+Note that $beta_2$ represent the trend over time, or the gains that occur over time *independent from the treatment*.
+
+```{r beta2, fig.cap="Difference in difference, beta 2", echo=F }
+
+T1 <- 50
+T2 <- 85
+CF <- 75
+C1 <- 35
+C2 <- 55
+
+palette( c( adjustcolor( "steelblue", alpha.f=1), adjustcolor( "darkred", alpha.f=1)  ) )
+
+plot( c(0,1,0,1), c(T1,T2,C1,C2), bty="n",
+      xlim=c(-1,2), ylim=c(30,95),
+      col=c("gray","gray","darkred","darkred"), pch=19, cex=6, 
+      xaxt="n", yaxt="n",
+      xlab="", ylab=""
+      #main = bquote("Diff-in-Diff" ~ beta[2]), cex.main = 2,
+      )
+
+segments( x0=0.08, x1=0.902, y0=C1, y1=C2, col="gray", lwd=2 )
+segments( x0=0.08, x1=1, y0=T1, y1=T2, col="gray", lwd=2 )
+
+text( c(0,1,0,1), c(T1,T2,C1,C2), c(T1,T2,C1,C2), cex=1.5, col="white" )
+
+axis( side=1, at=c(0,1), 
+      labels=c("Pre-intervention",
+      "Post-intervention" ) )
+
+text( 1.1, T2+7, "Treatment Group", col="gray54", pos=4, cex=1 )
+text( 1.1, C2+7, "Comparison Group", col="darkred", pos=4, cex=1 )
+text( -0.1, C1, expression(paste(beta[0])), col="darkred", pos=2, cex=2 )
+text( 1.1, C2, expression(paste(beta[0] + beta[2])), col="darkred", pos=4, cex = 2 )
+
+text( -0.1, C1-5, "= 35", col="darkred", pos=2, cex=1)
+text( 1.5, C2-5, "= 35 + 20", col="darkred", pos=2, cex=1)
+
+text(-1, 95, expression(paste(beta[0], "=35")), col = "gray54", cex = 1.5)
+text(-1, 88, expression(paste(beta[1], "=15")), col = "gray54", cex = 1.5)
+text(-1, 81, expression(paste(beta[2], "=20")), col = "black", cex = 1.5)
+text(-1, 74, expression(paste(beta[3], "=15")), col = "gray54", cex = 1.5)
+```
+
+Finally, $\beta_3$ is the key parameter that we are interested in estimating. It represents how much the average outcome of the treatment group has changed in the period after the treatment, compared to what it would happened to the same group had the intervention not occurred. If $beta_3$ = 0, we can conclude that the treatment had no effect.
+
+Note that $\beta_3$ represents the difference; to calculate the average outcome of the treatment group after the treatment, we need to add the initial average outcome ($beta_0$ + $beta_1$), the gains over time independent from the treatment ($beta_2$) and the gains because of the treatment ($beta_3$).  
+
+```{r beta3, fig.cap="Diff-in-Diff, beta 3", echo=F }
+
+T1 <- 50
+T2 <- 85
+CF <- 75
+C1 <- 35
+C2 <- 55
+
+palette( c( adjustcolor( "steelblue", alpha.f=1), adjustcolor( "darkred", alpha.f=1)  ) )
+
+plot( c(0,1,0,1), c(T1,T2,C1,C2), bty="n",
+      xlim=c(-1,2), ylim=c(30,95),
+      col=c("steelblue","steelblue","gray","gray"), pch=19, cex=6, 
+      xaxt="n", yaxt="n",
+      xlab="", ylab="" 
+      #main = bquote("Diff-in-Diff" ~ beta[3]), cex.main = 2,
+      )
+
+segments( x0=0.08, x1=0.902, y0=C1, y1=C2, col="gray", lwd=2 )
+segments( x0=0.08, x1=0.902, y0=T1, y1=T2, col="gray", lwd=2 )
+
+text( c(0,1,0,1), c(T1,T2,C1,C2), c(T1,T2,C1,C2), cex=1.5, col="white" )
+
+axis( side=1, at=c(0,1), 
+      labels=c("Pre-intervention",
+      "Post-intervention" ) )
+
+text( 1.1, T2+7, "Treatment Group", col="Steelblue", pos=4, cex=1 )
+text( 1.1, C2+7, "Comparison Group", col="gray54", pos=4, cex=1 )
+text( -0.1, T1, expression(paste(beta[0] + beta[1])), col="steelblue", pos=2, cex = 2 )
+text( 1.1, T2, expression(paste(beta[0] + beta[1] + beta[2] + beta[3])), col="steelblue", pos=4, cex=2 )
+
+text( -0.1, T1-5, "= 35 + 15", col="steelblue", pos=2, cex=1)
+text( 1.7, T2-5, "= 35 + 15 + 20 + 15", col="steelblue", pos=2, cex=1)
+
+text(-1, 95, expression(paste(beta[0], "=35")), col = "gray54", cex = 1.5)
+text(-1, 88, expression(paste(beta[1], "=15")), col = "gray54", cex = 1.5)
+text(-1, 81, expression(paste(beta[2], "=20")), col = "gray54", cex = 1.5)
+text(-1, 74, expression(paste(beta[3], "=15")), col = "black", cex = 1.5)
+```
+
+Note that each of the coefficient tests a different hypothesis - it tells us something fundamentally different about the model. 
+
+Graph | $\beta$ | HYPOTHESES
+--------|:----- |--------------------------------------------
+Graph \@ref(fig:beta0) | $b_0$ | Is the average outcome of the control group before the treatment $\ne$ 0? 
+Graph \@ref(fig:beta1) | $b_1$ | Is the difference between the control and treatment group before the treatment $\ne$ 0?  
+Graph \@ref(fig:beta2) | $b_2$ | Is the difference between the average outcome of the control group before and after the treatment $\ne$ 0?  
+Graph \@ref(fig:beta3) | $b_3$ | Difference in difference estimator. Does the treatment have an impact?
+
+## The counterfactual 
+
+To better understand $beta_3$ represented in graph \@ref(fig:beta3), we need to give a better look at the counterfactual. The counterfactual *what it would have occured to Y, had the policy intervention not happened*; in the diff-in-diff model, the counterfactual is the outcome of the intervention group, had the intervention not occured. $beta_3$ represents the difference between the counterfactual and the average outcome of the treatment group in the period after the treatment.
+
+You can see it in figure \@ref(fig:counterfactual).
+
+```{r counterfactual, fig.cap="DID counterfactual", echo=F }
+
+T1 <- 50
+T2 <- 85
+CF <- 70
+C1 <- 35
+C2 <- 55
+
+palette( c( adjustcolor( "steelblue", alpha.f=1), adjustcolor( "darkred", alpha.f=1)  ) )
+
+plot( c(0,1,0,1), c(T1,T2,C1,C2), bty="n",
+      xlim=c(-1,2), ylim=c(30,95),
+      col="gray54", pch=19, cex=6, 
+      xaxt="n", yaxt="n",
+      xlab="", ylab="", main="Counterfacutal" )
+
+segments( x0=0, x1=1, y0=C1, y1=C2, col="gray54", lwd=2 )
+segments( x0=0, x1=1, y0=T1, y1=T2, col="gray54", lwd=2 )
+
+text( c(0,1,0,1), c(T1,T2,C1,C2), c(T1,T2,C1,C2), cex=1.5, col="white" )
+
+axis( side=1, at=c(0,1), 
+      labels=c("Pre-intervention",
+      "Post-intervention" ) )
+
+text( 1.1, T2+7, "Treatment Group", col="gray54", pos=4, cex=1 )
+text( 1.1, C2+7, "Comparison Group", col="gray54", pos=4, cex=1 )
+
+# Counterfactual
+
+cf.col <- "darkgreen"
+
+points( 1, CF, cex=6, col=cf.col )
+segments( x0=0.1, x1=0.9, y0=T1+1, y1=CF-1, col=cf.col, lwd=1, lty=2 )
+text( 1, CF, CF, col=cf.col, cex=1.5 )
+text( 1.1, CF+7, "Counterfactual", col=cf.col, pos=4, cex=1 )
+
+```
+
+We can find the value of the counterfactual using the equation \@ref(eq:didtable). 
+
+\begin{equation} 
+\text{(Treatment_post - Treatment_pre) = (Control_post - Control_pre)}
+  (\#eq:counterfatual)
+\end{equation}
+
+\begin{equation*} 
+\text{(X - 50) = (55 - 35)}
+\end{equation*}
+
+\begin{equation*} 
+\text{(X - 50) = 20}
+\end{equation*}
+
+\begin{equation*} 
+\text{ X = 20 + 50 = 70}
+\end{equation*}
+
+<br>
+
+We can also calculate the counterfactual using the coefficients estimated from our statistical model. 
+
+\begin{equation} 
+\text{Counterfactual} = \beta_0 + \beta_1 + \beta_2
+  (\#eq:counterfactualBeta)
+\end{equation}
+
+```{r CF, fig.cap="Counterfactual, betas", echo=F }
+
+T1 <- 50
+T2 <- 85
+CF <- 70
+C1 <- 35
+C2 <- 55
+
+palette( c( adjustcolor( "steelblue", alpha.f=1), adjustcolor( "darkred", alpha.f=1)  ) )
+
+plot( c(0,1,0,1), c(T1,T2,C1,C2), bty="n",
+      xlim=c(-1,2), ylim=c(30,95),
+      col=c("steelblue","steelblue","darkred","darkred"), pch=19, cex=6, 
+      xaxt="n", yaxt="n",
+      xlab="", ylab="" 
+      #main = bquote("Diff-in-Diff" ~ beta[3]), cex.main = 2,
+      )
+
+segments( x0=0.08, x1=0.902, y0=C1, y1=C2, col="gray", lwd=2 )
+segments( x0=0.08, x1=0.902, y0=T1, y1=T2, col="gray", lwd=2 )
+
+text( c(0,1,0,1), c(T1,T2,C1,C2), c(T1,T2,C1,C2), cex=1.5, col="white" )
+
+axis( side=1, at=c(0,1), 
+      labels=c("Pre-intervention",
+      "Post-intervention" ) )
+
+text( 1.1, T2+7, "Treatment Group", col="Steelblue", pos=4, cex=1 )
+text( 1.1, C2+7, "Comparison Group", col="darkred", pos=4, cex=1 )
+
+text( -0.1, T1, expression(paste(beta[0] + beta[1])), col="steelblue", pos=2, cex = 2 )
+text( 1.1, T2, expression(paste(beta[0] + beta[1] + beta[2] + beta[3])), col="steelblue", pos=4, cex=2 )
+text( -0.1, C1, expression(paste(beta[0])), col="darkred", pos=2, cex = 2 )
+text( 1.1, C2, expression(paste(beta[0] + beta[2])), col="darkred", pos=4, cex=2 )
+
+#text( -0.1, T1-5, "= 35 + 15", col="steelblue", pos=2, cex=1)
+#text( 1.7, T2-5, "= 35 + 15 + 20 + 15", col="steelblue", pos=2, cex=1)
+
+# Counterfactual
+
+cf.col <- "darkgreen"
+
+points( 1, CF, cex=6, col=cf.col )
+segments( x0=0.1, x1=0.9, y0=T1+1, y1=CF-1, col=cf.col, lwd=1, lty=2 )
+text( 1, CF, CF, col=cf.col, cex=1.5 )
+text( 1.1, CF+7, "Counterfactual", col=cf.col, pos=4, cex=1 )
+text( 1.1, CF, expression(paste(beta[0] + beta[1] + beta[2])), col=cf.col, pos=4, cex=2 )
+```
+
+
+```{r, echo=F}
+set.seed(98)
+Post_Treatment = rep(c(0,1), 500)
+
+Group = rep(c(0,0,1,1), 250)
+
+e = rnorm(1000, 500, 7000)
+
+y = 5000 + 1500 * Group + 4300* Post_Treatment + 4000 * Group * Post_Treatment + e
+
+House_Price <- rescale(y, to = c(50000, 500000))
+#House_Price = log(Y)
+
+data = as.data.frame(cbind(House_Price, Group, Post_Treatment))
+
+```
+
+# A Difference-in-Difference model
+
+```{r housing, fig.cap="A housing project in [New York](https://www1.nyc.gov/site/nycha/about/100-percent-affordable-housing.page)", out.width='60%', echo=F }
+knitr::include_graphics( "FIGURE/DiffInDiff/Housing.png" )
+```
+
+The U.S. Dept. of Housing and Urban Development, along with state and local governments, [subsidize several housing projects to create affordable living spaces](https://homeguides.sfgate.com/subsidized-housing-mean-55552.html). This policy has become increasingly important in the past yeas, as [rent and housing costs increase in several US cities](https://www.nytimes.com/2018/07/27/us/politics/hud-affordable-housing-crisis.html). 
+
+However, there are several critics to housing programs, including the belief that the development of affordable housing might cause a [decline in housing value in nearby neighborhoods](http://furmancenter.org/files/media/Dont_Put_It_Here.pdf). There are several theories behind this idea, including: 
+
+* individuals prefer living close to high-income families, so affordble housing projects make the neighborhood less attractive; 
+* with housing projects there is an increase in the neighborhood population which might lead to congestion that negatively affect house prices; 
+* new housing projects do not fit the neighborhood landscape, and reduced its attractiveness; and so on. 
+
+We can test the hypothesis that **housing projects reduce housing value** using a difference-in-difference model (you can see a great example in this work conducted by [Ellen and colleagues in 2007](https://onlinelibrary.wiley.com/doi/epdf/10.1002/pam.20247)).
+
+We are going to simulate some housing prices data for 2 groups of houses: houses that are located close to a subsized housing site (treatment group) and houses that are far away from a subsized housing site (control group). We are going to look at whether prices have changed before and after the creation of the subsized housing site. 
+
+> **Research question**: 
+> Do affordable housing projects reduce prices of nearby houses?
+>
+> **Hypothesis**: 
+> Houses nearby affordable housing projects will report a greater decrease in price over time.
+
+## Data
+
+We can have a look at the dataset
+
+```{r}
+head(data, 10)
+```
+
+The dataset contains three variables:
+
+ **Variable name   **   | **Description    **                                                                         | 
+----------------------- | ------------------------------------------------------------------------------------------- |
+$\text{House Price}$    |House pricing                                                                                |
+$\text{Group}$          |Houses close to a subsized housing site (=1) and houses far from a subsized housing site (=0)|
+$\text{Post_Treatment}$ |Subsized housing site is not constructed (=0) or subsized housing site is open (=1)          |
+
+## Analysis
+
+Our model is based on the equation \@ref(eq:did):
+
+<center>$\text{Y} = \beta_0 + \beta_1*Group + \beta_2*Treatment + \beta_3 * Group * Treatment + \text{e}$</center>
+
+```{r, echo=T, results='asis'}
+
+reg = lm(House_Price ~ Group + Post_Treatment + Group * Post_Treatment)
+
+stargazer( reg, 
+           type = "html", 
+           dep.var.labels = ("Housing prices"),
+           column.labels = c(""),
+           covariate.labels = c("Intercept (B0)", "Treatment group (B1)", "Post-treatment (B2)", "Diff in Diff (B3)"),
+           omit.stat = "all", 
+           digits = 2, intercept.bottom = FALSE )
+```
+
+## Discussion of the results
+
+As we discussed in our section \@ref(the-statistical-model) each coefficient tests a different hypothesis. By looking at the results we should be able to answer the following questions: 
+
+1. Is the comparison group in Time = 1 different from zero?
+2. Did the treatment and comparison groups differ significantly in the first time period? In other words, do houses in the treatment group cost more than houses in the control group?
+3. Did the comparison group change significantly between the first and second time periods? In other words, do the prices of houses in the control group increase over time?
+4. Is the treatment group in Time = 2 different from the counterfactual? In other words, does the construction of an affordable housing site change the price of the nearby houses? If our hypothesis is confirmed we would expect a negative and significant coefficient.  
+
+Answers:
+
+1. The coefficient $\beta_0$ (the constant) is significant and different from zero. Houses in the control group have an average price of 216,672.60$ in time = 1.
+
+2. The coefficient $\beta_1$ (Treatment group) is also significant and different from zero, telling us that at time = 1, houses in the treatment and control group had a different average price. Specifically, houses in the treatment group cost 16,461.22$ more than houses in the control group. The average price of houses in the treatment group is 216,672.6 + 16,461.22 = 233,133.80.
+
+3. The coefficient $\beta_2$ (Post-treatment) is significant and different from zero. We can conclude that the price of houses in the control group increased from time = 1 to time = 2. The average price of houses in the control group increases of 35,230.86$ at time = 2. The average price of houses in the control group at time = 2 is 216,672.6 + 35,230.86 = 251,903.5 
+
+4. Finally, the coefficient $\beta_3$ (Diff-in-Diff) is significant and different from zero, which means that the construction of an affordable housing site change the price of nearby houses. Particularly, the price increases of 34,066.02$ more than it would have without the construction of the housing site. 
+
+## The counterfactual
+
+Based on our results, we can calculate the counterfactual using the formula \@ref(eq:counterfactualBeta):
+
+\begin{equation} 
+\text{Counterfactual} = \beta_0 + \beta_1 + \beta_2
+  (\#eq:did)
+\end{equation}
+
+The counterfactual represents the price of the houses in the treatment group, had the construction of the housing site never happend. It is equal to 268,364.7. But because the intervention did occur the price of the houses is equal to 302,430.7 (the counterfactual + the diff-in-diff).
+
+We can map all these numbers in a graph:
+
+```{r Example, fig.cap="Results from the working example", echo=F }
+
+T1 <- 50
+T2 <- 85
+CF <- 75
+C1 <- 35
+C2 <- 55
+
+palette( c( adjustcolor( "steelblue", alpha.f=1), adjustcolor( "darkred", alpha.f=1)  ) )
+
+plot( c(0,1,0,1), c(T1,T2,C1,C2), bty="n",
+      xlim=c(-0.5,2), ylim=c(30,90),
+      col=c("steelblue","steelblue","darkred","darkred"), pch=19, cex=6, 
+      xaxt="n", yaxt="n",
+      xlab="", ylab="" 
+      #main = bquote("Diff-in-Diff" ~ beta[3]), cex.main = 2,
+      )
+
+segments( x0=0.08, x1=0.902, y0=C1, y1=C2, col="gray", lwd=2 )
+segments( x0=0.08, x1=0.902, y0=T1, y1=T2, col="gray", lwd=2 )
+
+#text( c(0,1,0,1), c(T1,T2,C1,C2), c(T1,T2,C1,C2), cex=1.5, col="white" )
+
+axis( side=1, at=c(0,1), 
+      labels=c("Pre-intervention",
+      "Post-intervention" ) )
+
+text( 1.1, T2+5, "302,430.7", col="Steelblue", pos=4, cex=1.5 )
+text( 1.1, C2-5, "233,133.8", col="darkred", pos=4, cex=1.5 )
+text( -0.45, T1+4, "251,903.5", col="Steelblue", pos=4, cex=1.5 )
+text( -0.45, C1+4, "216,672.6", col="darkred", pos=4, cex=1.5 )
+text( -0.1, C1, expression(paste(beta[0])), col="darkred", pos=2, cex=1 )
+text( -0.1, T1, expression(paste(beta[0] + beta[1])), col="steelblue", pos=2, cex = 1 )
+text( 1.1, C2, expression(paste(beta[0] + beta[2])), col="darkred", pos=4, cex = 1 )
+text( 1.1, T2, expression(paste(beta[0] + beta[1] + beta[2] + beta[3])), col="steelblue", pos=4, cex=1 )
+
+# Counterfactual
+
+cf.col <- "darkgreen"
+
+points( 1, CF, cex=6, col=cf.col )
+segments( x0=0.1, x1=0.9, y0=T1+1, y1=CF-1, col=cf.col, lwd=1, lty=2 )
+#text( 1, CF, CF, col=cf.col, cex=1.5 )
+text( 1.1, CF-5, "268,364.7", col=cf.col, pos=4, cex=1.5 )
+text( 1.1, CF, expression(paste(beta[0] + beta[1] + beta[2])), col="black", pos=4, cex=1 )
+
+```
+
+# Replication of a study
+
+```{r repstudy, fig.cap="Source: http://factsmaps.com/minimum-wage-us-states-july-2018/", out.width='60%', echo=F }
+knitr::include_graphics( "FIGURE/DiffInDiff/Minimum Wage.png" )
+```
+
+We are going to replicate a study conducted by [Card and Krueger in 1994](http://davidcard.berkeley.edu/papers/njmin-aer.pdf) that investigate the relationship between a rise in minimum wage and employment. 
+
+[Economic theories](https://www.frbsf.org/economic-research/publications/economic-letter/2015/december/effects-of-minimum-wage-on-employment/) have long suggested that increases in the minimum wage lead to a reduction in the employment for at least two reasons:
+
+* Businesses are less likely to hire and will rather invest in other resources that are now cheaper because of wage increase
+* Higher salaries will induce businesses to raise their prices to compensate their greater costs; as prices increase, we expect fewer buyers, which will lead to lower demand and employment. 
+
+These theories have found mixed [support](https://www.nber.org/papers/w12663) but the discussion is still very much open within the policy world, as states discuss the opportunity to rise their minimum wage to help local populations to face increasing living costs. Discussions are currently occuring in [New Jersey](https://www.nytimes.com/2019/01/17/nyregion/nj-minimum-wage.html) and [Illinois](https://kmox.radio.com/articles/discussions-underway-raise-illinois-minimum-wage-15hour) to raise the minimum wage to 15$/hour ([New york](https://www.nytimes.com/2018/12/31/nyregion/15-minimum-wage-new-york.html?module=inline) has successfully passed this same raise in 2018).
+
+One of the first study looking at this policy problem was Card and Krueger's. They applied a difference-in-difference the design to look at two groups of fast-food restaurants:
+
+* fast-food restaurants in New Jersey where the minimum wage increased from 4.25$ to 5.05$ per hour (treatment group) AND
+* fast-food restaurants in Pennsylvania where the minimum wage did not increase (control group).
+
+They collected data before and after the minimum wage was approved. Data used in the study can be download here. #PROVIDE LINK
+
+> **Research question:** 
+> Do increases in the minimum wage affect employment?
+>
+> **Hypothesis:** 
+> An increase in the minimum wage is negatively correlated with employment.
+
+## Data
+
+We start by uploading the data
+
+```{r, echo=T}
+data = read.csv("DATA/DID_Example.csv")
+```
+
+These are the variables contained in the dataset. 
+
+**Variable name   ** | **Description    **                                  | 
+-------------------- | -----------------------------------------------------|
+ID                   |Unique identifier for fast food                       |
+Treatment            |Pre-treatment (=0) and post-treatment (=1)            |
+Group                |1 if NJ (treatment); 0 if PA (Control)                |
+Empl                 |# of full time employees                              |
+C.Owned              |If owned by a company (=1) or not (=0)                | 
+Hours.Opening        |Number hours open per day                             | 
+Soda                 |Price of medium soda, including tax                   |
+Fries                |price of small fries, including tax                   |
+Chain                |1 = BK, 2 = KFC, 3 = Roys, 4 = Wendys                 |
+SouthJ               |South New Jersey                                      |
+CentralJ             |Central New Jersey                                    |
+NorthJ               |North New Jersey                                      |
+PA1                  |Northeast suburbs of Philadelphia                     |
+PA2                  |Easton and other PA areas 
+Shore                |New Jersey Shore
+
+Here are some basic statistics.
+
+```{r, echo=T, results='asis'}
+stargazer( data,  
+           type = "html", 
+           omit.summary.stat = c("p25", "p75"),
+           digits = 2 )
+```
+
+From the descriptive statistics table, you can see that the fast-food restaurants in our data have, on average, 8 employees. Moreover, 80% of the fast-food restaurants are part of the intervention group (see the Group variable). 
+
+## Analysis
+
+We now estimate the difference-in-difference model based on the equation \@ref(eq:did); note that along with the Group and Treatment variables, we also include a set of control variables to account for differences across restaurants. For instance, we include the variable "opening hours" (if fast food restaurants are open more hours they might need more employees) or prices for fries and sodas (more expensive fast food might have more money to hire more employees). 
+
+```{r, echo=T, results='asis'}
+reg = lm(Empl ~
+Group +
+Treatment +           
+Treatment * Group +
+C.Owned +             
+Hours.Opening +      
+Soda +                 
+Fries +               
+as.factor(Chain) +               
+SouthJ +              
+CentralJ +             
+NorthJ +               
+PA1 +                 
+PA2 +                 
+Shore, 
+data = data)
+
+stargazer( reg, 
+           type = "html", 
+           dep.var.labels = ("Full-time Employees"),
+           omit = c("PA2", "NorthJ"),
+           column.labels = ("Model results"), intercept.bottom = FALSE,
+           covariate.labels = c("Constant (b0)", 
+            "Treatment (b1)", "Post-treatment (b2)", "C.Owned",
+            "Hours.Opening", "Soda",
+            "Fries", "Burger King",
+            "Roys", "Wendy's",
+            "SouthJ", "CentralJ",
+            "PA1", "Shore",
+            "Diff-in-Diff estimator (b3)"),
+           omit.stat = "all", 
+           digits = 2)
+
+```
+
+Note that two variables were omitted because of multiple
+
+
+## Discussion of the results
+
+As before, test your knowledge with the following questions: 
+
+1. Is the control group in Time=1 different from zero?
+2. Did the treatment and comparison groups differ significantly in the first time period?
+3. Did the comparison group change significantly between the first and second time periods?
+4. Is the treatment Group in Time=2 different from the counterfactual? In other words, does the program have impact?
+
+You can see the correct answers in the code. 
+
+```{r}
+
+# 1. No. The coefficient b0 is not statistically significant suggesting that the mean of the control group is not statistically different from zero (see the variable "Constant").
+
+# 2. Yes, the treatment group has, on average, 3 employees less than the control group. Beta1 is statistically significant (see the variable "Group").
+
+# 3. No. Despite the coefficient b2 = -1.32, suggesting a decrease in the number of employees, it is not statistically significant - therefore, we can conclude that there was no change in the control group.
+
+# 4. Yes. The difference-in-difference estimator is equal to 4, suggesting that after the treatment, employment for restaurant in New Jersey (our treatment group) saw an increase in employment equal to an average of 4 employees.
+```
+
+# Additional resources
+
+In this section we are going to look at some more cases of difference-in-difference as well as a key assumption that you need to consider. 
+
+## Cases in difference-in-difference
+
+We can look at some specific cases of difference-in-difference models in the following pictures. This will help you thinking about the different coefficients in the model. 
+
+In the first picture, the control group does not increase over time, such that $\beta_1$ = 0 and the control group outcome is equal to $\beta_0$ both before and after the treatment. 
+
+In the second picture, there is no difference between the control and the treatment group before the treatment. In this case, $\beta_0$ = $\beta_2$. 
+
+In the last picture, the program has no effect and we would expect $\beta_3$ = 0 as both groups have increases at the same ration. 
+
+```{r cases, fig.cap="Multiple cases in a DID model", echo=F }
+
+par( mfrow=c(1,3), mar=c(2,0,2,0) )
+
+## Case 1
+
+T1 <- 30
+T2 <- 40
+C1 <- 20
+C2 <- 20
+
+palette( c( adjustcolor( "steelblue", alpha.f=1), adjustcolor( "darkred", alpha.f=1)  ) )
+
+plot( c(0,1,0,1), c(T1,T2,C1,C2), bty="n",
+      xlim=c(-0.5,1.5), ylim=c(19,41),
+      col=c(1,1,2,2), pch=19, cex=6, 
+      xaxt="n", xlab="", ylab="", yaxt="n",
+      main="NO TREND in THE CONTROL GROUP", cex.main=1.5 )
+
+segments( x0=0, x1=1, y0=C1, y1=C2, col=2, lwd=2 )
+segments( x0=0, x1=1, y0=T1, y1=T2, col=1, lwd=2 )
+
+text( c(0,1,0,1), c(T1,T2,C1,C2), c(T1,T2,C1,C2), cex=1.5, col="white" )
+
+axis( side=1, at=c(0,1), 
+      labels=c("Pre-treatment","Post-treatment" ) )
+
+text( 1.2, T2, "TG", col=1, pos=4, cex=1.5 )
+text( 1.2, C2, "CG", col=2, pos=4, cex=1.5 )
+
+## Case 2
+
+T1 <- 20
+T2 <- 40
+C1 <- 20
+C2 <- 25
+
+palette( c( adjustcolor( "steelblue", alpha.f=1), adjustcolor( "darkred", alpha.f=1)  ) )
+
+plot( c(-0.1,1,0.1,1), c(T1,T2,C1,C2), bty="n",
+      xlim=c(-0.5,1.5), ylim=c(19,41),
+      col=c(1,1,2,2), pch=19, cex=6, 
+      xaxt="n", yaxt="n",
+      xlab="", ylab="", 
+      main="NO INITIAL DIFFERENCES", cex.main=1.5 )
+
+segments( x0=0.1, x1=1, y0=C1, y1=C2, col=2, lwd=2 )
+segments( x0=-0.1, x1=1, y0=T1, y1=T2, col=1, lwd=2 )
+
+text( c(-0.1,1,0.1,1), c(T1,T2,C1,C2), c(T1,T2,C1,C2), cex=1.5, col="white" )
+
+axis( side=1, at=c(0,1), 
+      labels=c("Pre-treatment","Post-treatment") )
+
+text( 1.2, T2, "TG", col="Steelblue", pos=4, cex=1.5 )
+text( 1.2, C2, " CG", col="darkred", pos=4, cex=1.5 )
+
+## Case 3
+
+T1 <- 30
+T2 <- 40
+C1 <- 20
+C2 <- 30
+
+palette( c( adjustcolor( "steelblue", alpha.f=1), adjustcolor( "darkred", alpha.f=1)  ) )
+
+plot( c(0,1,0,1), c(T1,T2,C1,C2), bty="n",
+      xlim=c(-0.5,1.5), ylim=c(19,41),
+      col=c(1,1,2,2), pch=19, cex=6, 
+      xaxt="n", xlab="", ylab="", yaxt="n",
+      main="NO PROGRAM EFFECTS", cex.main=1.5 )
+
+segments( x0=0, x1=1, y0=C1, y1=C2, col=2, lwd=2 )
+segments( x0=0, x1=1, y0=T1, y1=T2, col=1, lwd=2 )
+
+text( c(0,1,0,1), c(T1,T2,C1,C2), c(T1,T2,C1,C2), cex=1.5, col="white" )
+
+axis( side=1, at=c(0,1), 
+      labels=c("Pre-treatment","Post-treatment") )
+
+text( 1.2, T2, "TG", col=1, pos=4, cex=1.5 )
+text( 1.2, C2, "CG", col=2, pos=4, cex=1.5 )
+```
+
+Statistically, you can see each case represented in the following table. 
+
+```{r, echo=T, results='asis'}
+T1 <- seq(20,40)
+T2 <- seq(30,50)
+C1 <- seq(10,30)
+C2 <- seq(10,30)
+
+moxy <- c(C1,C2,T1,T2)
+treat <- rep( c(0,1), each=42 )
+post <- rep( c(0,1,0,1), each=21 )
+
+m1 <- lm( moxy ~ treat + post + treat*post )
+
+
+T1 <- seq(10,30)
+T2 <- seq(30,50)
+C1 <- seq(10,30)
+C2 <- seq(15,35)
+
+moxy <- c(C1,C2,T1,T2)
+treat <- rep( c(0,1), each=42 )
+post <- rep( c(0,1,0,1), each=21 )
+
+
+m2 <- lm( moxy ~ treat + post + treat*post )
+
+T1 <- seq(20,40)
+T2 <- seq(30,50)
+C1 <- seq(10,30)
+C2 <- seq(20,40)
+
+moxy <- c(C1,C2,T1,T2)
+treat <- rep( c(0,1), each=42 )
+post <- rep( c(0,1,0,1), each=21 )
+
+m3<- lm( moxy ~ treat + post + treat*post )
+
+
+stargazer( m1, m2, m3, type='html', digits=1,
+           omit.stat=c("f","rsq","adj.rsq","ser"),
+           intercept.bottom = FALSE, column.labels = "Outcome",
+           covariate.labels = c("Intercept (A)", "Treatment Group (B)",
+                                "Post-Period (C)", "Treat x Post (D)" ) )
+```
+
+## Parallel trend assumption
+
+The difference-in-difference model assumes that - in the absence of treatment - the treatment and control group have a similar trend over time, so as we can calculate the counterfactual based on the changes in the control group (remember that the counterfactual is calculated by summing$beta_0$, $beta_1$, and $beta_2$ as in equation \@ref(eq:counterfactualBeta). This is called the *parallel trend assumption*. 
+
+You can see what happens when the assumption is met or not met in the following pictures, where we assume that no treatment has occured.
+
+In the first picture, the two groups have the same growth over time. 
+
+```{r pline, fig.cap="Parallel trend assumption: met", echo=F }
+
+T1 <- 30
+T2 <- 40
+C1 <- 20
+C2 <- 30
+
+palette( c( adjustcolor( "steelblue", alpha.f=1), adjustcolor( "darkred", alpha.f=1)  ) )
+
+plot( c(0,1,0,1), c(T1,T2,C1,C2), bty="n",
+      xlim=c(-1,2), ylim=c(10,60),
+      col=c("steelblue","steelblue","darkred","darkred"), pch=19, cex=6, 
+      xaxt="n", yaxt="n",
+      xlab="", ylab="" 
+      #main = bquote("Diff-in-Diff" ~ beta[3]), cex.main = 2,
+      )
+
+segments( x0=0.08, x1=0.902, y0=C1, y1=C2, col="gray", lwd=2 )
+segments( x0=0.08, x1=0.902, y0=T1, y1=T2, col="gray", lwd=2 )
+
+text( c(0,1,0,1), c(T1,T2,C1,C2), c(T1,T2,C1,C2), cex=1.5, col="white" )
+
+axis( side=1, at=c(0,1), 
+      labels=c("Pre-intervention",
+      "Post-intervention" ) )
+
+text( 1.1, T2+5, "Group 1", col="Steelblue", pos=4, cex=1 )
+text( 1.1, C2+5, "Group 2", col="darkred", pos=4, cex=1 )
+
+#text( -0.1, T1-5, "= 35 + 15", col="steelblue", pos=2, cex=1)
+#text( 1.7, T2-5, "= 35 + 15 + 20 + 15", col="steelblue", pos=2, cex=1)
+```
+
+In a difference-in-difference model we would be able to correctly calculate the counterfactual based on the trend observed in the control group and we could obtain our diff-in-diff estimator.
+
+```{r pline2, fig.cap="Parallel trend assumption: counterfactual", echo=F }
+
+T1 <- 30
+T2 <- 55
+CF <- 40
+C1 <- 20
+C2 <- 30
+
+palette( c( adjustcolor( "steelblue", alpha.f=1), adjustcolor( "darkred", alpha.f=1)  ) )
+
+plot( c(0,1,0,1), c(T1,T2,C1,C2), bty="n",
+      xlim=c(-1,2), ylim=c(10,60),
+      col=c("steelblue","steelblue","darkred","darkred"), pch=19, cex=6, 
+      xaxt="n", yaxt="n",
+      xlab="", ylab="" 
+      #main = bquote("Diff-in-Diff" ~ beta[3]), cex.main = 2,
+      )
+
+segments( x0=0.08, x1=0.902, y0=C1, y1=C2, col="gray", lwd=2 )
+segments( x0=0.08, x1=0.902, y0=T1, y1=T2, col="gray", lwd=2 )
+
+text( c(0,1,0,1), c(T1,T2,C1,C2), c(T1,T2,C1,C2), cex=1.5, col="white" )
+
+axis( side=1, at=c(0,1), 
+      labels=c("Pre-intervention",
+      "Post-intervention" ) )
+
+text( 1.1, T2+5, "Treatment Group", col="Steelblue", pos=4, cex=1 )
+text( 1.1, C2+5, "Comparison Group", col="darkred", pos=4, cex=1 )
+
+#text( -0.1, T1-5, "= 35 + 15", col="steelblue", pos=2, cex=1)
+#text( 1.7, T2-5, "= 35 + 15 + 20 + 15", col="steelblue", pos=2, cex=1)
+
+# Counterfactual
+
+cf.col <- "darkgreen"
+
+points( 1, CF, cex=6, col=cf.col )
+segments( x0=0.1, x1=0.9, y0=T1+1, y1=CF-1, col=cf.col, lwd=1, lty=2 )
+text( 1, CF, CF, col=cf.col, cex=1.5 )
+text( 1.1, CF+5, "Counterfactual", col=cf.col, pos=4, cex=1 )
+```
+
+In this second graph, the two groups have a different trend, with the first group growing more than the second group. 
+
+```{r pline3, fig.cap="Parallel trend assumption: unmet", echo=F }
+## Case 3
+
+T1 <- 20
+T2 <- 55
+C1 <- 10
+C2 <- 30
+
+palette( c( adjustcolor( "steelblue", alpha.f=1), adjustcolor( "darkred", alpha.f=1)  ) )
+
+plot( c(0,1,0,1), c(T1,T2,C1,C2), bty="n",
+      xlim=c(-1,2), ylim=c(5,60),
+      col=c("steelblue","steelblue","darkred","darkred"), pch=19, cex=6, 
+      xaxt="n", yaxt="n",
+      xlab="", ylab="" 
+      #main = bquote("Diff-in-Diff" ~ beta[3]), cex.main = 2,
+      )
+
+segments( x0=0.08, x1=0.902, y0=C1, y1=C2, col="gray", lwd=2 )
+segments( x0=0.08, x1=0.902, y0=T1, y1=T2, col="gray", lwd=2 )
+
+text( c(0,1,0,1), c(T1,T2,C1,C2), c(T1,T2,C1,C2), cex=1.5, col="white" )
+
+axis( side=1, at=c(0,1), 
+      labels=c("Pre-intervention",
+      "Post-intervention" ) )
+
+text( 1.1, T2+5, "Group 1", col="Steelblue", pos=4, cex=1 )
+text( 1.1, C2+5, "Group 2", col="darkred", pos=4, cex=1 )
+
+#text( -0.1, T1-5, "= 35 + 15", col="steelblue", pos=2, cex=1)
+#text( 1.7, T2-5, "= 35 + 15 + 20 + 15", col="steelblue", pos=2, cex=1)
+```
+
+If we were to calculate the counterfactual based on the control group, we would misscalculate it and attribute a greater effect to the treatment. This could happen if we compare salary at T=0 and T=10 among individuals in different professions; or the likelihood to go to college between high and low achieving students. You need to pay attention to the selection of the control group. 
+```{r pline4, fig.cap="Parallel trend assumption: wrong counterfactual", echo=F }
+
+T1 <- 20
+T2 <- 55
+C1 <- 10
+C2 <- 30
+CF <- 40
+
+palette( c( adjustcolor( "steelblue", alpha.f=1), adjustcolor( "darkred", alpha.f=1)  ) )
+
+plot( c(0,1,0,1), c(T1,T2,C1,C2), bty="n",
+      xlim=c(-1,2), ylim=c(5,60),
+      col=c("steelblue","steelblue","darkred","darkred"), pch=19, cex=6, 
+      xaxt="n", yaxt="n",
+      xlab="", ylab="" 
+      #main = bquote("Diff-in-Diff" ~ beta[3]), cex.main = 2,
+      )
+
+segments( x0=0.08, x1=0.902, y0=C1, y1=C2, col="gray", lwd=2 )
+segments( x0=0.08, x1=0.902, y0=T1, y1=T2, col="gray", lwd=2 )
+
+text( c(0,1,0,1), c(T1,T2,C1,C2), c(T1,T2,C1,C2), cex=1.5, col="white" )
+
+axis( side=1, at=c(0,1), 
+      labels=c("Pre-intervention",
+      "Post-intervention" ) )
+
+text( 1.1, T2+5, "Group 1", col="Steelblue", pos=4, cex=1 )
+text( 1.1, C2+5, "Group 2", col="darkred", pos=4, cex=1 )
+
+#text( -0.1, T1-5, "= 35 + 15", col="steelblue", pos=2, cex=1)
+#text( 1.7, T2-5, "= 35 + 15 + 20 + 15", col="steelblue", pos=2, cex=1)
+
+# Counterfactual
+
+cf.col <- "darkgreen"
+
+points( 1, CF, cex=6, col=cf.col )
+segments( x0=0.1, x1=0.9, y0=T1+1, y1=CF-1, col=cf.col, lwd=1, lty=2 )
+text( 1, CF, CF, col=cf.col, cex=1.5 )
+text( 1.1, CF+5, "Counterfactual", col=cf.col, pos=4, cex=1 )
+```
+
+There is no easy way to test the parallel line assumption. You can (1) use theory to make and argument or (2) if you have longitudinal data compare the trend of the control and treatment group before the intervention to see if they are similar. 
+
+```{css, echo=F}
+p {
+color: black;
+margin: 0 0 20px 0;
+}
+
+td {
+    padding: 3px 10px 3px 10px;
+}
+
+p.caption {
+    text-align: center;
+    font-style: italic;
+}
+
+table
+{ 
+    margin-left: auto;
+    margin-right: auto;
+    margin-top:80px;
+    margin-bottom:100px;
+}
+
+h1, h2{
+  margin-top:100px;
+  margin-bottom:20px;
+}
+
+H5{
+    text-align: center;
+    color: gray;
+    font-size:0.8em;
+}
+
+img {
+    max-width: 90%;
+    display: block;
+    margin-right: auto;
+    margin-left: auto;
+    margin-top:30px;
+    margin-bottom:20px;
+}
+
+pre {
+  overflow-x: auto;
+}
+
+pre code {
+   display: block; 
+   padding: 0.5em;
+   margin-bottom:20px;
+}
+
+code {
+  font-size: 92%;
+  border: 10px solid #F8F8F8;
+  margin-bottom: 2px;
+}
+
+code[class] {
+  background-color: #F8F8F8;
+}
+
+
+caption {
+  font-style: bold;
+}
+
+```
+

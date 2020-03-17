@@ -1,0 +1,2812 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+
+
+<title>Dataset Examples</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script src="site_libs/navigation-1.1/codefolding.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+<link rel="stylesheet" href="custom.css" type="text/css" />
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #ffffff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+</style>
+<script>
+$(document).ready(function () {
+  window.initializeCodeFolding("hide" === "show");
+});
+</script>
+
+
+
+
+
+<div class="navbar navbar-inverse  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Program Eval III</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="Datasets_in_R.html">Data1</a>
+</li>
+<li>
+  <a href="EvalDataPackage.html">Data2</a>
+</li>
+<li>
+  <a href="TimeSeries.html">TimeS</a>
+</li>
+<li>
+  <a href="InstrumentalVariables.html">InstrumentalVs</a>
+</li>
+<li>
+  <a href="DiffInDiff.html">Diff-in-Diff</a>
+</li>
+<li>
+  <a href="MatchingScores.html">Matching</a>
+</li>
+<li>
+  <a href="LogisticReg.html">Logistic Reg</a>
+</li>
+<li>
+  <a href="FixedEffects.html">Fixed Effects</a>
+</li>
+<li>
+  <a href="panel-model-selection.html">Panel Models</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/DS4PS/PROG-EVAL-III/tree/master/TEXTBOOK">
+    <span class="fa fa-github fa-2x"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+<div class="btn-group pull-right">
+<button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu" style="min-width: 50px;">
+<li><a id="rmd-show-all-code" href="#">Show All Code</a></li>
+<li><a id="rmd-hide-all-code" href="#">Hide All Code</a></li>
+</ul>
+</div>
+
+
+
+<h1 class="title toc-ignore">Dataset Examples</h1>
+
+</div>
+
+<div id="TOC">
+<ul>
+<li><a href="#package-aes"><span class="toc-section-number">1</span> Package <em>AES</em></a><ul>
+<li><a href="#california-schools-data"><span class="toc-section-number">1.1</span> California Schools Data</a><ul>
+<li><a href="#specification"><span class="toc-section-number">1.1.1</span> Specification</a></li>
+<li><a href="#additional-controls"><span class="toc-section-number">1.1.2</span> Additional Controls</a></li>
+</ul></li>
+<li><a href="#teacher-ratings"><span class="toc-section-number">1.2</span> Teacher Ratings</a></li>
+</ul></li>
+<li><a href="#package-woolridge"><span class="toc-section-number">2</span> Package ‘woolridge’</a><ul>
+<li><a href="#affairs-dataset"><span class="toc-section-number">2.1</span> Affairs Dataset</a><ul>
+<li><a href="#models"><span class="toc-section-number">2.1.1</span> Models</a></li>
+</ul></li>
+<li><a href="#school-voucher-dataset"><span class="toc-section-number">2.2</span> School Voucher Dataset</a></li>
+</ul></li>
+<li><a href="#package-ecdat"><span class="toc-section-number">3</span> Package ‘Ecdat’</a><ul>
+<li><a href="#star-dataset"><span class="toc-section-number">3.1</span> Star Dataset</a></li>
+<li><a href="#dataset-treatment"><span class="toc-section-number">3.2</span> Dataset ‘Treatment’</a></li>
+</ul></li>
+</ul>
+</div>
+
+<div id="package-aes" class="section level1">
+<h1><span class="header-section-number">1</span> Package <em>AES</em></h1>
+<p>Applied Econometrics with R</p>
+<p>Functions, data sets, examples, demos, and vignettes for the book Christian Kleiber and Achim Zeileis (2008),
+Applied Econometrics with R, Springer-Verlag, New York.</p>
+<pre class="r"><code>install.packages( &quot;AER&quot; )
+library( AER )
+
+vignette( &quot;AER&quot; )</code></pre>
+<div id="california-schools-data" class="section level2">
+<h2><span class="header-section-number">1.1</span> California Schools Data</h2>
+<p>The data used here are from all 420 K-6 and K-8 districts in California with data available for 1998
+and 1999.</p>
+<p>The dataset is used to address the question of whether</p>
+<p>Test scores are on the Stanford 9 standardized test administered to 5th grade students.
+School characteristics (averaged across the district) include enrollment, number of teachers (measured
+as “full-time equivalents”, number of computers per classroom, and expenditures per student.
+Demographic variables for the students are averaged across the district. The demographic variables
+include the percentage of students in the public assistance program CalWorks (formerly AFDC),
+the percentage of students that qualify for a reduced price lunch, and the percentage of students that
+are English learners (that is, students for whom English is a second language).</p>
+<p><strong>Data Dictionary</strong></p>
+<ul>
+<li><strong>district</strong>: District code (character)</li>
+<li><strong>stratio</strong>: Student-teacher ratio (calculated below)</li>
+<li><strong>score</strong>: Average of two primary scores, math and reading</li>
+<li><strong>school</strong>: School name (character)</li>
+<li><strong>county</strong>: indicating county (factor)</li>
+<li><strong>grades</strong>: indicating grade span of district (factor)</li>
+<li><strong>students</strong>: Total enrollment</li>
+<li><strong>teachers</strong>: Number of teachers</li>
+<li><strong>calworks</strong>: Percent qualifying for CalWorks (income assistance)</li>
+<li><strong>lunch</strong>: Percent qualifying for reduced-price lunch</li>
+<li><strong>computer</strong>: Number of computers</li>
+<li><strong>expenditure</strong>: Expenditure per student</li>
+<li><strong>income</strong>: District average income (in USD 1,000)</li>
+<li><strong>english</strong>: Percent of English learners</li>
+<li><strong>read</strong>: Average reading score</li>
+<li><strong>math</strong>: Average math score</li>
+</ul>
+<div id="specification" class="section level3">
+<h3><span class="header-section-number">1.1.1</span> Specification</h3>
+<p>What happens to the significance of the student-teacher ratio variable once appropriate controls are added to the model?</p>
+<pre class="r"><code>data( &quot;CASchools&quot; )
+
+## variable transformations
+CASchools$stratio &lt;- with(CASchools, students/teachers)
+CASchools$score &lt;- with(CASchools, (math + read)/2)
+
+
+dat &lt;- dplyr::select( CASchools, score, stratio, expenditure, english, lunch, calworks )
+
+pairs( dat, lower.panel=panel.smooth, upper.panel=panel.cor)</code></pre>
+<p><img src="Datasets_in_R_files/figure-html/unnamed-chunk-4-1.png" width="960" /></p>
+<pre class="r"><code>## Stock and Watson (2007)
+## p. 152
+fm1 &lt;- lm( score ~ stratio, data = CASchools )
+# coeftest(fm1, vcov = sandwich)
+
+## p. 159
+fm2 &lt;- lm( score ~ I(stratio &lt; 20), data = CASchools )
+
+## p. 199
+fm3 &lt;- lm( score ~ stratio + english, data = CASchools )
+
+## p. 224
+fm4 &lt;- lm( score ~ stratio + expenditure + english, data = CASchools )
+
+
+stargazer( fm1, fm2, fm3, fm4, type=&quot;html&quot;,
+           omit.stat = c(&quot;rsq&quot;, &quot;f&quot;, &quot;ser&quot;),
+           digits=2)</code></pre>
+<table style="text-align:center">
+<tr>
+<td colspan="5" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td colspan="4">
+<em>Dependent variable:</em>
+</td>
+</tr>
+<tr>
+<td>
+</td>
+<td colspan="4" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td colspan="4">
+score
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(1)
+</td>
+<td>
+(2)
+</td>
+<td>
+(3)
+</td>
+<td>
+(4)
+</td>
+</tr>
+<tr>
+<td colspan="5" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+stratio
+</td>
+<td>
+-2.28<sup>***</sup>
+</td>
+<td>
+</td>
+<td>
+-1.10<sup>***</sup>
+</td>
+<td>
+-0.29
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.48)
+</td>
+<td>
+</td>
+<td>
+(0.38)
+</td>
+<td>
+(0.48)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+I(stratio &lt; 20)
+</td>
+<td>
+</td>
+<td>
+7.17<sup>***</sup>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+(1.85)
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+expenditure
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+0.004<sup>***</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+(0.001)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+english
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+-0.65<sup>***</sup>
+</td>
+<td>
+-0.66<sup>***</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+(0.04)
+</td>
+<td>
+(0.04)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Constant
+</td>
+<td>
+698.93<sup>***</sup>
+</td>
+<td>
+650.08<sup>***</sup>
+</td>
+<td>
+686.03<sup>***</sup>
+</td>
+<td>
+649.58<sup>***</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(9.47)
+</td>
+<td>
+(1.39)
+</td>
+<td>
+(7.41)
+</td>
+<td>
+(15.21)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td colspan="5" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Observations
+</td>
+<td>
+420
+</td>
+<td>
+420
+</td>
+<td>
+420
+</td>
+<td>
+420
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Adjusted R<sup>2</sup>
+</td>
+<td>
+0.05
+</td>
+<td>
+0.03
+</td>
+<td>
+0.42
+</td>
+<td>
+0.43
+</td>
+</tr>
+<tr>
+<td colspan="5" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+<em>Note:</em>
+</td>
+<td colspan="4" style="text-align:right">
+<sup><em></sup>p&lt;0.1; <sup><strong></sup>p&lt;0.05; <sup></strong></em></sup>p&lt;0.01
+</td>
+</tr>
+</table>
+</div>
+<div id="additional-controls" class="section level3">
+<h3><span class="header-section-number">1.1.2</span> Additional Controls</h3>
+<p>Control for non-native speakers and income level of students.</p>
+<pre class="r"><code>## Table 7.1, p. 242 (numbers refer to columns)
+fmc3 &lt;- lm( score ~ stratio + english + lunch, data = CASchools )
+fmc4 &lt;- lm( score ~ stratio + english + calworks, data = CASchools )
+fmc5 &lt;- lm( score ~ stratio + english + lunch + calworks, data = CASchools )</code></pre>
+<pre class="r"><code>stargazer( fmc3, fmc4, fmc5, type=&quot;html&quot;,
+           omit.stat = c(&quot;rsq&quot;, &quot;f&quot;, &quot;ser&quot;),
+           digits=2 )</code></pre>
+<table style="text-align:center">
+<tr>
+<td colspan="4" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td colspan="3">
+<em>Dependent variable:</em>
+</td>
+</tr>
+<tr>
+<td>
+</td>
+<td colspan="3" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td colspan="3">
+score
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(1)
+</td>
+<td>
+(2)
+</td>
+<td>
+(3)
+</td>
+</tr>
+<tr>
+<td colspan="4" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+stratio
+</td>
+<td>
+-1.00<sup>***</sup>
+</td>
+<td>
+-1.31<sup>***</sup>
+</td>
+<td>
+-1.01<sup>***</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.24)
+</td>
+<td>
+(0.31)
+</td>
+<td>
+(0.24)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+english
+</td>
+<td>
+-0.12<sup>***</sup>
+</td>
+<td>
+-0.49<sup>***</sup>
+</td>
+<td>
+-0.13<sup>***</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.03)
+</td>
+<td>
+(0.03)
+</td>
+<td>
+(0.03)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+lunch
+</td>
+<td>
+-0.55<sup>***</sup>
+</td>
+<td>
+</td>
+<td>
+-0.53<sup>***</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.02)
+</td>
+<td>
+</td>
+<td>
+(0.03)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+calworks
+</td>
+<td>
+</td>
+<td>
+-0.79<sup>***</sup>
+</td>
+<td>
+-0.05
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+(0.05)
+</td>
+<td>
+(0.06)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Constant
+</td>
+<td>
+700.15<sup>***</sup>
+</td>
+<td>
+698.00<sup>***</sup>
+</td>
+<td>
+700.39<sup>***</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(4.69)
+</td>
+<td>
+(6.02)
+</td>
+<td>
+(4.70)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td colspan="4" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Observations
+</td>
+<td>
+420
+</td>
+<td>
+420
+</td>
+<td>
+420
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Adjusted R<sup>2</sup>
+</td>
+<td>
+0.77
+</td>
+<td>
+0.63
+</td>
+<td>
+0.77
+</td>
+</tr>
+<tr>
+<td colspan="4" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+<em>Note:</em>
+</td>
+<td colspan="3" style="text-align:right">
+<sup><em></sup>p&lt;0.1; <sup><strong></sup>p&lt;0.05; <sup></strong></em></sup>p&lt;0.01
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div id="teacher-ratings" class="section level2">
+<h2><span class="header-section-number">1.2</span> Teacher Ratings</h2>
+<pre class="r"><code>data(&quot;TeachingRatings&quot;)
+
+TeachingRatings$response.rate &lt;- TeachingRatings$students / TeachingRatings$allstudents
+
+TeachingRatings %&gt;% head() %&gt;% pander()</code></pre>
+<table>
+<caption>Table continues below</caption>
+<colgroup>
+<col width="14%" />
+<col width="8%" />
+<col width="12%" />
+<col width="13%" />
+<col width="13%" />
+<col width="9%" />
+<col width="14%" />
+<col width="14%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="center">minority</th>
+<th align="center">age</th>
+<th align="center">gender</th>
+<th align="center">credits</th>
+<th align="center">beauty</th>
+<th align="center">eval</th>
+<th align="center">division</th>
+<th align="center">native</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">yes</td>
+<td align="center">36</td>
+<td align="center">female</td>
+<td align="center">more</td>
+<td align="center">0.2899</td>
+<td align="center">4.3</td>
+<td align="center">upper</td>
+<td align="center">yes</td>
+</tr>
+<tr class="even">
+<td align="center">no</td>
+<td align="center">59</td>
+<td align="center">male</td>
+<td align="center">more</td>
+<td align="center">-0.7377</td>
+<td align="center">4.5</td>
+<td align="center">upper</td>
+<td align="center">yes</td>
+</tr>
+<tr class="odd">
+<td align="center">no</td>
+<td align="center">51</td>
+<td align="center">male</td>
+<td align="center">more</td>
+<td align="center">-0.572</td>
+<td align="center">3.7</td>
+<td align="center">upper</td>
+<td align="center">yes</td>
+</tr>
+<tr class="even">
+<td align="center">no</td>
+<td align="center">40</td>
+<td align="center">female</td>
+<td align="center">more</td>
+<td align="center">-0.678</td>
+<td align="center">4.3</td>
+<td align="center">upper</td>
+<td align="center">yes</td>
+</tr>
+<tr class="odd">
+<td align="center">no</td>
+<td align="center">31</td>
+<td align="center">female</td>
+<td align="center">more</td>
+<td align="center">1.51</td>
+<td align="center">4.4</td>
+<td align="center">upper</td>
+<td align="center">yes</td>
+</tr>
+<tr class="even">
+<td align="center">no</td>
+<td align="center">62</td>
+<td align="center">male</td>
+<td align="center">more</td>
+<td align="center">0.5886</td>
+<td align="center">4.2</td>
+<td align="center">upper</td>
+<td align="center">yes</td>
+</tr>
+</tbody>
+</table>
+<table style="width:79%;">
+<colgroup>
+<col width="12%" />
+<col width="15%" />
+<col width="19%" />
+<col width="9%" />
+<col width="22%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="center">tenure</th>
+<th align="center">students</th>
+<th align="center">allstudents</th>
+<th align="center">prof</th>
+<th align="center">response.rate</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">yes</td>
+<td align="center">24</td>
+<td align="center">43</td>
+<td align="center">1</td>
+<td align="center">0.5581</td>
+</tr>
+<tr class="even">
+<td align="center">yes</td>
+<td align="center">17</td>
+<td align="center">20</td>
+<td align="center">2</td>
+<td align="center">0.85</td>
+</tr>
+<tr class="odd">
+<td align="center">yes</td>
+<td align="center">55</td>
+<td align="center">55</td>
+<td align="center">3</td>
+<td align="center">1</td>
+</tr>
+<tr class="even">
+<td align="center">yes</td>
+<td align="center">40</td>
+<td align="center">46</td>
+<td align="center">4</td>
+<td align="center">0.8696</td>
+</tr>
+<tr class="odd">
+<td align="center">yes</td>
+<td align="center">42</td>
+<td align="center">48</td>
+<td align="center">5</td>
+<td align="center">0.875</td>
+</tr>
+<tr class="even">
+<td align="center">yes</td>
+<td align="center">182</td>
+<td align="center">282</td>
+<td align="center">6</td>
+<td align="center">0.6454</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>dat &lt;- dplyr::select( TeachingRatings, eval, age, beauty, response.rate )
+
+pairs( dat, lower.panel=panel.smooth, upper.panel=panel.cor)</code></pre>
+<p><img src="Datasets_in_R_files/figure-html/unnamed-chunk-9-1.png" width="960" /></p>
+<ul>
+<li>Are beautiful people better teachers?</li>
+<li>What is the relationship between age and response rate?</li>
+<li>Are people content with a course more or less likely to submit evaluations?</li>
+</ul>
+<pre class="r"><code>par( mfrow=c(2,2) )
+plot( TeachingRatings$gender, TeachingRatings$eval, frame.plot=F, outline=F, main=&quot;Gender&quot; )
+plot( TeachingRatings$minority, TeachingRatings$eval, frame.plot=F, outline=F, main=&quot;Minority&quot; )
+plot( TeachingRatings$tenure, TeachingRatings$eval, frame.plot=F, outline=F, main=&quot;Tenure Status&quot; )
+plot( TeachingRatings$credits, TeachingRatings$eval, frame.plot=F, outline=F, main=&quot;Credits&quot; )</code></pre>
+<p><img src="Datasets_in_R_files/figure-html/unnamed-chunk-10-1.png" width="672" /></p>
+<pre class="r"><code>group.structure &lt;- formula( TeachingRatings$eval ~ TeachingRatings$minority * TeachingRatings$gender )
+
+boxplot( group.structure, ylim=c(3,5),
+         las=0, frame.plot=F, outline=F, 
+         main=&quot;Performance by Gender &amp; Minority Status&quot;,
+         col=c(&quot;steelblue4&quot;,&quot;steelblue3&quot;,&quot;firebrick4&quot;,&quot;firebrick3&quot;), 
+         staplewex=0, whisklty=0, border=&quot;gray90&quot;, lwd=2 )
+
+abline( h=seq(3,5,0.25), col=&quot;gray&quot;, lty=3, lwd=0.25 )</code></pre>
+<p><img src="Datasets_in_R_files/figure-html/unnamed-chunk-11-1.png" width="672" /></p>
+<pre class="r"><code>group.structure &lt;- formula( TeachingRatings$eval ~ TeachingRatings$gender * TeachingRatings$tenure )
+
+boxplot( group.structure, ylim=c(3,5),
+         las=0, frame.plot=F, outline=F, 
+         main=&quot;Performance by Gender and Tenure Status of the Professor&quot;,
+         col=c(&quot;steelblue&quot;,&quot;firebrick&quot;,&quot;steelblue&quot;,&quot;firebrick&quot; ), 
+         staplewex=0, whisklty=0, border=&quot;gray90&quot;, lwd=2 )
+
+abline( h=seq(3,5,0.25), col=&quot;gray&quot;, lty=3, lwd=0.25 )</code></pre>
+<p><img src="Datasets_in_R_files/figure-html/unnamed-chunk-12-1.png" width="672" /></p>
+<pre class="r"><code>## evaluation score vs. beauty
+jplot( TeachingRatings$beauty, TeachingRatings$eval, xlab=&quot;Beauty&quot;, ylab=&quot;Student Evaluations&quot; )
+fm &lt;- lm(eval ~ beauty, data = TeachingRatings)
+abline(fm)</code></pre>
+<p><img src="Datasets_in_R_files/figure-html/unnamed-chunk-13-1.png" width="672" /></p>
+<pre class="r"><code>summary(fm)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = eval ~ beauty, data = TeachingRatings)
+## 
+## Residuals:
+##      Min       1Q   Median       3Q      Max 
+## -1.80015 -0.36304  0.07254  0.40207  1.10373 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)  3.99827    0.02535 157.727  &lt; 2e-16 ***
+## beauty       0.13300    0.03218   4.133 4.25e-05 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 0.5455 on 461 degrees of freedom
+## Multiple R-squared:  0.03574,    Adjusted R-squared:  0.03364 
+## F-statistic: 17.08 on 1 and 461 DF,  p-value: 4.247e-05</code></pre>
+<pre class="r"><code>## prediction of Stock &amp; Watson&#39;s evaluation score
+sw &lt;- with(TeachingRatings, mean(beauty) + c(0, 1) * sd(beauty))
+names(sw) &lt;- c(&quot;Watson&quot;, &quot;Stock&quot;)
+predict(fm, newdata = data.frame(beauty = sw))</code></pre>
+<pre><code>##   Watson    Stock 
+## 3.998272 4.103163</code></pre>
+<pre class="r"><code>## Hamermesh and Parker, 2005, Table 3
+
+fmw &lt;- lm(eval ~ beauty + gender + minority + native + tenure + division + credits,
+weights = students, data = TeachingRatings)
+coeftest(fmw, vcov = sandwich)</code></pre>
+<pre><code>## 
+## t test of coefficients:
+## 
+##                Estimate Std. Error t value  Pr(&gt;|t|)    
+## (Intercept)    4.223142   0.063947 66.0417 &lt; 2.2e-16 ***
+## beauty         0.274805   0.034761  7.9056 2.033e-14 ***
+## genderfemale  -0.238993   0.056402 -4.2373 2.740e-05 ***
+## minorityyes   -0.248937   0.089177 -2.7915  0.005467 ** 
+## nativeno      -0.252713   0.098061 -2.5771  0.010277 *  
+## tenureyes     -0.135923   0.060122 -2.2608  0.024245 *  
+## divisionlower -0.045895   0.059307 -0.7739  0.439421    
+## creditssingle  0.686507   0.114675  5.9866 4.351e-09 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<pre class="r"><code>## (same coefficients but with different covariances)</code></pre>
+<pre class="r"><code>stargazer( fmc3, fmc4, fmc5, type=&quot;html&quot;,
+           omit.stat = c(&quot;rsq&quot;, &quot;f&quot;, &quot;ser&quot;),
+           digits=2 )</code></pre>
+<table style="text-align:center">
+<tr>
+<td colspan="4" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td colspan="3">
+<em>Dependent variable:</em>
+</td>
+</tr>
+<tr>
+<td>
+</td>
+<td colspan="3" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td colspan="3">
+score
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(1)
+</td>
+<td>
+(2)
+</td>
+<td>
+(3)
+</td>
+</tr>
+<tr>
+<td colspan="4" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+stratio
+</td>
+<td>
+-1.00<sup>***</sup>
+</td>
+<td>
+-1.31<sup>***</sup>
+</td>
+<td>
+-1.01<sup>***</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.24)
+</td>
+<td>
+(0.31)
+</td>
+<td>
+(0.24)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+english
+</td>
+<td>
+-0.12<sup>***</sup>
+</td>
+<td>
+-0.49<sup>***</sup>
+</td>
+<td>
+-0.13<sup>***</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.03)
+</td>
+<td>
+(0.03)
+</td>
+<td>
+(0.03)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+lunch
+</td>
+<td>
+-0.55<sup>***</sup>
+</td>
+<td>
+</td>
+<td>
+-0.53<sup>***</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.02)
+</td>
+<td>
+</td>
+<td>
+(0.03)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+calworks
+</td>
+<td>
+</td>
+<td>
+-0.79<sup>***</sup>
+</td>
+<td>
+-0.05
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+(0.05)
+</td>
+<td>
+(0.06)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Constant
+</td>
+<td>
+700.15<sup>***</sup>
+</td>
+<td>
+698.00<sup>***</sup>
+</td>
+<td>
+700.39<sup>***</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(4.69)
+</td>
+<td>
+(6.02)
+</td>
+<td>
+(4.70)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td colspan="4" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Observations
+</td>
+<td>
+420
+</td>
+<td>
+420
+</td>
+<td>
+420
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Adjusted R<sup>2</sup>
+</td>
+<td>
+0.77
+</td>
+<td>
+0.63
+</td>
+<td>
+0.77
+</td>
+</tr>
+<tr>
+<td colspan="4" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+<em>Note:</em>
+</td>
+<td colspan="3" style="text-align:right">
+<sup><em></sup>p&lt;0.1; <sup><strong></sup>p&lt;0.05; <sup></strong></em></sup>p&lt;0.01
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div id="package-woolridge" class="section level1">
+<h1><span class="header-section-number">2</span> Package ‘woolridge’</h1>
+<p>Read directly from the website:</p>
+<pre class="r"><code>library( foreign )
+
+dat &lt;- read.dta( &quot;http://fmwww.bc.edu/ec-p/data/wooldridge/meap01.dta&quot; )
+
+dat &lt;- read.dta( &quot;http://fmwww.bc.edu/ec-p/data/wooldridge/affairs.dta&quot; )</code></pre>
+<p>R package:</p>
+<pre class="r"><code>install.packages( &quot;wooldridge&quot; )
+library( wooldridge )</code></pre>
+<div id="affairs-dataset" class="section level2">
+<h2><span class="header-section-number">2.1</span> Affairs Dataset</h2>
+<pre class="r"><code>data( &quot;affairs&quot; )
+head( affairs ) %&gt;% pander()</code></pre>
+<table>
+<caption>Table continues below</caption>
+<colgroup>
+<col width="6%" />
+<col width="8%" />
+<col width="7%" />
+<col width="12%" />
+<col width="8%" />
+<col width="10%" />
+<col width="8%" />
+<col width="10%" />
+<col width="13%" />
+<col width="13%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="center">id</th>
+<th align="center">male</th>
+<th align="center">age</th>
+<th align="center">yrsmarr</th>
+<th align="center">kids</th>
+<th align="center">relig</th>
+<th align="center">educ</th>
+<th align="center">occup</th>
+<th align="center">ratemarr</th>
+<th align="center">naffairs</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">4</td>
+<td align="center">1</td>
+<td align="center">37</td>
+<td align="center">10</td>
+<td align="center">0</td>
+<td align="center">3</td>
+<td align="center">18</td>
+<td align="center">7</td>
+<td align="center">4</td>
+<td align="center">0</td>
+</tr>
+<tr class="even">
+<td align="center">5</td>
+<td align="center">0</td>
+<td align="center">27</td>
+<td align="center">4</td>
+<td align="center">0</td>
+<td align="center">4</td>
+<td align="center">14</td>
+<td align="center">6</td>
+<td align="center">4</td>
+<td align="center">0</td>
+</tr>
+<tr class="odd">
+<td align="center">6</td>
+<td align="center">1</td>
+<td align="center">27</td>
+<td align="center">1.5</td>
+<td align="center">0</td>
+<td align="center">3</td>
+<td align="center">18</td>
+<td align="center">4</td>
+<td align="center">4</td>
+<td align="center">3</td>
+</tr>
+<tr class="even">
+<td align="center">11</td>
+<td align="center">0</td>
+<td align="center">32</td>
+<td align="center">15</td>
+<td align="center">1</td>
+<td align="center">1</td>
+<td align="center">12</td>
+<td align="center">1</td>
+<td align="center">4</td>
+<td align="center">0</td>
+</tr>
+<tr class="odd">
+<td align="center">12</td>
+<td align="center">0</td>
+<td align="center">27</td>
+<td align="center">4</td>
+<td align="center">1</td>
+<td align="center">3</td>
+<td align="center">17</td>
+<td align="center">1</td>
+<td align="center">5</td>
+<td align="center">3</td>
+</tr>
+<tr class="even">
+<td align="center">16</td>
+<td align="center">1</td>
+<td align="center">57</td>
+<td align="center">15</td>
+<td align="center">1</td>
+<td align="center">5</td>
+<td align="center">18</td>
+<td align="center">6</td>
+<td align="center">5</td>
+<td align="center">0</td>
+</tr>
+</tbody>
+</table>
+<table style="width:100%;">
+<colgroup>
+<col width="10%" />
+<col width="10%" />
+<col width="10%" />
+<col width="11%" />
+<col width="9%" />
+<col width="10%" />
+<col width="10%" />
+<col width="12%" />
+<col width="12%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="center">affair</th>
+<th align="center">vryhap</th>
+<th align="center">hapavg</th>
+<th align="center">avgmarr</th>
+<th align="center">unhap</th>
+<th align="center">vryrel</th>
+<th align="center">smerel</th>
+<th align="center">slghtrel</th>
+<th align="center">notrel</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">1</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">1</td>
+<td align="center">0</td>
+</tr>
+<tr class="even">
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">1</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">1</td>
+<td align="center">0</td>
+<td align="center">0</td>
+</tr>
+<tr class="odd">
+<td align="center">1</td>
+<td align="center">0</td>
+<td align="center">1</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">1</td>
+<td align="center">0</td>
+</tr>
+<tr class="even">
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">1</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">0</td>
+</tr>
+<tr class="odd">
+<td align="center">1</td>
+<td align="center">1</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">1</td>
+<td align="center">0</td>
+</tr>
+<tr class="even">
+<td align="center">0</td>
+<td align="center">1</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">1</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">0</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>id: identifier</li>
+<li>male: =1 if male</li>
+<li>age: in years</li>
+<li>yrsmarr: years married</li>
+<li>kids: =1 if have kids</li>
+<li>relig: 5 = very relig., 4 = somewhat, 3 = slightly, 2 = not at all, 1 = anti</li>
+<li>educ: years schooling</li>
+<li>occup: occupation, reverse Hollingshead scale</li>
+<li>ratemarr: 5 = vry hap marr, 4 = hap than avg, 3 = avg, 2 = smewht unhap, 1 = vry unhap</li>
+<li>naffairs: number of affairs within last year</li>
+<li>affair: =1 if had at least one affair</li>
+<li>vryhap: ratemarr == 5</li>
+<li>hapavg: ratemarr == 4</li>
+<li>avgmarr: ratemarr == 3</li>
+<li>unhap: ratemarr == 2</li>
+<li>vryrel: relig == 5</li>
+<li>smerel: relig == 4</li>
+<li>slghtrel: relig == 3</li>
+<li>notrel: relig == 2</li>
+</ul>
+<div id="models" class="section level3">
+<h3><span class="header-section-number">2.1.1</span> Models</h3>
+<p>Insert model exammples here…</p>
+</div>
+</div>
+<div id="school-voucher-dataset" class="section level2">
+<h2><span class="header-section-number">2.2</span> School Voucher Dataset</h2>
+<pre class="r"><code>data( &#39;voucher&#39; )
+head( voucher ) %&gt;% pander()</code></pre>
+<table>
+<caption>Table continues below</caption>
+<colgroup>
+<col width="13%" />
+<col width="10%" />
+<col width="15%" />
+<col width="12%" />
+<col width="13%" />
+<col width="9%" />
+<col width="12%" />
+<col width="12%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="center">studyid</th>
+<th align="center">black</th>
+<th align="center">hispanic</th>
+<th align="center">female</th>
+<th align="center">appyear</th>
+<th align="center">mnce</th>
+<th align="center">select</th>
+<th align="center">choice</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">21</td>
+<td align="center">1</td>
+<td align="center">0</td>
+<td align="center">1</td>
+<td align="center">90</td>
+<td align="center">44</td>
+<td align="center">1</td>
+<td align="center">0</td>
+</tr>
+<tr class="even">
+<td align="center">26</td>
+<td align="center">1</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">90</td>
+<td align="center">46</td>
+<td align="center">1</td>
+<td align="center">1</td>
+</tr>
+<tr class="odd">
+<td align="center">30</td>
+<td align="center">1</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">90</td>
+<td align="center">20</td>
+<td align="center">1</td>
+<td align="center">1</td>
+</tr>
+<tr class="even">
+<td align="center">31</td>
+<td align="center">1</td>
+<td align="center">0</td>
+<td align="center">1</td>
+<td align="center">90</td>
+<td align="center">36</td>
+<td align="center">1</td>
+<td align="center">1</td>
+</tr>
+<tr class="odd">
+<td align="center">33</td>
+<td align="center">1</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">90</td>
+<td align="center">32</td>
+<td align="center">1</td>
+<td align="center">1</td>
+</tr>
+<tr class="even">
+<td align="center">39</td>
+<td align="center">1</td>
+<td align="center">0</td>
+<td align="center">1</td>
+<td align="center">90</td>
+<td align="center">76</td>
+<td align="center">1</td>
+<td align="center">0</td>
+</tr>
+</tbody>
+</table>
+<table>
+<caption>Table continues below</caption>
+<colgroup>
+<col width="16%" />
+<col width="16%" />
+<col width="12%" />
+<col width="18%" />
+<col width="18%" />
+<col width="18%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="center">selectyrs</th>
+<th align="center">choiceyrs</th>
+<th align="center">mnce90</th>
+<th align="center">selectyrs1</th>
+<th align="center">selectyrs2</th>
+<th align="center">selectyrs3</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">4</td>
+<td align="center">1</td>
+<td align="center">NA</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">0</td>
+</tr>
+<tr class="even">
+<td align="center">4</td>
+<td align="center">4</td>
+<td align="center">NA</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">0</td>
+</tr>
+<tr class="odd">
+<td align="center">4</td>
+<td align="center">4</td>
+<td align="center">NA</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">0</td>
+</tr>
+<tr class="even">
+<td align="center">4</td>
+<td align="center">4</td>
+<td align="center">NA</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">0</td>
+</tr>
+<tr class="odd">
+<td align="center">4</td>
+<td align="center">4</td>
+<td align="center">NA</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">0</td>
+</tr>
+<tr class="even">
+<td align="center">4</td>
+<td align="center">1</td>
+<td align="center">19</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">0</td>
+</tr>
+</tbody>
+</table>
+<table style="width:90%;">
+<colgroup>
+<col width="18%" />
+<col width="18%" />
+<col width="18%" />
+<col width="18%" />
+<col width="18%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="center">selectyrs4</th>
+<th align="center">choiceyrs1</th>
+<th align="center">choiceyrs2</th>
+<th align="center">choiceyrs3</th>
+<th align="center">choiceyrs4</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">1</td>
+<td align="center">1</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">0</td>
+</tr>
+<tr class="even">
+<td align="center">1</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">1</td>
+</tr>
+<tr class="odd">
+<td align="center">1</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">1</td>
+</tr>
+<tr class="even">
+<td align="center">1</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">1</td>
+</tr>
+<tr class="odd">
+<td align="center">1</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">1</td>
+</tr>
+<tr class="even">
+<td align="center">1</td>
+<td align="center">1</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">0</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div id="package-ecdat" class="section level1">
+<h1><span class="header-section-number">3</span> Package ‘Ecdat’</h1>
+<pre class="r"><code>install.packages( &quot;Ecdat&quot; )
+library( Ecdat )</code></pre>
+<div id="star-dataset" class="section level2">
+<h2><span class="header-section-number">3.1</span> Star Dataset</h2>
+<ul>
+<li>tmathssk total math scaled score</li>
+<li>treadssk total reading scaled score</li>
+<li>classk type of class, a factor with levels (regular,small.class,regular.with.aide)</li>
+<li>totexpk years of total teaching experience</li>
+<li>sex a factor with levels (boy,girl)</li>
+<li>freelunk qualified for free lunch ?</li>
+<li>race a factor with levels (white,black,other)</li>
+<li>schidkn school indicator variable</li>
+</ul>
+<pre class="r"><code>data( Star )
+head( Star ) %&gt;% pander()</code></pre>
+<table>
+<caption>Table continues below</caption>
+<colgroup>
+<col width="11%" />
+<col width="13%" />
+<col width="13%" />
+<col width="25%" />
+<col width="12%" />
+<col width="8%" />
+<col width="13%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="center"> </th>
+<th align="center">tmathssk</th>
+<th align="center">treadssk</th>
+<th align="center">classk</th>
+<th align="center">totexpk</th>
+<th align="center">sex</th>
+<th align="center">freelunk</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center"><strong>2</strong></td>
+<td align="center">473</td>
+<td align="center">447</td>
+<td align="center">small.class</td>
+<td align="center">7</td>
+<td align="center">girl</td>
+<td align="center">no</td>
+</tr>
+<tr class="even">
+<td align="center"><strong>3</strong></td>
+<td align="center">536</td>
+<td align="center">450</td>
+<td align="center">small.class</td>
+<td align="center">21</td>
+<td align="center">girl</td>
+<td align="center">no</td>
+</tr>
+<tr class="odd">
+<td align="center"><strong>5</strong></td>
+<td align="center">463</td>
+<td align="center">439</td>
+<td align="center">regular.with.aide</td>
+<td align="center">0</td>
+<td align="center">boy</td>
+<td align="center">yes</td>
+</tr>
+<tr class="even">
+<td align="center"><strong>11</strong></td>
+<td align="center">559</td>
+<td align="center">448</td>
+<td align="center">regular</td>
+<td align="center">16</td>
+<td align="center">boy</td>
+<td align="center">no</td>
+</tr>
+<tr class="odd">
+<td align="center"><strong>12</strong></td>
+<td align="center">489</td>
+<td align="center">447</td>
+<td align="center">small.class</td>
+<td align="center">5</td>
+<td align="center">boy</td>
+<td align="center">yes</td>
+</tr>
+<tr class="even">
+<td align="center"><strong>13</strong></td>
+<td align="center">454</td>
+<td align="center">431</td>
+<td align="center">regular</td>
+<td align="center">8</td>
+<td align="center">boy</td>
+<td align="center">yes</td>
+</tr>
+</tbody>
+</table>
+<table style="width:38%;">
+<colgroup>
+<col width="12%" />
+<col width="11%" />
+<col width="13%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="center"> </th>
+<th align="center">race</th>
+<th align="center">schidkn</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center"><strong>2</strong></td>
+<td align="center">white</td>
+<td align="center">63</td>
+</tr>
+<tr class="even">
+<td align="center"><strong>3</strong></td>
+<td align="center">black</td>
+<td align="center">20</td>
+</tr>
+<tr class="odd">
+<td align="center"><strong>5</strong></td>
+<td align="center">black</td>
+<td align="center">19</td>
+</tr>
+<tr class="even">
+<td align="center"><strong>11</strong></td>
+<td align="center">white</td>
+<td align="center">69</td>
+</tr>
+<tr class="odd">
+<td align="center"><strong>12</strong></td>
+<td align="center">white</td>
+<td align="center">79</td>
+</tr>
+<tr class="even">
+<td align="center"><strong>13</strong></td>
+<td align="center">white</td>
+<td align="center">5</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>dat &lt;- dplyr::select( Star, tmathssk,treadssk, totexpk ) %&gt;% 
+  dplyr::rename( Math_Score=tmathssk, Reading_Score=treadssk, Teacher_Experience=totexpk )
+
+pairs( dat, lower.panel=panel.smooth, upper.panel=panel.cor)</code></pre>
+<p><img src="Datasets_in_R_files/figure-html/unnamed-chunk-20-1.png" width="960" /></p>
+<pre class="r"><code>par( mfrow=c(2,2) )
+plot( Star$class, Star$tmathssk, frame.plot=F, outline=F, main=&quot;Class Type&quot; )
+plot( Star$sex, Star$tmathssk, frame.plot=F, outline=F, main=&quot;Gender&quot; )
+plot( Star$freelunk, Star$tmathssk, frame.plot=F, outline=F, main=&quot;Free Lunch&quot; )
+plot( Star$race, Star$tmathssk, frame.plot=F, outline=F, main=&quot;Race&quot; )</code></pre>
+<p><img src="Datasets_in_R_files/figure-html/unnamed-chunk-21-1.png" width="672" /></p>
+<pre class="r"><code>group.structure &lt;- formula( Star$tmathssk ~ Star$freelunk * Star$totexpk )
+
+boxplot( group.structure, 
+         las=2, frame.plot=F, outline=F, main=&quot;Age Group by Gender&quot;,
+         col=c(&quot;firebrick&quot;,&quot;steelblue&quot;), xaxt=&quot;n&quot;,
+         staplewex=0, whisklty=0, ylim=c(400,600) )</code></pre>
+<p><img src="Datasets_in_R_files/figure-html/unnamed-chunk-22-1.png" width="672" /></p>
+<pre class="r"><code>m1 &lt;- lm( tmathssk ~ classk, data=Star )
+m2 &lt;- lm( tmathssk ~ classk + totexpk + sex + race + freelunk, data=Star )
+m3 &lt;- lm( treadssk ~ classk, data=Star )
+m4 &lt;- lm( treadssk ~ classk + totexpk + sex + race + freelunk, data=Star )
+
+stargazer( m1, m2, m3, m4, type=&quot;html&quot; )</code></pre>
+<table style="text-align:center">
+<tr>
+<td colspan="5" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td colspan="4">
+<em>Dependent variable:</em>
+</td>
+</tr>
+<tr>
+<td>
+</td>
+<td colspan="4" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td colspan="2">
+tmathssk
+</td>
+<td colspan="2">
+treadssk
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(1)
+</td>
+<td>
+(2)
+</td>
+<td>
+(3)
+</td>
+<td>
+(4)
+</td>
+</tr>
+<tr>
+<td colspan="5" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+classksmall.class
+</td>
+<td>
+8.209<sup>***</sup>
+</td>
+<td>
+8.200<sup>***</sup>
+</td>
+<td>
+5.899<sup>***</sup>
+</td>
+<td>
+5.900<sup>***</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(1.563)
+</td>
+<td>
+(1.502)
+</td>
+<td>
+(1.040)
+</td>
+<td>
+(0.992)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+classkregular.with.aide
+</td>
+<td>
+-0.251
+</td>
+<td>
+-0.107
+</td>
+<td>
+0.806
+</td>
+<td>
+0.878
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(1.503)
+</td>
+<td>
+(1.447)
+</td>
+<td>
+(1.000)
+</td>
+<td>
+(0.955)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+totexpk
+</td>
+<td>
+</td>
+<td>
+0.618<sup>***</sup>
+</td>
+<td>
+</td>
+<td>
+0.490<sup>***</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+(0.106)
+</td>
+<td>
+</td>
+<td>
+(0.070)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+sexboy
+</td>
+<td>
+</td>
+<td>
+-7.872<sup>***</sup>
+</td>
+<td>
+</td>
+<td>
+-6.135<sup>***</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+(1.209)
+</td>
+<td>
+</td>
+<td>
+(0.798)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+raceblack
+</td>
+<td>
+</td>
+<td>
+-7.746<sup>***</sup>
+</td>
+<td>
+</td>
+<td>
+-3.799<sup>***</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+(1.454)
+</td>
+<td>
+</td>
+<td>
+(0.960)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+raceother
+</td>
+<td>
+</td>
+<td>
+-14.486
+</td>
+<td>
+</td>
+<td>
+-1.870
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+(8.841)
+</td>
+<td>
+</td>
+<td>
+(5.837)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+freelunkyes
+</td>
+<td>
+</td>
+<td>
+-19.553<sup>***</sup>
+</td>
+<td>
+</td>
+<td>
+-14.852<sup>***</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+(1.355)
+</td>
+<td>
+</td>
+<td>
+(0.894)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Constant
+</td>
+<td>
+483.261<sup>***</sup>
+</td>
+<td>
+493.512<sup>***</sup>
+</td>
+<td>
+434.681<sup>***</sup>
+</td>
+<td>
+441.649<sup>***</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(1.065)
+</td>
+<td>
+(1.699)
+</td>
+<td>
+(0.708)
+</td>
+<td>
+(1.122)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td colspan="5" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Observations
+</td>
+<td>
+5,748
+</td>
+<td>
+5,748
+</td>
+<td>
+5,748
+</td>
+<td>
+5,748
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+R<sup>2</sup>
+</td>
+<td>
+0.006
+</td>
+<td>
+0.083
+</td>
+<td>
+0.006
+</td>
+<td>
+0.097
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Adjusted R<sup>2</sup>
+</td>
+<td>
+0.006
+</td>
+<td>
+0.082
+</td>
+<td>
+0.006
+</td>
+<td>
+0.096
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Residual Std. Error
+</td>
+<td>
+47.626 (df = 5745)
+</td>
+<td>
+45.765 (df = 5740)
+</td>
+<td>
+31.676 (df = 5745)
+</td>
+<td>
+30.214 (df = 5740)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+F Statistic
+</td>
+<td>
+18.553<sup>***</sup> (df = 2; 5745)
+</td>
+<td>
+74.563<sup>***</sup> (df = 7; 5740)
+</td>
+<td>
+18.538<sup>***</sup> (df = 2; 5745)
+</td>
+<td>
+87.895<sup>***</sup> (df = 7; 5740)
+</td>
+</tr>
+<tr>
+<td colspan="5" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+<em>Note:</em>
+</td>
+<td colspan="4" style="text-align:right">
+<sup><em></sup>p&lt;0.1; <sup><strong></sup>p&lt;0.05; <sup></strong></em></sup>p&lt;0.01
+</td>
+</tr>
+</table>
+</div>
+<div id="dataset-treatment" class="section level2">
+<h2><span class="header-section-number">3.2</span> Dataset ‘Treatment’</h2>
+<pre class="r"><code>data( &#39;Treatment&#39; )
+head( Treatment ) %&gt;% pander()</code></pre>
+<table style="width:100%;">
+<colgroup>
+<col width="10%" />
+<col width="7%" />
+<col width="9%" />
+<col width="10%" />
+<col width="13%" />
+<col width="9%" />
+<col width="9%" />
+<col width="10%" />
+<col width="9%" />
+<col width="9%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="center">treat</th>
+<th align="center">age</th>
+<th align="center">educ</th>
+<th align="center">ethn</th>
+<th align="center">married</th>
+<th align="center">re74</th>
+<th align="center">re75</th>
+<th align="center">re78</th>
+<th align="center">u74</th>
+<th align="center">u75</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">TRUE</td>
+<td align="center">37</td>
+<td align="center">11</td>
+<td align="center">black</td>
+<td align="center">TRUE</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">9930</td>
+<td align="center">TRUE</td>
+<td align="center">TRUE</td>
+</tr>
+<tr class="even">
+<td align="center">TRUE</td>
+<td align="center">30</td>
+<td align="center">12</td>
+<td align="center">black</td>
+<td align="center">FALSE</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">24910</td>
+<td align="center">TRUE</td>
+<td align="center">TRUE</td>
+</tr>
+<tr class="odd">
+<td align="center">TRUE</td>
+<td align="center">27</td>
+<td align="center">11</td>
+<td align="center">black</td>
+<td align="center">FALSE</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">7506</td>
+<td align="center">TRUE</td>
+<td align="center">TRUE</td>
+</tr>
+<tr class="even">
+<td align="center">TRUE</td>
+<td align="center">33</td>
+<td align="center">8</td>
+<td align="center">black</td>
+<td align="center">FALSE</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">289.8</td>
+<td align="center">TRUE</td>
+<td align="center">TRUE</td>
+</tr>
+<tr class="odd">
+<td align="center">TRUE</td>
+<td align="center">22</td>
+<td align="center">9</td>
+<td align="center">black</td>
+<td align="center">FALSE</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">4056</td>
+<td align="center">TRUE</td>
+<td align="center">TRUE</td>
+</tr>
+<tr class="even">
+<td align="center">TRUE</td>
+<td align="center">23</td>
+<td align="center">12</td>
+<td align="center">black</td>
+<td align="center">FALSE</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">TRUE</td>
+<td align="center">TRUE</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+<div class="footer">
+<div class="row"  align="center">
+
+  Designed by <a href=http://ds4ps.github.io target="_blank">DS4PS</a><br>
+  Powered by <a href=http://jekyllrb.com target="_blank">Jekyll</a>
+
+</div>
+</div>
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

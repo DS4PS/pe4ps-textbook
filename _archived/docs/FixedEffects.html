@@ -1,0 +1,4057 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+
+
+<title>Fixed effects</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script src="site_libs/navigation-1.1/codefolding.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+<link rel="stylesheet" href="custom.css" type="text/css" />
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #ffffff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+</style>
+<script>
+$(document).ready(function () {
+  window.initializeCodeFolding("hide" === "show");
+});
+</script>
+
+
+
+
+
+<div class="navbar navbar-inverse  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Program Eval III</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="Datasets_in_R.html">Data1</a>
+</li>
+<li>
+  <a href="EvalDataPackage.html">Data2</a>
+</li>
+<li>
+  <a href="TimeSeries.html">TimeS</a>
+</li>
+<li>
+  <a href="InstrumentalVariables.html">InstrumentalVs</a>
+</li>
+<li>
+  <a href="DiffInDiff.html">Diff-in-Diff</a>
+</li>
+<li>
+  <a href="MatchingScores.html">Matching</a>
+</li>
+<li>
+  <a href="LogisticReg.html">Logistic Reg</a>
+</li>
+<li>
+  <a href="FixedEffects.html">Fixed Effects</a>
+</li>
+<li>
+  <a href="panel-model-selection.html">Panel Models</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/DS4PS/PROG-EVAL-III/tree/master/TEXTBOOK">
+    <span class="fa fa-github fa-2x"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+<div class="btn-group pull-right">
+<button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu" style="min-width: 50px;">
+<li><a id="rmd-show-all-code" href="#">Show All Code</a></li>
+<li><a id="rmd-hide-all-code" href="#">Hide All Code</a></li>
+</ul>
+</div>
+
+
+
+<h1 class="title toc-ignore">Fixed effects</h1>
+
+</div>
+
+<div id="TOC">
+<ul>
+<li><a href="#the-key-concept"><span class="toc-section-number">1</span> The key concept</a><ul>
+<li><a href="#ols-demeaning-and-fixed-effects."><span class="toc-section-number">1.1</span> OLS, demeaning, and fixed effects.</a><ul>
+<li><a href="#ols-model"><span class="toc-section-number">1.1.1</span> OLS model</a></li>
+<li><a href="#pooled-ols-model"><span class="toc-section-number">1.1.2</span> Pooled OLS model</a></li>
+<li><a href="#de-meaned-ols-model"><span class="toc-section-number">1.1.3</span> De-meaned OLS model</a></li>
+<li><a href="#fixed-effect-model"><span class="toc-section-number">1.1.4</span> Fixed-effect model</a></li>
+</ul></li>
+<li><a href="#the-statistical-model"><span class="toc-section-number">1.2</span> The statistical model</a></li>
+</ul></li>
+<li><a href="#a-fixed-effect-model"><span class="toc-section-number">2</span> A fixed effect model</a><ul>
+<li><a href="#the-statistical-model-1"><span class="toc-section-number">2.1</span> The statistical model</a></li>
+<li><a href="#plm-package"><span class="toc-section-number">2.2</span> plm package</a></li>
+<li><a href="#key-notes-on-fixed-effects"><span class="toc-section-number">2.3</span> Key notes on fixed effects</a></li>
+</ul></li>
+<li><a href="#replication-of-a-study"><span class="toc-section-number">3</span> Replication of a study</a><ul>
+<li><a href="#data"><span class="toc-section-number">3.1</span> Data</a></li>
+<li><a href="#analysis"><span class="toc-section-number">3.2</span> Analysis</a></li>
+</ul></li>
+<li><a href="#random-effects"><span class="toc-section-number">4</span> Random effects</a><ul>
+<li><a href="#notes-on-random-vs-fixed-effects"><span class="toc-section-number">4.1</span> Notes on random vs fixed effects</a></li>
+</ul></li>
+<li><a href="#additional-resources"><span class="toc-section-number">5</span> Additional resources</a></li>
+</ul>
+</div>
+
+<p><strong>Packages</strong></p>
+<p>Here are the packages we will use in this lecture. If you don’t remember how to install them, you can have a look at the code.</p>
+<ul>
+<li><strong>stargazer</strong> for nice tables</li>
+<li><strong>car</strong> and <strong>gplots</strong> for graphs</li>
+<li><strong>plm</strong> for fixed effect model</li>
+</ul>
+<pre class="r"><code>install.packages( stargazer )
+library( &quot;stargazer&quot; )
+
+install.packages( car )
+library( &quot;car&quot; )
+
+install.packages( gplots )
+library( &quot;gplots&quot; )
+
+install.packages( plm )
+library( &quot;plm&quot; )</code></pre>
+<p><strong>What you will learn</strong></p>
+<ul>
+<li>What is the scope of fixed effects?</li>
+<li>Which data structure do you need to run a fixed effect model?</li>
+<li>What is the difference between an OLS, fixed, and random effect model?</li>
+<li>How do you interpret the effect of X on Y in a fixed effect model? And in a random effect model?</li>
+<li>Apply a fixed effect model to data in R</li>
+<li>Compare a fixed effect model vs an OLS vs a random model</li>
+</ul>
+<div id="the-key-concept" class="section level1">
+<h1><span class="header-section-number">1</span> The key concept</h1>
+<p>We will start with a very simple example to illustrate the idea of within and between variation, which is key to fixed effect models.</p>
+<p>Let’s imagine to have data about three different countries. We want to understand the relationship between international aid funding received by the country (policy variable) and economic growth (outcome variable).</p>
+<div class="figure"><span id="fig:f1"></span>
+<img src="FIGURE/FixEffs/Picture1.png" alt="Relationship between economic growth and international aid" width="60%" />
+<p class="caption">
+Figure 1.1: Relationship between economic growth and international aid
+</p>
+</div>
+<p>Based on the graph, we would expect a negative relationship between x and y: countries receiving greater international aid report a lower growth. For instance, country C receives more funding than country B but its growth it’s less than half of country B.</p>
+<div class="figure"><span id="fig:f2"></span>
+<img src="FIGURE/FixEffs/Picture2.png" alt="A negative relationship between growth and international aid?" width="60%" />
+<p class="caption">
+Figure 1.2: A negative relationship between growth and international aid?
+</p>
+</div>
+<p>Are we supposed to conclude that international aid has a negative effect on growth?</p>
+<p>A way to confirm this result is to collect data about each country over an extended period of time. In this way, we move from <strong>cross-sectional</strong> data to <strong>panel</strong> data, where each variable in the datset is observed along a given time period.</p>
+<p>The small “t” next to each observation indicates the time at which data were collected.</p>
+<p>The graph <a href="#fig:f3">1.3</a> represents observations from three countries across three time periods.</p>
+<div class="figure"><span id="fig:f3"></span>
+<img src="FIGURE/FixEffs/Picture3.png" alt="Relationship between growth and international aid: panel data" width="60%" />
+<p class="caption">
+Figure 1.3: Relationship between growth and international aid: panel data
+</p>
+</div>
+<p>If we consider the relationship between international aid and growth <strong>within</strong> each time period and <strong>across</strong> the 3 countries, the relationship is once again negative.</p>
+<div class="figure"><span id="fig:f4"></span>
+<img src="FIGURE/FixEffs/Picture4.png" alt="Relationship between growth and international aid: **Across** countries variation" width="60%" />
+<p class="caption">
+Figure 1.4: Relationship between growth and international aid: <strong>Across</strong> countries variation
+</p>
+</div>
+<p>However, if we change the way we look at the data and consider the relationship between international aid and growth <strong>within</strong> one single country and <strong>across</strong> time, we would observe a positive relationship.</p>
+<div class="figure"><span id="fig:f5"></span>
+<img src="FIGURE/FixEffs/Picture5.png" alt="Relationship between growth and international aid: **Within** countries variation" width="60%" />
+<p class="caption">
+Figure 1.5: Relationship between growth and international aid: <strong>Within</strong> countries variation
+</p>
+</div>
+<p>Why does the relationship change so much?</p>
+<p>One possible explanation is that country C is poorer and, because of that, it receives more funding than the other countries. However, when we compare country C against other countries, its growth is still limited. As results, <strong>across</strong> countries variation is negative. The trend is positive only if we compare growth over time <strong>within</strong> each country. As country C receives more funding, its economic growth improves.</p>
+<p>This statistical phenomenon is known as the <strong>Simpson’s Paradox</strong>, where trends are different depeding on whether data are observed by groups or at the aggregate level (you can read more about the Simpson’s paradox <a href="https://towardsdatascience.com/simpsons-paradox-how-to-prove-two-opposite-arguments-using-one-dataset-1c9c917f5ff9">here</a> and <a href="https://towardsdatascience.com/simpsons-paradox-and-interpreting-data-6a0443516765">here</a>).</p>
+<p>As we will see in the remain of the lecture, <strong>fixed effect</strong> wil enable us to consider differences across groups so that we can estimated the within effect of the policy intervention.</p>
+<div id="ols-demeaning-and-fixed-effects." class="section level2">
+<h2><span class="header-section-number">1.1</span> OLS, demeaning, and fixed effects.</h2>
+<p>We will continue our example and look at some numbers to better understand differences between OLS and fixed effects.</p>
+<p>Let’s take a look at a simulated dataset that replicates the example illustrated in figure <a href="#fig:f3">1.3</a>. We plot the observations on a graph. We have three countries (A, B, C) and we observe the relationship between international aid and economic growth at three points in time.</p>
+<pre class="r"><code>palette( c( &quot;steelblue&quot;, &quot;darkred&quot;, &quot;darkgreen&quot;  ) )
+
+plot(x, y, ylim = c(-8,10), xlim = c(0,8), lwd = 5, col = as.factor(data$g), ylab = &quot;Economic growth (%)&quot;, xlab = &quot;International aid ($M)&quot;)
+
+text(data$x[1], data$y[1]+1, &quot;A t1&quot;)
+text(data$x[2], data$y[2]+1, &quot;A t2&quot;)
+text(data$x[3], data$y[3]+1, &quot;A t3&quot;)
+
+text(data$x[4], data$y[4]+1, &quot;B t1&quot;)
+text(data$x[5], data$y[5]+1, &quot;B t2&quot;)
+text(data$x[6], data$y[6]+1, &quot;B t3&quot;)
+
+text(data$x[7], data$y[7]+1, &quot;C t1&quot;)
+text(data$x[8], data$y[8]+1, &quot;C t2&quot;)
+text(data$x[9], data$y[9]+1, &quot;C t3&quot;)</code></pre>
+<div class="figure"><span id="fig:f6"></span>
+<img src="FixedEffects_files/figure-html/f6-1.png" alt="Simulated dataset: Economic growth and international aid" width="960" />
+<p class="caption">
+Figure 1.6: Simulated dataset: Economic growth and international aid
+</p>
+</div>
+<div id="ols-model" class="section level3">
+<h3><span class="header-section-number">1.1.1</span> OLS model</h3>
+<p>First, we estimate the relationship between x and y considering only one year of data (cross-sectional dataset as in figure <a href="#fig:f2">1.2</a>). We can use an <strong>OLS model</strong>.</p>
+<p>The OLS results show that the coefficient of International Aid is significantly and negatively correlated with Economic Growth. It suggests that for each additional milion received in international aid funding, economic growth decreases by 11%.</p>
+<pre class="r"><code>palette( c( &quot;steelblue&quot;, &quot;darkred&quot;, &quot;darkgreen&quot;  ) )
+
+plot(x[data$t ==1], y[data$t==1], ylim = c(-8,10), xlim = c(0,8), col = as.factor(data$g), lwd = 5, ylab = &quot;Economic growth (%)&quot;, xlab = &quot;International aid ($M)&quot;)
+abline(y[data$t == 1] ~ x[data$t == 1], col = &quot;red&quot;)
+
+text(data$x[1], data$y[1]+1, &quot;A t1&quot;)
+
+text(data$x[4], data$y[4]+1, &quot;B t1&quot;)
+
+text(data$x[7], data$y[7]+1, &quot;C t1&quot;)</code></pre>
+<div class="figure"><span id="fig:f7"></span>
+<img src="FixedEffects_files/figure-html/f7-1.png" alt="Simulated dataset: Year = 1" width="960" />
+<p class="caption">
+Figure 1.7: Simulated dataset: Year = 1
+</p>
+</div>
+<pre class="r"><code>OLS = lm ( y[data$t == 1] ~ x[data$t == 1] )
+
+stargazer( OLS, 
+           type = &quot;html&quot;, 
+           dep.var.labels = (&quot;Economic growth (T1)&quot;),
+           column.labels = c(&quot;Cross-Sectional OLS&quot;),
+           covariate.labels = c(&quot;Intercept&quot;, &quot;International aid - Year 1&quot;),
+           omit.stat = &quot;all&quot;, 
+           digits = 2, intercept.bottom = FALSE )</code></pre>
+<table style="text-align:center">
+<tr>
+<td colspan="2" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+<em>Dependent variable:</em>
+</td>
+</tr>
+<tr>
+<td>
+</td>
+<td colspan="1" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+Economic growth (T1)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+Cross-Sectional OLS
+</td>
+</tr>
+<tr>
+<td colspan="2" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Intercept
+</td>
+<td>
+26.60<sup>**</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(1.26)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+International aid - Year 1
+</td>
+<td>
+-11.20<sup>**</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.51)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td colspan="2" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td colspan="2" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+<em>Note:</em>
+</td>
+<td style="text-align:right">
+<sup><em></sup>p&lt;0.1; <sup><strong></sup>p&lt;0.05; <sup></strong></em></sup>p&lt;0.01
+</td>
+</tr>
+</table>
+</div>
+<div id="pooled-ols-model" class="section level3">
+<h3><span class="header-section-number">1.1.2</span> Pooled OLS model</h3>
+<p>Since we have data across multiple years, we can also use a <strong>pooled OLS</strong> regression, where we use all observations across years to predict Economic Growth (as in figure <a href="#fig:f3">1.3</a>).</p>
+<p>We compare results across a cross-sectional OLS and a pooled OLS model. The pooled OLS regression indicates that international aid has no effect on economic growth; the beta coefficient is not significantly different from zero.</p>
+<p>Results are substantially different between the cross-sectional and the pooled OLS model.</p>
+<pre class="r"><code>palette( c( &quot;steelblue&quot;, &quot;darkred&quot;, &quot;darkgreen&quot;  ) )
+
+plot(x, y, ylim = c(-8,10), xlim = c(0,8), lwd = 5, col = as.factor(data$g), ylab = &quot;Economic growth (%)&quot;, xlab = &quot;International aid ($M)&quot;)
+
+text(data$x[1], data$y[1]+1, &quot;A t1&quot;)
+text(data$x[2], data$y[2]+1, &quot;A t2&quot;)
+text(data$x[3], data$y[3]+1, &quot;A t3&quot;)
+
+text(data$x[4], data$y[4]+1, &quot;B t1&quot;)
+text(data$x[5], data$y[5]+1, &quot;B t2&quot;)
+text(data$x[6], data$y[6]+1, &quot;B t3&quot;)
+
+text(data$x[7], data$y[7]+1, &quot;C t1&quot;)
+text(data$x[8], data$y[8]+1, &quot;C t2&quot;)
+text(data$x[9], data$y[9]+1, &quot;C t3&quot;)</code></pre>
+<div class="figure"><span id="fig:f8"></span>
+<img src="FixedEffects_files/figure-html/f8-1.png" alt="Simulated dataset: All observations" width="960" />
+<p class="caption">
+Figure 1.8: Simulated dataset: All observations
+</p>
+</div>
+<pre class="r"><code>Pooled_OLS = lm ( y ~ x )
+
+stargazer( OLS, Pooled_OLS, 
+           type = &quot;html&quot;, 
+           dep.var.labels = (&quot;Economic growth&quot;),
+           column.labels = c(&quot;Cross-Sectional OLS&quot;, &quot;Pooled OLS&quot;),
+           covariate.labels = c(&quot;Intercept&quot;, &quot;International aid - Year 1&quot;, &quot;International aid&quot;),
+           omit.stat = &quot;all&quot;, 
+           digits = 2, intercept.bottom = FALSE )</code></pre>
+<table style="text-align:center">
+<tr>
+<td colspan="3" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td colspan="2">
+<em>Dependent variable:</em>
+</td>
+</tr>
+<tr>
+<td>
+</td>
+<td colspan="2" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+Economic growth
+</td>
+<td>
+y
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+Cross-Sectional OLS
+</td>
+<td>
+Pooled OLS
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(1)
+</td>
+<td>
+(2)
+</td>
+</tr>
+<tr>
+<td colspan="3" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Intercept
+</td>
+<td>
+26.60<sup>**</sup>
+</td>
+<td>
+-0.85
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(1.26)
+</td>
+<td>
+(6.02)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+International aid - Year 1
+</td>
+<td>
+-11.20<sup>**</sup>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.51)
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+International aid
+</td>
+<td>
+</td>
+<td>
+0.46
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+(1.37)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td colspan="3" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td colspan="3" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+<em>Note:</em>
+</td>
+<td colspan="2" style="text-align:right">
+<sup><em></sup>p&lt;0.1; <sup><strong></sup>p&lt;0.05; <sup></strong></em></sup>p&lt;0.01
+</td>
+</tr>
+</table>
+</div>
+<div id="de-meaned-ols-model" class="section level3">
+<h3><span class="header-section-number">1.1.3</span> De-meaned OLS model</h3>
+<p>As we discussed before, OLS can be problematic with panel data because it takes into account <strong>across-country</strong> variation. The effect of international aid on growth is negative because the overall trend across countries is negative. Countries which receive more funding (like Country C) report a lower economic growth. To observe the true effect of international aid, we need to remove the across-country variation. We can do it by demeaning the data.</p>
+<p>De-meaning requires you to substract the mean from each variable. In this case, we are interested in demeaning by group, so that the values of x and y are centered around each group mean. You can observe the process in table <a href="#fig:f5">1.5</a>.</p>
+<blockquote>
+<p>By demeaning the data, we remove across-country variation: the mean of each country across years is now equal to 0.</p>
+</blockquote>
+<p>The mean value of Economic Growth in group A is 4. We substract 4 from each value of Economic Growth within group A (2, 4, 6) and obtain -2, 0, and 2. We repeat the same process for each group, and for both Economic Growth (x) and International Aid (note: you need to demean all the variables in your model, including control variables).</p>
+<div class="figure"><span id="fig:f9"></span>
+<img src="FIGURE/FixEffs/Picture6.png" alt="Relationship between growth and international aid: Within countries variation" width="60%" />
+<p class="caption">
+Figure 1.9: Relationship between growth and international aid: Within countries variation
+</p>
+</div>
+<pre class="r"><code>data$x_dem = ifelse(
+   data$g == &quot;a&quot;, data$x - mean(data$x[data$g == &quot;a&quot;]),
+      ifelse(data$g == &quot;b&quot;, data$x - mean(data$x[data$g == &quot;b&quot;]),
+          ifelse(data$g == &quot;c&quot;, data$x - mean(data$x[data$g == &quot;c&quot;]),NA)))
+
+data$y_dem = ifelse(
+   data$g == &quot;a&quot;, data$y - mean(data$y[data$g == &quot;a&quot;]),
+      ifelse(data$g == &quot;b&quot;, data$y - mean(data$y[data$g == &quot;b&quot;]),
+          ifelse(data$g == &quot;c&quot;, data$y - mean(data$y[data$g == &quot;c&quot;]),NA)))</code></pre>
+<p>As a result, we obtain a new dataset where our observations are disposed along a line. In graph <a href="#fig:f10">1.10</a>, there are no longer significant differences <strong>across</strong> the 3 countries - they all lay on the same line. We observe only <strong>within</strong> countries differences.</p>
+<pre class="r"><code>palette( c( &quot;steelblue&quot;, &quot;darkred&quot;, &quot;darkgreen&quot;  ) )
+
+plot(data$x_dem, data$y_dem, ylim = c(-5,5), xlim = c(-3,3), lwd = 5, col = as.factor(data$g), ylab = &quot;Economic growth (%)&quot;, xlab = &quot;International aid ($M)&quot;)
+
+points(2, -4, col = &quot;steelblue&quot;, lwd = 5 )
+points(2, -4.5, col = &quot;darkred&quot;, lwd = 5 )
+points(2, -5, col = &quot;darkgreen&quot;, lwd = 5 )
+
+text(2.4, -4, &quot;A&quot;, col = &quot;steelblue&quot;)
+text(2.4, -4.5, &quot;B&quot;, col = &quot;darkred&quot;)
+text(2.4, -5, &quot;C&quot;, col = &quot;darkgreen&quot;)</code></pre>
+<div class="figure"><span id="fig:f10"></span>
+<img src="FixedEffects_files/figure-html/f10-1.png" alt="Simulated dataset: De-meaned observations" width="960" />
+<p class="caption">
+Figure 1.10: Simulated dataset: De-meaned observations
+</p>
+</div>
+<p>At this point, we can estimate the relationship between x and y using an OLS model. Our beta coefficient is positive and statistically significant. For each milion dollar received in funding aid, a country’s economic growth increases - on average - of 1.01 points percentage.</p>
+<blockquote>
+<p>Note that we do not know whether a country grows more than another. We are estimating an <strong>average within country effect</strong>.</p>
+</blockquote>
+<pre class="r"><code>Demean_OLS = lm ( y_dem ~ x_dem, data = data )
+
+stargazer( OLS, Pooled_OLS, Demean_OLS, 
+           type = &quot;html&quot;, 
+           dep.var.labels = c(&quot;Economic growth&quot;, &quot;Economic growth&quot;, &quot;Economic growth (de-meaned)&quot;),
+           column.labels = c(&quot;Cross-Sectional OLS&quot;, &quot;Pooled OLS&quot;, &quot;De-meaned OLS&quot;),
+           covariate.labels = c(&quot;Constant&quot;, &quot;International aid - Year 1&quot;, &quot;International aid&quot;, &quot;International aid - De-meaned OLS&quot;),
+           omit.stat = &quot;all&quot;, 
+           digits = 2, intercept.bottom = FALSE )</code></pre>
+<table style="text-align:center">
+<tr>
+<td colspan="4" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td colspan="3">
+<em>Dependent variable:</em>
+</td>
+</tr>
+<tr>
+<td>
+</td>
+<td colspan="3" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+Economic growth
+</td>
+<td>
+Economic growth
+</td>
+<td>
+Economic growth (de-meaned)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+Cross-Sectional OLS
+</td>
+<td>
+Pooled OLS
+</td>
+<td>
+De-meaned OLS
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(1)
+</td>
+<td>
+(2)
+</td>
+<td>
+(3)
+</td>
+</tr>
+<tr>
+<td colspan="4" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Constant
+</td>
+<td>
+26.60<sup>**</sup>
+</td>
+<td>
+-0.85
+</td>
+<td>
+0.00
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(1.26)
+</td>
+<td>
+(6.02)
+</td>
+<td>
+(0.09)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+International aid - Year 1
+</td>
+<td>
+-11.20<sup>**</sup>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.51)
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+International aid
+</td>
+<td>
+</td>
+<td>
+0.46
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+(1.37)
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+International aid - De-meaned OLS
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+1.01<sup>***</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+(0.07)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td colspan="4" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td colspan="4" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+<em>Note:</em>
+</td>
+<td colspan="3" style="text-align:right">
+<sup><em></sup>p&lt;0.1; <sup><strong></sup>p&lt;0.05; <sup></strong></em></sup>p&lt;0.01
+</td>
+</tr>
+</table>
+</div>
+<div id="fixed-effect-model" class="section level3">
+<h3><span class="header-section-number">1.1.4</span> Fixed-effect model</h3>
+<p>The demeaning procedure shows what happens when we use a fixed effect model.</p>
+<p>A fixed effect model is an OLS model including a set of dummy variables for each group in your dataset. In our case, we need to include 3 dummy variable - one for each country. The model automatically excludes one to avoid multicollinearity problems.</p>
+<p>Results for our policy variable in the fixed effect model are identical to the de-meaned OLS. The international aid coefficient represents a one-unit change in the economic growth, on average, within a country for each additional one-milion dollar received.</p>
+<p>The fixed effect model also includes different intercepts for each country. The intercept for country A is represented by the constant. It represents the average economic growth when international aid is equal to 0. Country B intercept is 4.90 points percentage lower than Country A. Country C intercept is 12.8 points percentage lower than Country A. The coefficient of Country B and Country C indicate how much a country is different, on average, from country A (the reference category).</p>
+<pre class="r"><code>fixed_reg = lm ( y ~ x + as.factor(g), data = data)
+
+stargazer( OLS, Pooled_OLS, Demean_OLS, fixed_reg,
+           type = &quot;html&quot;, 
+           dep.var.labels = c(&quot;Economic growth&quot;, &quot;Economic growth&quot;, &quot;Economic growth (de-meaned)&quot;),
+           column.labels = c(&quot;Cross-Sectional OLS&quot;, &quot;Pooled OLS&quot;, &quot;De-mean OLS&quot;, &quot;Fixed effect&quot;),
+           covariate.labels = c(&quot;Constant&quot;, &quot;International aid - Year 1&quot;, &quot;International aid&quot;, &quot;International aid - De-meaned OLS&quot;, &quot;Country B&quot;, &quot;Country C&quot;),
+           omit.stat = &quot;all&quot;, 
+           digits = 2, intercept.bottom = FALSE )</code></pre>
+<table style="text-align:center">
+<tr>
+<td colspan="5" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td colspan="4">
+<em>Dependent variable:</em>
+</td>
+</tr>
+<tr>
+<td>
+</td>
+<td colspan="4" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+Economic growth
+</td>
+<td>
+Economic growth
+</td>
+<td>
+Economic growth (de-meaned)
+</td>
+<td>
+y
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+Cross-Sectional OLS
+</td>
+<td>
+Pooled OLS
+</td>
+<td>
+De-mean OLS
+</td>
+<td>
+Fixed effect
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(1)
+</td>
+<td>
+(2)
+</td>
+<td>
+(3)
+</td>
+<td>
+(4)
+</td>
+</tr>
+<tr>
+<td colspan="5" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Constant
+</td>
+<td>
+26.60<sup>**</sup>
+</td>
+<td>
+-0.85
+</td>
+<td>
+0.00
+</td>
+<td>
+2.75<sup>***</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(1.26)
+</td>
+<td>
+(6.02)
+</td>
+<td>
+(0.09)
+</td>
+<td>
+(0.37)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+International aid - Year 1
+</td>
+<td>
+-11.20<sup>**</sup>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.51)
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+International aid
+</td>
+<td>
+</td>
+<td>
+0.46
+</td>
+<td>
+</td>
+<td>
+1.01<sup>***</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+(1.37)
+</td>
+<td>
+</td>
+<td>
+(0.08)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+International aid - De-meaned OLS
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+1.01<sup>***</sup>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+(0.07)
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Country B
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+-4.90<sup>***</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+(0.27)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Country C
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+-12.80<sup>***</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+(0.28)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td colspan="5" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td colspan="5" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+<em>Note:</em>
+</td>
+<td colspan="4" style="text-align:right">
+<sup><em></sup>p&lt;0.1; <sup><strong></sup>p&lt;0.05; <sup></strong></em></sup>p&lt;0.01
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div id="the-statistical-model" class="section level2">
+<h2><span class="header-section-number">1.2</span> The statistical model</h2>
+<p>To summarize key conclusions from our previous example:</p>
+<ol style="list-style-type: decimal">
+<li>We are looking panel data, where we have multiple observations over time for different entity - e.g., countries’ economic growth over time.</li>
+</ol>
+<p>The dataset below is an example of a panel dataset. It contains 35 observations. Data are grouped into 7 groups and for each group we have 5 years of observation.</p>
+<pre class="r"><code>head(data[13:16], 10)</code></pre>
+<pre><code>##           X   Outcome G    Y
+## 1  35925.98  97251.81 1 2010
+## 2  39491.79 113394.41 1 2011
+## 3  30982.23  83029.76 1 2012
+## 4  23601.33  77980.51 1 2013
+## 5  23717.48  79985.21 1 2014
+## 6  49275.48 150318.89 2 2010
+## 7  52329.12 153086.73 2 2011
+## 8  24152.64 126582.74 2 2012
+## 9  20997.74 111552.96 2 2013
+## 10 16147.12 102579.59 2 2014</code></pre>
+<ol start="2" style="list-style-type: decimal">
+<li>We are interested in investigating the effect of a policy variable X on a given outcome. But because groups are different across each others (<em>between variation</em>), an OLS model (either a cross-sectional or a pooled model) does not approximate our data very well.</li>
+</ol>
+<p>For instance, we can plot the relationship between x and y in our dataset in graph <a href="#fig:graph1">1.11</a>. The line represent a basic regression where X predicts Y.</p>
+<pre class="r"><code>plot( data$X, data$Outcome, 
+      col=gray(0.5,0.5), 
+      pch=19, cex=3, bty=&quot;n&quot;, 
+      xlab=&quot;X - Policy variable&quot;, ylab=&quot;Y - Outcome&quot; )
+
+abline( lm( Outcome ~ X, data=data ), col=&quot;red&quot;, lwd=2 )</code></pre>
+<div class="figure"><span id="fig:graph1"></span>
+<img src="FixedEffects_files/figure-html/graph1-1.png" alt="Relationship between X and Y" width="960" />
+<p class="caption">
+Figure 1.11: Relationship between X and Y
+</p>
+</div>
+<ol start="3" style="list-style-type: decimal">
+<li>Because we know that data are grouped into 7 different groups we can use fixed effets to control for <em>between variation</em> and estimate the average <em>within groups</em> effect of x on y.</li>
+</ol>
+<p>In other words, we would like to obtain a regression line for each group in our dataset, as one unique regression line is not a good approximation.</p>
+<pre class="r"><code>palette( c( &quot;steelblue&quot;, &quot;darkred&quot;, &quot;forestgreen&quot;, &quot;goldenrod1&quot;, &quot;gray67&quot;, &quot;darkorchid4&quot;, &quot;seagreen1&quot; )) # Set colors
+
+plot( data$X, data$Outcome,  
+      col=factor(data$G), 
+      pch=19, cex=3, bty=&quot;n&quot;, 
+      xlab=&quot;X - Policy variable&quot;, ylab=&quot;Outcome&quot; )
+
+abline( lm( Outcome ~ X, data=data ), col=&quot;red&quot;, lwd=2 )</code></pre>
+<p><img src="FixedEffects_files/figure-html/unnamed-chunk-12-1.png" width="960" /></p>
+<ol start="4" style="list-style-type: decimal">
+<li>A fixed effects includes a set of dummy variables each of which represents a group. The equation of a fixed effect model is the following:</li>
+</ol>
+<p><span class="math display" id="eq:fixedeffect">\[\begin{equation} 
+\text{Yit} = \beta_1*Xit + \alpha_i + \text{e}
+  \tag{1.1}
+\end{equation}\]</span></p>
+<p>Where:
+<br>
+<br>
+<span class="math inline">\(\text{i}\)</span> indicates the number of groups in the dataset;
+<br>
+<br>
+<span class="math inline">\(\text{t}\)</span> indicates the number of time periods in the dataset;
+<br>
+<br>
+<span class="math inline">\(\text{Yit}\)</span> is the outcome variable;
+<br>
+<br>
+<span class="math inline">\(\beta_1\)</span> is the coefficient of the policy variable; it indicates the average changes in the outcome over time within each group;<br />
+<br>
+<span class="math inline">\(\alpha_i\)</span> is a set of dummy variable for each entity;
+<br>
+<br>
+<span class="math inline">\(\text{e}\)</span> is the error term.</p>
+<p>We can estimate the model as follows:</p>
+<pre class="r"><code>reg = lm( Outcome ~ X + factor(G) - 1, data = data )
+
+stargazer( reg, 
+           type = &quot;html&quot;, 
+           dep.var.labels = (&quot; &quot;),
+           column.labels = c(&quot; &quot;),
+           covariate.labels = c(&quot;Policy variable&quot;, &quot;Group 1&quot;, &quot;Group 2&quot;, &quot;Group 3&quot;, &quot;Group 4&quot;, &quot;Group 5&quot;, &quot;Group 6&quot;, &quot;Group 7&quot;),
+           omit.stat = &quot;all&quot;, 
+           digits = 2, intercept.bottom = FALSE )</code></pre>
+<table style="text-align:center">
+<tr>
+<td colspan="2" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+<em>Dependent variable:</em>
+</td>
+</tr>
+<tr>
+<td>
+</td>
+<td colspan="1" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td colspan="2" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Policy variable
+</td>
+<td>
+1.46<sup>***</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.09)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Group 1
+</td>
+<td>
+45,424.04<sup>***</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(3,855.35)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Group 2
+</td>
+<td>
+81,237.27<sup>***</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(3,970.97)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Group 3
+</td>
+<td>
+78,774.94<sup>***</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(3,856.03)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Group 4
+</td>
+<td>
+54,388.96<sup>***</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(4,077.09)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Group 5
+</td>
+<td>
+71,810.91<sup>***</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(4,149.83)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Group 6
+</td>
+<td>
+34,387.68<sup>***</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(4,445.21)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Group 7
+</td>
+<td>
+87,701.40<sup>***</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(3,670.89)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td colspan="2" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td colspan="2" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+<em>Note:</em>
+</td>
+<td style="text-align:right">
+<sup><em></sup>p&lt;0.1; <sup><strong></sup>p&lt;0.05; <sup></strong></em></sup>p&lt;0.01
+</td>
+</tr>
+</table>
+<pre class="r"><code># We add factor(G) - 1 in our model to add a set of intercepts; one for each group. 
+fe  &lt;- lm( Outcome ~ X + factor(G) - 1, data = data )
+
+yhat &lt;- fe$fitted</code></pre>
+<p>We plot our results in graph <a href="#fig:graph2">1.12</a>. As you can see, the lines have the same slope, but different intercept. The slope is represented by the coefficient of international aid, the policy variable. It represents the average within-group variation across time. The intercepts represent the average of each group when international aid is equal to 0. A fixed effect model better approximates the actual strucutre of the data and controls for group-level characteristics.</p>
+<blockquote>
+<p>Note that the group-level dummy variables control for all time-invariant characteristics of the group. But they do not control for characteristics that change over time.</p>
+</blockquote>
+<pre class="r"><code>plot( data$X, yhat, col=factor(data$G), 
+      pch=19, cex=2, xlab=&quot;X&quot;, ylab=&quot;Y&quot;, bty=&quot;n&quot; )</code></pre>
+<div class="figure"><span id="fig:graph2"></span>
+<img src="FixedEffects_files/figure-html/graph2-1.png" alt="Fixed effect model" width="960" />
+<p class="caption">
+Figure 1.12: Fixed effect model
+</p>
+</div>
+</div>
+</div>
+<div id="a-fixed-effect-model" class="section level1">
+<h1><span class="header-section-number">2</span> A fixed effect model</h1>
+<div class="figure"><span id="fig:labs"></span>
+<img src="FIGURE/FixEffs/labs.jpg" alt="Source: [Wikimedia](https://commons.wikimedia.org/wiki/File:Argonne_lab_education.jpg)" width="60%" />
+<p class="caption">
+Figure 2.1: Source: <a href="https://commons.wikimedia.org/wiki/File:Argonne_lab_education.jpg">Wikimedia</a>
+</p>
+</div>
+<p>Countries strongly <a href="http://uis.unesco.org/apps/visualisations/research-and-development-spending/">invest in Research &amp; Development</a> (R&amp;D). The United States spend <a href="https://www.nsf.gov/statistics/2018/nsb20181/report/sections/research-and-development-u-s-trends-and-international-comparisons/cross-national-comparisons-of-r-d-performance">2.7% of their GDP</a> into research and development. One of the goals of these investments is to provide <a href="https://www.nsf.gov/news/news_summ.jsp?cntn_id=296760&amp;org=NSF&amp;from=news">funding to companies and incentivize private investments</a>. In this example, we want to assess the impact of public expenditure on research and development (R&amp;D) on companies’ investments.</p>
+<p>Data are structured in a <strong>panel dataset</strong> where we have 10 companies and observations over a five-year period. You can see here the structure of the data for Company 1, Company 10, and Company 2.</p>
+<pre class="r"><code> head(data[,c(1,2,18)],15)</code></pre>
+<pre><code>##      Company Year    RDPub
+## 1   Company1 2010 36084.68
+## 2   Company1 2011 39167.07
+## 3   Company1 2012 25470.58
+## 4   Company1 2013 38535.33
+## 5   Company1 2014 49854.10
+## 6  Company10 2010 34432.72
+## 7  Company10 2011 47245.19
+## 8  Company10 2012 33777.57
+## 9  Company10 2013 32980.91
+## 10 Company10 2014 18674.63
+## 11  Company2 2010 51582.58
+## 12  Company2 2011 49657.59
+## 13  Company2 2012 21151.75
+## 14  Company2 2013 44989.39
+## 15  Company2 2014 27469.65</code></pre>
+<p>Each company has different levels of investment in research and development. We plot each company average R&amp;D investement in graph <a href="#fig:companies">2.2</a>. Each bar represents a company. The middle dot is the average R&amp;D investment. The bars go from the minimum level of investment to the maximum.</p>
+<p>You can see how Company 1 has a lower average R&amp;D investment than Company 2. Company 5 has a smaller range than the other companies, with a minimum investment that it is higher than the average outcome of company 6 and so on.</p>
+<p>There are can be several explanation for these differences: size, different managerial practices, or business culture, among others. Note that this variable changes <em>across organizations</em> but not across time.</p>
+<pre class="r"><code>plotmeans(RD ~ Company, 
+xlab = &quot;Companies&quot;, ylab = &quot;R&amp;D Investment&quot;,
+barwidth = 2,
+col = 
+palette( c( &quot;steelblue&quot;, &quot;darkred&quot;, &quot;forestgreen&quot;, &quot;goldenrod1&quot;, &quot;gray67&quot;, &quot;turquoise4&quot;, &quot;tan1&quot; )),
+barcol = 
+palette( c( &quot;steelblue&quot;, &quot;darkred&quot;, &quot;forestgreen&quot;, &quot;goldenrod1&quot;, &quot;gray67&quot;, &quot;turquoise4&quot;, &quot;tan1&quot; )),
+data = data)</code></pre>
+<div class="figure"><span id="fig:companies"></span>
+<img src="FixedEffects_files/figure-html/companies-1.png" alt="Heterogeneity across companies" width="960" />
+<p class="caption">
+Figure 2.2: Heterogeneity across companies
+</p>
+</div>
+<p>Variation occurs also across years. We can plot each year in graph <a href="#fig:years">2.3</a>. Year 2014 shows great variability than year 2, for instance.</p>
+<p>Variation across years can be explained by new national policies that get implemented, internaional agreeements, taation policies, or the economic situation. Note that these varibles vary <em>across years</em> but not across entities (e.g., national policies affect all companies in the dataset).</p>
+<pre class="r"><code>plotmeans(RD ~ Year, 
+main=&quot;Heterogeineity across companies&quot;, 
+xlab =&quot;Years, 2010 - 2014&quot;, ylab = &quot;R&amp;D Investment&quot;,
+data = data, barwidth = 2,
+col = &quot;gray52&quot;,
+barcol = &quot;gray52&quot;)</code></pre>
+<div class="figure"><span id="fig:years"></span>
+<img src="FixedEffects_files/figure-html/years-1.png" alt="Heterogeneity across years" width="960" />
+<p class="caption">
+Figure 2.3: Heterogeneity across years
+</p>
+</div>
+<p>We can look at both company and year variation at the same time in one graph:</p>
+<pre class="r"><code>palette( c( &quot;steelblue&quot;, &quot;darkred&quot;, &quot;forestgreen&quot;, &quot;goldenrod1&quot;, &quot;gray67&quot;, &quot;turquoise4&quot;, &quot;black&quot;))
+
+coplot(RD ~ as.factor(Year)|as.factor(Company), 
+xlab = c(&quot;Year&quot;, &quot;Companies&quot;), ylab = &quot;Company R&amp;D&quot;, 
+col = as.factor(Company), lwd = 2,
+type=&quot;b&quot;, data=data) </code></pre>
+<div class="figure"><span id="fig:companyYears"></span>
+<img src="FixedEffects_files/figure-html/companyYears-1.png" alt=" Heterogeneity across companies and years" width="960" />
+<p class="caption">
+Figure 2.4:  Heterogeneity across companies and years
+</p>
+</div>
+<p>Because of differences across companies, we want to use fixed effects to control for these unobserved characteristics that affect variation across entities (e.g., companies).</p>
+<div id="the-statistical-model-1" class="section level2">
+<h2><span class="header-section-number">2.1</span> The statistical model</h2>
+<p>We can start by looking at the results that we would have if we were running the model as an OLS regression.</p>
+<pre class="r"><code>reg = lm(RD ~ RDPub)
+
+stargazer( reg, 
+           type = &quot;html&quot;, 
+           dep.var.labels = (&quot;Company R&amp;D&quot;),
+           column.labels = c(&quot; &quot;),
+           covariate.labels = c(&quot;Constant&quot;, &quot;Public R&amp;D&quot;),
+           omit.stat = &quot;all&quot;, 
+           digits = 2, intercept.bottom = FALSE )</code></pre>
+<table style="text-align:center">
+<tr>
+<td colspan="2" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+<em>Dependent variable:</em>
+</td>
+</tr>
+<tr>
+<td>
+</td>
+<td colspan="1" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+Company R&amp;D
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td colspan="2" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Constant
+</td>
+<td>
+83,671.23<sup>***</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(9,276.31)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Public R&amp;D
+</td>
+<td>
+0.92<sup>***</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.25)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td colspan="2" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td colspan="2" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+<em>Note:</em>
+</td>
+<td style="text-align:right">
+<sup><em></sup>p&lt;0.1; <sup><strong></sup>p&lt;0.05; <sup></strong></em></sup>p&lt;0.01
+</td>
+</tr>
+</table>
+<p>The effect of public R&amp;D investment on private ones is equal to 1.036, indicating that for each dollar invested by the government, private companies will invest 1.036 dollars.</p>
+<p>We can plot our observations and the OLS results on graph <a href="#fig:plotOLS">2.5</a>. The black dots represent our observations. The red line represents OLS results.</p>
+<p>We can see that the line only approximates the actual observations.</p>
+<pre class="r"><code>plot(RDPub, RD, pch=19, xlab=&quot;Public R&amp;D Investment&quot;, ylab=&quot;Company R&amp;D Investment&quot;)
+abline(lm( RD ~ RDPub ),lwd=3, col=&quot;darkred&quot;)</code></pre>
+<div class="figure"><span id="fig:plotOLS"></span>
+<img src="FixedEffects_files/figure-html/plotOLS-1.png" alt="OLS results" width="960" />
+<p class="caption">
+Figure 2.5: OLS results
+</p>
+</div>
+<p>A way to improve the results is to include a set of dummy variable for each company, so as we can control differences across companies.</p>
+<p>Results of our variable of interest (Public R&amp;D) change; now, for each dollar spent by the public, companies spend 0.99.</p>
+<pre class="r"><code>regDummy = lm ( RD ~ RDPub + as.factor(Company), data = data)
+
+stargazer( regDummy, 
+           type = &quot;html&quot;, 
+           dep.var.labels = (&quot;Company R&amp;D&quot;),
+           column.labels = c(&quot; &quot;),
+           omit.stat = &quot;all&quot;, 
+           covariate.labels = c(&quot;Constant (or Company 1)&quot;, &quot;Public R&amp;D&quot;, &quot;Company 10&quot;, &quot;Company 2&quot;,  &quot;Company 3&quot;,  &quot;Company 4&quot;,  &quot;Company 5&quot;,  &quot;Company 6&quot;, &quot;Company 7&quot;,  &quot;Company 8&quot;,  &quot;Company 9&quot;),
+           digits = 2, intercept.bottom = FALSE )</code></pre>
+<table style="text-align:center">
+<tr>
+<td colspan="2" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+<em>Dependent variable:</em>
+</td>
+</tr>
+<tr>
+<td>
+</td>
+<td colspan="1" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+Company R&amp;D
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td colspan="2" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Constant (or Company 1)
+</td>
+<td>
+56,569.91<sup>***</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(9,411.86)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Public R&amp;D
+</td>
+<td>
+1.15<sup>***</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.19)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Company 10
+</td>
+<td>
+33,047.18<sup>***</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(8,830.99)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Company 2
+</td>
+<td>
+35,794.77<sup>***</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(8,795.26)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Company 3
+</td>
+<td>
+36,860.79<sup>***</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(8,801.86)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Company 4
+</td>
+<td>
+5,193.58
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(8,857.36)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Company 5
+</td>
+<td>
+20,994.55<sup>**</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(8,800.51)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Company 6
+</td>
+<td>
+-4,121.64
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(8,954.31)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Company 7
+</td>
+<td>
+35,253.30<sup>***</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(8,845.63)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Company 8
+</td>
+<td>
+6,857.00
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(8,795.14)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Company 9
+</td>
+<td>
+19,830.50<sup>**</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(8,887.64)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td colspan="2" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td colspan="2" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+<em>Note:</em>
+</td>
+<td style="text-align:right">
+<sup><em></sup>p&lt;0.1; <sup><strong></sup>p&lt;0.05; <sup></strong></em></sup>p&lt;0.01
+</td>
+</tr>
+</table>
+<p>We can see how the regression line varies for each company. The dark red, thicker line represent the regression results when dummies are not included.</p>
+<p>Note that each line has a different intercept (which is predicted by our dummies) but the same slope - as <span class="math inline">\(\beta_1\)</span> estimates the average within effect for all groups.</p>
+<pre class="r"><code>yhat = regDummy$fitted
+
+colline = palette( c( &quot;steelblue&quot;, &quot;darkred&quot;, &quot;forestgreen&quot;, &quot;goldenrod1&quot;, &quot;gray67&quot;, &quot;turquoise4&quot;, &quot;black&quot; ) )
+
+scatterplot(yhat ~ RDPub | as.factor(Company), boxplots = FALSE, xlab = &quot;Public R&amp;D Investment&quot;, ylab = &quot;Predicted Company R&amp;D Investment&quot;, smooth = FALSE, col=colline, lwd = 2, legend=c(title = &quot;Companies&quot;))
+
+abline(lm( RD ~ RDPub ), lwd = 3, col = &quot;red&quot;)</code></pre>
+<div class="figure"><span id="fig:plotdummy"></span>
+<img src="FixedEffects_files/figure-html/plotdummy-1.png" alt="Plot of OLS with dummy variables" width="960" />
+<p class="caption">
+Figure 2.6: Plot of OLS with dummy variables
+</p>
+</div>
+</div>
+<div id="plm-package" class="section level2">
+<h2><span class="header-section-number">2.2</span> plm package</h2>
+<p>We can use the plm package to estimate the fixed effects model. In the output table, we compare results across the OLS, the OLS with dummies, and the fixed effect model.</p>
+<pre class="r"><code>fixed &lt;- plm(RD ~ RDPub, data=data, index=c(&quot;Company&quot;), model=&quot;within&quot;) ## The model is specified as a OLS model, but we need to indicate the &quot;index&quot; - i.e. the level of grouping.
+
+stargazer( reg, regDummy, fixed, 
+           type = &quot;html&quot;, 
+           dep.var.labels = (&quot;Company R&amp;D&quot;),
+           column.labels = c(&quot;Ols&quot;, &quot;Ols with Dummy&quot;, &quot;Fixed&quot;),
+           covariate.labels = c(&quot;Constant (or Company 1)&quot;, &quot;Public R&amp;D&quot;, &quot;Company 10&quot;, &quot;Company 2&quot;,  &quot;Company 3&quot;,  &quot;Company 4&quot;,  &quot;Company 5&quot;,  &quot;Company 6&quot;, &quot;Company 7&quot;,  &quot;Company 8&quot;,  &quot;Company 9&quot;),
+           omit.stat = &quot;all&quot;, 
+           digits = 2, intercept.bottom = FALSE )</code></pre>
+<table style="text-align:center">
+<tr>
+<td colspan="4" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td colspan="3">
+<em>Dependent variable:</em>
+</td>
+</tr>
+<tr>
+<td>
+</td>
+<td colspan="3" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td colspan="3">
+Company R&amp;D
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td colspan="2">
+<em>OLS</em>
+</td>
+<td>
+<em>panel</em>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td colspan="2">
+<em></em>
+</td>
+<td>
+<em>linear</em>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+Ols
+</td>
+<td>
+Ols with Dummy
+</td>
+<td>
+Fixed
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(1)
+</td>
+<td>
+(2)
+</td>
+<td>
+(3)
+</td>
+</tr>
+<tr>
+<td colspan="4" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Constant (or Company 1)
+</td>
+<td>
+83,671.23<sup>***</sup>
+</td>
+<td>
+56,569.91<sup>***</sup>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(9,276.31)
+</td>
+<td>
+(9,411.86)
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Public R&amp;D
+</td>
+<td>
+0.92<sup>***</sup>
+</td>
+<td>
+1.15<sup>***</sup>
+</td>
+<td>
+1.15<sup>***</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.25)
+</td>
+<td>
+(0.19)
+</td>
+<td>
+(0.19)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Company 10
+</td>
+<td>
+</td>
+<td>
+33,047.18<sup>***</sup>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+(8,830.99)
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Company 2
+</td>
+<td>
+</td>
+<td>
+35,794.77<sup>***</sup>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+(8,795.26)
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Company 3
+</td>
+<td>
+</td>
+<td>
+36,860.79<sup>***</sup>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+(8,801.86)
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Company 4
+</td>
+<td>
+</td>
+<td>
+5,193.58
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+(8,857.36)
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Company 5
+</td>
+<td>
+</td>
+<td>
+20,994.55<sup>**</sup>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+(8,800.51)
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Company 6
+</td>
+<td>
+</td>
+<td>
+-4,121.64
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+(8,954.31)
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Company 7
+</td>
+<td>
+</td>
+<td>
+35,253.30<sup>***</sup>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+(8,845.63)
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Company 8
+</td>
+<td>
+</td>
+<td>
+6,857.00
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+(8,795.14)
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Company 9
+</td>
+<td>
+</td>
+<td>
+19,830.50<sup>**</sup>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+(8,887.64)
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td colspan="4" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td colspan="4" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+<em>Note:</em>
+</td>
+<td colspan="3" style="text-align:right">
+<sup><em></sup>p&lt;0.1; <sup><strong></sup>p&lt;0.05; <sup></strong></em></sup>p&lt;0.01
+</td>
+</tr>
+</table>
+<p>As in the model with the dummy variables, the coefficient of the fixed effect model indicates, on average, how much the outcome (Company R&amp;D) changes per country over time for a one unit increases of x (Public R&amp;D).</p>
+<p>Note that the fixed effect model estimated using plm does not have an intercept (see column #3 in the above table). When estimating the model with plm, we can retrieve each company’ intercept by using the command <span class="math inline">\(fixef\)</span>. The intercept for company A is the intercept in the dummy model (see column #2 in the above table).</p>
+<pre class="r"><code> fixef(fixed) </code></pre>
+<pre><code>##  Company1 Company10  Company2  Company3  Company4  Company5  Company6 
+##  56569.91  89617.09  92364.68  93430.70  61763.49  77564.46  52448.28 
+##  Company7  Company8  Company9 
+##  91823.21  63426.91  76400.41</code></pre>
+<p>The plm package also allows us to test whether the fixed effect model is a better choice compared to the OLS model with the <span class="math inline">\(pFtest\)</span> command. If the p-value is lower than 0.05, than the fixed effect model is a better choice.</p>
+<pre class="r"><code>pFtest(fixed, reg) </code></pre>
+<pre><code>## 
+##  F test for individual effects
+## 
+## data:  RD ~ RDPub
+## F = 6.4244, df1 = 9, df2 = 39, p-value = 1.516e-05
+## alternative hypothesis: significant effects</code></pre>
+</div>
+<div id="key-notes-on-fixed-effects" class="section level2">
+<h2><span class="header-section-number">2.3</span> Key notes on fixed effects</h2>
+<p>Before moving to random effects, we need to point out some important features that you need to remember about fixed effect models:</p>
+<blockquote>
+<ul>
+<li>Using a fixed effect model allows us to control for all <strong>time - invariant characteristics</strong> of an entity (even characteristics that you cannot measure or observe); we assume that some characteristics of the entity we are investigating (e.g., the country or the company) affect our predictor and we need to control for it. Note that a fixed effect model control for <em>all</em> time invariant characterists, thus reducing omit variable bias issues.
+<br></li>
+</ul>
+</blockquote>
+<blockquote>
+<ul>
+<li>BUT you cannot investigate time-invariant characteristics using fixed effects. For instance, in the previous example, we cannot investigate the effect of a company location. As the location does not change over time, the fixed effects “absorb” this variation. Statistically, time-invariant characteristics are perfectly collinear with the dummy, so as their effect cannot be estimated in the model (you can see a practical example in section <a href="#replication-of-a-study">3</a>)<br />
+<br></li>
+</ul>
+</blockquote>
+<blockquote>
+<ul>
+<li>Because of this, you need to keep in mind that fixed effects are designed to <strong>investigate time-variant characteristics within an entity</strong>.
+<br></li>
+</ul>
+</blockquote>
+<blockquote>
+<ul>
+<li>Finally, fixed effects assume that each entity is unique, such that the error terms and each entity’s constant are <strong>not</strong> correlated with other entities’ error terms and constant. In other words, there is independence across entities. This condition can be tested using a randome effect model and an Hausman test (see section <a href="#random-effects">4</a>).</li>
+</ul>
+</blockquote>
+</div>
+</div>
+<div id="replication-of-a-study" class="section level1">
+<h1><span class="header-section-number">3</span> Replication of a study</h1>
+<div class="figure"><span id="fig:repstudy"></span>
+<img src="FIGURE/FixEffs/Model.png" alt="Deterrence Theory" width="60%" />
+<p class="caption">
+Figure 3.1: Deterrence Theory
+</p>
+</div>
+<p>As replication study we are going to look at research on <a href="https://en.wikipedia.org/wiki/Deterrence_(psychology)">deterrence theory</a>. Deterrence theory argues that individuals refrain from engaging in deviant activities if they know they will be punished and if they know the pain will be severe, as illustrated in figure <a href="#fig:repstudy">3.1</a>. This theory is often applied to justify more severe penalties ( <a href="https://www.nytimes.com/2007/11/18/us/18deter.html">such as the death penalty</a> ) and <a href="https://www.theatlantic.com/politics/archive/2016/04/what-caused-the-crime-decline/477408/">explain why crime rates have decreased in recent years</a>. Of course, there are <a href="https://www.nytimes.com/2012/04/28/opinion/the-myth-of-deterrence.html">mixed opinions</a> and <a href="https://nij.gov/five-things/pages/deterrence.aspx">evidence</a>.</p>
+<p>We will use a panel dataset of 90 observational units (counties) from 1981 to 1987 collected by Cornwell and Trumbull in 1994 (you can find the full paper <a href="https://www.amherst.edu/media/view/121570/original/CornwellTrumbullCrime%2BElasticities.pdf">here</a> ). Data look at whether the certainty of (1) being arrested, (2) being convicted, or (3) being sentencing to prison and (4) the severity of the pain decrease crimes within a given county.</p>
+<blockquote>
+<p><strong>Research question:</strong>
+Do certainty and severity of pain lead to lower crime?</p>
+<p><strong>Hypothesis:</strong>
+Based on deterrence theory, we argue that greater certainty or severity of pain will decrease crime in a given county.</p>
+</blockquote>
+<div id="data" class="section level2">
+<h2><span class="header-section-number">3.1</span> Data</h2>
+<p>We start by uploading the data <em>Crime</em> from the plm package,</p>
+<pre class="r"><code>data(Crime)
+
+dataCrime = Crime</code></pre>
+<p>You can see te structure of the dataset and the main independent variables in the following table. Note that for each county (1 and 3 in this case), we have data from 1981 to 1987.</p>
+<pre class="r"><code>head(dataCrime[,1:7], 10)</code></pre>
+<pre><code>##    county year    crmrte   prbarr  prbconv  prbpris avgsen
+## 1       1   81 0.0398849 0.289696 0.402062 0.472222   5.61
+## 2       1   82 0.0383449 0.338111 0.433005 0.506993   5.59
+## 3       1   83 0.0303048 0.330449 0.525703 0.479705   5.80
+## 4       1   84 0.0347259 0.362525 0.604706 0.520104   6.89
+## 5       1   85 0.0365730 0.325395 0.578723 0.497059   6.55
+## 6       1   86 0.0347524 0.326062 0.512324 0.439863   6.90
+## 7       1   87 0.0356036 0.298270 0.527596 0.436170   6.71
+## 8       3   81 0.0163921 0.202899 0.869048 0.465753   8.45
+## 9       3   82 0.0190651 0.162218 0.772152 0.377049   5.71
+## 10      3   83 0.0151492 0.181586 1.028170 0.438356   8.69</code></pre>
+<p>These are the main <strong>independent variables</strong> that we will be investigating:</p>
+<table>
+<colgroup>
+<col width="13%" />
+<col width="86%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Variable</th>
+<th align="left">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Crime</td>
+<td align="left">FBI index crimes to county population</td>
+</tr>
+<tr class="even">
+<td>prbarr</td>
+<td align="left">Ratio of offenses to arrests (probability of arrest)</td>
+</tr>
+<tr class="odd">
+<td>prbconv</td>
+<td align="left">Ratio of convinction to arrests (probability of conviction)</td>
+</tr>
+<tr class="even">
+<td>prbpris</td>
+<td align="left">Ratio of prison sentences to convinctions (probability of prison sentence)</td>
+</tr>
+<tr class="odd">
+<td>avgsen</td>
+<td align="left">Average number of days for prison sentence (severity of the pain)</td>
+</tr>
+</tbody>
+</table>
+<p>Here are some basic statistics.</p>
+<pre class="r"><code>stargazer( dataCrime,  
+           type = &quot;html&quot;, 
+           keep = c(&quot;^crmrte&quot;, &quot;^prbarr&quot;, &quot;^prbconv&quot;, &quot;^prbpris&quot;, &quot;^avgsen&quot;),
+           omit.summary.stat = c(&quot;p25&quot;, &quot;p75&quot;),
+           digits = 2 )</code></pre>
+<table style="text-align:center">
+<tr>
+<td colspan="6" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Statistic
+</td>
+<td>
+N
+</td>
+<td>
+Mean
+</td>
+<td>
+St. Dev.
+</td>
+<td>
+Min
+</td>
+<td>
+Max
+</td>
+</tr>
+<tr>
+<td colspan="6" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+crmrte
+</td>
+<td>
+630
+</td>
+<td>
+0.03
+</td>
+<td>
+0.02
+</td>
+<td>
+0.002
+</td>
+<td>
+0.16
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+prbarr
+</td>
+<td>
+630
+</td>
+<td>
+0.31
+</td>
+<td>
+0.17
+</td>
+<td>
+0.06
+</td>
+<td>
+2.75
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+prbconv
+</td>
+<td>
+630
+</td>
+<td>
+0.69
+</td>
+<td>
+1.69
+</td>
+<td>
+0.07
+</td>
+<td>
+37.00
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+prbpris
+</td>
+<td>
+630
+</td>
+<td>
+0.43
+</td>
+<td>
+0.09
+</td>
+<td>
+0.15
+</td>
+<td>
+0.68
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+avgsen
+</td>
+<td>
+630
+</td>
+<td>
+8.95
+</td>
+<td>
+2.66
+</td>
+<td>
+4.22
+</td>
+<td>
+25.83
+</td>
+</tr>
+<tr>
+<td colspan="6" style="border-bottom: 1px solid black">
+</td>
+</tr>
+</table>
+<p>The average crime rate across all counties and years is 3.84%. The average probability of arrest is 30.74%. The average probability of convinction is 68.86%. The average probability of prison sentence is 42.55%. The average length of prison stay is 8.955 days.</p>
+<p><br>
+These are the <strong>control variables</strong> that we will also include in the model:</p>
+<table>
+<thead>
+<tr class="header">
+<th>Variable</th>
+<th align="left">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>wcon</td>
+<td align="left">Average wage in constuction</td>
+</tr>
+<tr class="even">
+<td>wtuc</td>
+<td align="left">Average wage in transportation, Utilities and Communication</td>
+</tr>
+<tr class="odd">
+<td>wtrd</td>
+<td align="left">Average wage in retail trade</td>
+</tr>
+<tr class="even">
+<td>wfir</td>
+<td align="left">Average wage in finance, insurance, real estate</td>
+</tr>
+<tr class="odd">
+<td>wser</td>
+<td align="left">Average wage in service industry</td>
+</tr>
+<tr class="even">
+<td>wmfg</td>
+<td align="left">Average wage in manufacturing</td>
+</tr>
+<tr class="odd">
+<td>wfed</td>
+<td align="left">Average wage in federal government</td>
+</tr>
+<tr class="even">
+<td>wsta</td>
+<td align="left">Average wage in state government</td>
+</tr>
+<tr class="odd">
+<td>wloc</td>
+<td align="left">Average wage in local government</td>
+</tr>
+<tr class="even">
+<td>smsa</td>
+<td align="left">Counties included in a metropolitan area</td>
+</tr>
+<tr class="odd">
+<td>density</td>
+<td align="left">population density</td>
+</tr>
+<tr class="even">
+<td>region</td>
+<td align="left">County location: West, central or other</td>
+</tr>
+<tr class="odd">
+<td>polpc</td>
+<td align="left">Police per capita</td>
+</tr>
+<tr class="even">
+<td>pctymle</td>
+<td align="left">Percentage male between 15 and 24</td>
+</tr>
+<tr class="odd">
+<td>pctmin</td>
+<td align="left">Percentage minority</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="analysis" class="section level2">
+<h2><span class="header-section-number">3.2</span> Analysis</h2>
+<p>We will estimate two models. The first model is an OLS model. The second model will include fixed effects to control for variation across years and counties.</p>
+<pre class="r"><code>OLS.Crime = lm(crmrte ~
+prbarr +
+prbconv +
+prbpris +
+avgsen +
+polpc +
+density +
+region +
+smsa +
+pctmin +
+wcon +
+wtuc +
+wtrd +
+wfir +
+wser +
+wmfg +
+wfed +
+wsta +
+wloc +
+pctymle, 
+data = dataCrime)
+
+Fixed.Crime = plm(crmrte ~
+prbarr +
+prbconv +
+prbpris +
+avgsen +
+polpc +
+density +
+region +
+smsa +
+pctmin +
+wcon +
+wtuc +
+wtrd +
+wfir +
+wser +
+wmfg +
+wfed +
+wsta +
+wloc +
+pctymle, index=c(&quot;county&quot;), data = dataCrime)
+
+stargazer( OLS.Crime, Fixed.Crime, 
+           type = &quot;html&quot;, 
+           dep.var.labels = (&quot;Crime rates&quot;),
+           column.labels = c(&quot;OLS&quot;, &quot;Fixed effects&quot;), intercept.bottom = FALSE,
+           omit.stat = &quot;all&quot;, 
+           digits = 2)</code></pre>
+<table style="text-align:center">
+<tr>
+<td colspan="3" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td colspan="2">
+<em>Dependent variable:</em>
+</td>
+</tr>
+<tr>
+<td>
+</td>
+<td colspan="2" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td colspan="2">
+Crime rates
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+<em>OLS</em>
+</td>
+<td>
+<em>panel</em>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+<em></em>
+</td>
+<td>
+<em>linear</em>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+OLS
+</td>
+<td>
+Fixed effects
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(1)
+</td>
+<td>
+(2)
+</td>
+</tr>
+<tr>
+<td colspan="3" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Constant
+</td>
+<td>
+0.01<sup>***</sup>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.005)
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+prbarr
+</td>
+<td>
+-0.03<sup>***</sup>
+</td>
+<td>
+-0.01<sup>***</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.003)
+</td>
+<td>
+(0.002)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+prbconv
+</td>
+<td>
+-0.002<sup>***</sup>
+</td>
+<td>
+-0.001<sup>***</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.0003)
+</td>
+<td>
+(0.0002)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+prbpris
+</td>
+<td>
+-0.0000
+</td>
+<td>
+-0.001
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.005)
+</td>
+<td>
+(0.004)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+avgsen
+</td>
+<td>
+-0.0000
+</td>
+<td>
+0.0002<sup>*</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.0001)
+</td>
+<td>
+(0.0001)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+polpc
+</td>
+<td>
+2.59<sup>***</sup>
+</td>
+<td>
+2.15<sup>***</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.17)
+</td>
+<td>
+(0.16)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+density
+</td>
+<td>
+0.01<sup>***</sup>
+</td>
+<td>
+0.01<sup>*</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.001)
+</td>
+<td>
+(0.005)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+regionwest
+</td>
+<td>
+-0.01<sup>***</sup>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.002)
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+regioncentral
+</td>
+<td>
+-0.01<sup>***</sup>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.001)
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+smsayes
+</td>
+<td>
+-0.002
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.003)
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+pctmin
+</td>
+<td>
+0.0001<sup>***</sup>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.0000)
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+wcon
+</td>
+<td>
+-0.0000
+</td>
+<td>
+-0.0000
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.0000)
+</td>
+<td>
+(0.0000)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+wtuc
+</td>
+<td>
+-0.0000
+</td>
+<td>
+-0.0000
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.0000)
+</td>
+<td>
+(0.0000)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+wtrd
+</td>
+<td>
+0.0000
+</td>
+<td>
+-0.0000
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.0000)
+</td>
+<td>
+(0.0000)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+wfir
+</td>
+<td>
+-0.0000
+</td>
+<td>
+-0.0000
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.0000)
+</td>
+<td>
+(0.0000)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+wser
+</td>
+<td>
+-0.0000
+</td>
+<td>
+0.0000
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.0000)
+</td>
+<td>
+(0.0000)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+wmfg
+</td>
+<td>
+0.0000
+</td>
+<td>
+-0.0000
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.0000)
+</td>
+<td>
+(0.0000)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+wfed
+</td>
+<td>
+0.0000<sup>***</sup>
+</td>
+<td>
+-0.0001<sup>***</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.0000)
+</td>
+<td>
+(0.0000)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+wsta
+</td>
+<td>
+-0.0000<sup>*</sup>
+</td>
+<td>
+0.0000
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.0000)
+</td>
+<td>
+(0.0000)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+wloc
+</td>
+<td>
+0.0000
+</td>
+<td>
+0.0000<sup>**</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.0000)
+</td>
+<td>
+(0.0000)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+pctymle
+</td>
+<td>
+0.08<sup>***</sup>
+</td>
+<td>
+-0.21
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.02)
+</td>
+<td>
+(0.15)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td colspan="3" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td colspan="3" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+<em>Note:</em>
+</td>
+<td colspan="2" style="text-align:right">
+<sup><em></sup>p&lt;0.1; <sup><strong></sup>p&lt;0.05; <sup></strong></em></sup>p&lt;0.01
+</td>
+</tr>
+</table>
+<p>Note differences across the two models:</p>
+<ol style="list-style-type: decimal">
+<li>The fixed effect model has no intercept. We can retrieve the intercept for each county using the command <span class="math inline">\(fixef\)</span>.</li>
+</ol>
+<pre class="r"><code>fixef(Fixed.Crime) </code></pre>
+<pre><code>##          1          3          5          7          9         11 
+## 0.06008380 0.04616095 0.04397873 0.05618387 0.03963517 0.04850172 
+##         13         15         17         19         21         23 
+## 0.06693969 0.05398029 0.05586298 0.05241807 0.05696899 0.05808010 
+##         25         27         33         35         37         39 
+## 0.05076612 0.06333701 0.04798006 0.06405122 0.05570115 0.04315078 
+##         41         45         47         49         51         53 
+## 0.05564134 0.05978015 0.06377220 0.07761934 0.08456992 0.04635910 
+##         55         57         59         61         63         65 
+## 0.08010031 0.05393594 0.04689486 0.05541325 0.07288809 0.09176798 
+##         67         69         71         77         79         81 
+## 0.03702207 0.05798697 0.06007574 0.07583131 0.04347463 0.05977589 
+##         83         85         87         89         91         93 
+## 0.06326111 0.07448984 0.06317630 0.05528267 0.06590669 0.07010747 
+##         97         99        101        105        107        109 
+## 0.06543167 0.06063011 0.06376829 0.07722246 0.07599284 0.04531503 
+##        111        113        115        117        119        123 
+## 0.04216029 0.04223970 0.02100296 0.05071326 0.06648979 0.06092552 
+##        125        127        129        131        133        135 
+## 0.05737006 0.07294416 0.06680016 0.05508579 0.09956319 0.08888891 
+##        137        139        141        143        145        147 
+## 0.04084588 0.06435933 0.07141286 0.05268857 0.06063136 0.09052899 
+##        149        151        153        155        157        159 
+## 0.04458252 0.05622279 0.06265948 0.06394358 0.05619013 0.05654222 
+##        161        163        165        167        169        171 
+## 0.05226790 0.05309409 0.07575148 0.05273969 0.04319476 0.05064528 
+##        173        175        179        181        183        185 
+## 0.03590281 0.04584681 0.05779035 0.08729171 0.06835270 0.03340218 
+##        187        189        191        193        195        197 
+## 0.06241153 0.06864923 0.05538939 0.05567039 0.07003994 0.04124668</code></pre>
+<ol start="2" style="list-style-type: decimal">
+<li><p>The variables that are time-invariant such as region type, location in a metropolitan area, or minority percentage are removed from the fixed-effect model.</p></li>
+<li><p>We can compare OLS and fixed effect results using the <span class="math inline">\(pFtest\)</span> command. Remember if the p-value &lt; 0.05, the fixed effect model is a better choice than the OLS model.</p></li>
+</ol>
+<pre class="r"><code>pFtest(Fixed.Crime, OLS.Crime) </code></pre>
+<pre><code>## 
+##  F test for individual effects
+## 
+## data:  crmrte ~ prbarr + prbconv + prbpris + avgsen + polpc + density +  ...
+## F = 12.181, df1 = 85, df2 = 524, p-value &lt; 2.2e-16
+## alternative hypothesis: significant effects</code></pre>
+</div>
+</div>
+<div id="random-effects" class="section level1">
+<h1><span class="header-section-number">4</span> Random effects</h1>
+<p>As mentioned in section <a href="#key-notes-on-fixed-effects">2.3</a>, fixed effects assume that there is no correlation across entities’ error term and constants - i.e., that each entity is independent from others.</p>
+<p>This assumption can be tested by using a <strong>random effects</strong> model, where we assume that differences <strong>across entities</strong> influence our dependent variable, and there is correlation across entities’ error terms and constants.</p>
+<p>We use our previous example about R&amp;D investment to illustrate a random effect model. The model can be estimated using the <span class="math inline">\(plm\)</span> function and specifying <span class="math inline">\(model = &quot;random&quot;\)</span>.</p>
+<pre class="r"><code>random &lt;- plm(RD ~ RDPub, data=data, index=c(&quot;Company&quot;, &quot;Year&quot;), model=&quot;random&quot;)
+
+stargazer( random, 
+           type = &quot;html&quot;, 
+           dep.var.labels = (&quot;Company R&amp;D&quot;),
+           column.labels = c(&quot;&quot;),
+           covariate.labels = c(&quot;Constant&quot;, &quot;Public R&amp;D&quot;),
+           omit.stat = &quot;all&quot;, 
+           digits = 2, intercept.bottom = FALSE )</code></pre>
+<table style="text-align:center">
+<tr>
+<td colspan="2" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+<em>Dependent variable:</em>
+</td>
+</tr>
+<tr>
+<td>
+</td>
+<td colspan="1" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+Company R&amp;D
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td colspan="2" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Constant
+</td>
+<td>
+77,087.49<sup>***</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(8,281.97)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Public R&amp;D
+</td>
+<td>
+1.10<sup>***</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.19)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td colspan="2" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td colspan="2" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+<em>Note:</em>
+</td>
+<td style="text-align:right">
+<sup><em></sup>p&lt;0.1; <sup><strong></sup>p&lt;0.05; <sup></strong></em></sup>p&lt;0.01
+</td>
+</tr>
+</table>
+<p>Interpretation of the coefficients is tricky since they include both the <strong>within-entity</strong> and <strong>between-entity</strong> effects. It represents the average effect of X over Y, when X changes across time and between countries by one unit.</p>
+<p>There are tests that you can run to chose between fixed and random effects. For instance, the Hausmann test compare a fixed and a random effect model. If the p-value is &lt; 0.05 then fixed effects is a better choice.</p>
+<pre class="r"><code> phtest(fixed, random)</code></pre>
+<pre><code>## 
+##  Hausman Test
+## 
+## data:  RD ~ RDPub
+## chisq = 5.2567, df = 1, p-value = 0.02186
+## alternative hypothesis: one model is inconsistent</code></pre>
+<div id="notes-on-random-vs-fixed-effects" class="section level2">
+<h2><span class="header-section-number">4.1</span> Notes on random vs fixed effects</h2>
+<blockquote>
+<ul>
+<li>Random effects allows you to include time-invariant characteristics of your entities because it assumes that the error terms of the entity are not correlated with the predictor.</li>
+</ul>
+</blockquote>
+<blockquote>
+<ul>
+<li>Random effects is affected by the omitted variable bias problem. Since we are not including dummy variables that account for all time-invariant characteristics of an entity, we need to carefully specify our control variables.</li>
+</ul>
+</blockquote>
+<blockquote>
+<ul>
+<li>The choice between random and fixed effects is not random! You need to perform the Hausman test to decide which model is a better fit. Fixed effects is generally a better model <a href="https://www.scribd.com/document/336218955/Fixed-Effects-Lecture1-pdf">(Berry, 2011)</a></li>
+</ul>
+</blockquote>
+</div>
+</div>
+<div id="additional-resources" class="section level1">
+<h1><span class="header-section-number">5</span> Additional resources</h1>
+<p>Some examples and graphs discussed in this lecture are inspired by <a href="https://www.princeton.edu/~otorres/Panel101.pdf">“Panel Data Analysis Fixed and Random Effects using Stata” designed by Oscar Torres-Reyna (2007)</a>.</p>
+<p>Another good presentation of fixed effects and research designed is <a href="https://www.scribd.com/document/336218955/Fixed-Effects-Lecture1-pdf">Christopher Berry (2011)</a>.</p>
+<style type="text/css">
+p {
+color: black;
+margin: 0 0 20px 0;
+}
+
+td {
+    padding: 3px 10px 3px 10px;
+}
+
+p.caption {
+    text-align: center;
+    font-style: italic;
+}
+
+table
+{ 
+    margin-left: auto;
+    margin-right: auto;
+    margin-top:80px;
+    margin-bottom:100px;
+}
+
+h1, h2{
+  margin-top:100px;
+  margin-bottom:20px;
+}
+
+H5{
+    text-align: center;
+    color: gray;
+    font-size:0.8em;
+}
+
+img {
+    max-width: 90%;
+    display: block;
+    margin-right: auto;
+    margin-left: auto;
+    margin-top:30px;
+    margin-bottom:20px;
+}
+
+pre {
+  overflow-x: auto;
+}
+
+pre code {
+   display: block; 
+   padding: 0.5em;
+   margin-bottom:20px;
+}
+
+code {
+  font-size: 92%;
+  border: 10px solid #F8F8F8;
+  margin-bottom: 2px;
+}
+
+code[class] {
+  background-color: #F8F8F8;
+}
+
+
+caption {
+  font-style: bold;
+}
+
+</style>
+</div>
+
+<div class="footer">
+<div class="row"  align="center">
+
+  Designed by <a href=http://ds4ps.github.io target="_blank">DS4PS</a><br>
+  Powered by <a href=http://jekyllrb.com target="_blank">Jekyll</a>
+
+</div>
+</div>
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

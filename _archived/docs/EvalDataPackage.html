@@ -1,0 +1,1028 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+
+
+<title>Datasets for Program Evaluation</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script src="site_libs/navigation-1.1/codefolding.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+<link rel="stylesheet" href="custom.css" type="text/css" />
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #ffffff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+</style>
+<script>
+$(document).ready(function () {
+  window.initializeCodeFolding("hide" === "show");
+});
+</script>
+
+
+
+
+
+<div class="navbar navbar-inverse  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Program Eval III</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="Datasets_in_R.html">Data1</a>
+</li>
+<li>
+  <a href="EvalDataPackage.html">Data2</a>
+</li>
+<li>
+  <a href="TimeSeries.html">TimeS</a>
+</li>
+<li>
+  <a href="InstrumentalVariables.html">InstrumentalVs</a>
+</li>
+<li>
+  <a href="DiffInDiff.html">Diff-in-Diff</a>
+</li>
+<li>
+  <a href="MatchingScores.html">Matching</a>
+</li>
+<li>
+  <a href="LogisticReg.html">Logistic Reg</a>
+</li>
+<li>
+  <a href="FixedEffects.html">Fixed Effects</a>
+</li>
+<li>
+  <a href="panel-model-selection.html">Panel Models</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/DS4PS/PROG-EVAL-III/tree/master/TEXTBOOK">
+    <span class="fa fa-github fa-2x"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+<div class="btn-group pull-right">
+<button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu" style="min-width: 50px;">
+<li><a id="rmd-show-all-code" href="#">Show All Code</a></li>
+<li><a id="rmd-hide-all-code" href="#">Hide All Code</a></li>
+</ul>
+</div>
+
+
+
+<h1 class="title toc-ignore">Datasets for Program Evaluation</h1>
+
+</div>
+
+<div id="TOC">
+<ul>
+<li><a href="#plotting-the-results"><span class="toc-section-number">0.1</span> Plotting the results</a></li>
+<li><a href="#comparing-seeds"><span class="toc-section-number">1</span> Comparing Seeds</a></li>
+</ul>
+</div>
+
+<pre class="r"><code>build_ts &lt;- function( seed=123 )
+{
+  set.seed( seed )
+  
+  T = rep(1:365)
+  D = ifelse(T &gt; 200, 1, 0)
+  P = ifelse(T &lt;= 200, 0, rep(1:200))
+  
+  err = rnorm(365, 150, 70)
+  Y = 5.4 + 0.5*T + 20*D + 1.2*P + err
+  Y &lt;- rescale( Y, to = c(0, 300)) %&gt;% round(2)
+  dat &lt;- as.data.frame(cbind(Y, T, D, P)) 
+  
+  return(dat)
+}
+
+dat.ts &lt;- build_ts( seed=04172019 )  # seed set as date of assignment build
+
+# build_rd  - regression discontinuity?
+# build_iv  - instrumental variables</code></pre>
+<p>The dataset contains four variables:</p>
+<table>
+<thead>
+<tr class="header">
+<th><strong>Column</strong></th>
+<th><strong>Variable name </strong></th>
+<th><strong>Description</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(\text{Y}\)</span></td>
+<td><span class="math inline">\(\text{Wellbeing}\)</span></td>
+<td>Wellbeing index (from 0 to 300)</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\text{T}\)</span></td>
+<td><span class="math inline">\(\text{Time}\)</span></td>
+<td>Time (from 1 to 365)</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(\text{D}\)</span></td>
+<td><span class="math inline">\(\text{Treatment}\)</span></td>
+<td>Observation post (=1) and pre (=0) intervention</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\text{P}\)</span></td>
+<td><span class="math inline">\(\text{Time Since Treatment}\)</span></td>
+<td>Time passed since the intervention</td>
+</tr>
+</tbody>
+</table>
+<table style="width:49%;">
+<colgroup>
+<col width="13%" />
+<col width="12%" />
+<col width="8%" />
+<col width="5%" />
+<col width="8%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="center"> </th>
+<th align="center">Y</th>
+<th align="center">T</th>
+<th align="center">D</th>
+<th align="center">P</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center"><strong>1</strong></td>
+<td align="center">95.43</td>
+<td align="center">1</td>
+<td align="center">0</td>
+<td align="center">0</td>
+</tr>
+<tr class="even">
+<td align="center"><strong>2</strong></td>
+<td align="center">87.76</td>
+<td align="center">2</td>
+<td align="center">0</td>
+<td align="center">0</td>
+</tr>
+<tr class="odd">
+<td align="center"><strong>3</strong></td>
+<td align="center">30.46</td>
+<td align="center">3</td>
+<td align="center">0</td>
+<td align="center">0</td>
+</tr>
+<tr class="even">
+<td align="center"><strong>4</strong></td>
+<td align="center">15.78</td>
+<td align="center">4</td>
+<td align="center">0</td>
+<td align="center">0</td>
+</tr>
+<tr class="odd">
+<td align="center"><strong>5</strong></td>
+<td align="center">114.14</td>
+<td align="center">5</td>
+<td align="center">0</td>
+<td align="center">0</td>
+</tr>
+<tr class="even">
+<td align="center"><strong>6</strong></td>
+<td align="center">4.34</td>
+<td align="center">6</td>
+<td align="center">0</td>
+<td align="center">0</td>
+</tr>
+<tr class="odd">
+<td align="center"><strong>7</strong></td>
+<td align="center"></td>
+<td align="center"></td>
+<td align="center"></td>
+<td align="center"></td>
+</tr>
+<tr class="even">
+<td align="center"><strong>198</strong></td>
+<td align="center">172.05</td>
+<td align="center">198</td>
+<td align="center">0</td>
+<td align="center">0</td>
+</tr>
+<tr class="odd">
+<td align="center"><strong>199</strong></td>
+<td align="center">111.36</td>
+<td align="center">199</td>
+<td align="center">0</td>
+<td align="center">0</td>
+</tr>
+<tr class="even">
+<td align="center"><strong>200</strong></td>
+<td align="center">211.07</td>
+<td align="center">200</td>
+<td align="center">0</td>
+<td align="center">0</td>
+</tr>
+<tr class="odd">
+<td align="center"><strong>201</strong></td>
+<td align="center">130.53</td>
+<td align="center">201</td>
+<td align="center">1</td>
+<td align="center">1</td>
+</tr>
+<tr class="even">
+<td align="center"><strong>202</strong></td>
+<td align="center">145.76</td>
+<td align="center">202</td>
+<td align="center">1</td>
+<td align="center">2</td>
+</tr>
+<tr class="odd">
+<td align="center"><strong>203</strong></td>
+<td align="center">64.19</td>
+<td align="center">203</td>
+<td align="center">1</td>
+<td align="center">3</td>
+</tr>
+<tr class="even">
+<td align="center"><strong>204</strong></td>
+<td align="center">121.07</td>
+<td align="center">204</td>
+<td align="center">1</td>
+<td align="center">4</td>
+</tr>
+<tr class="odd">
+<td align="center"><strong>15</strong></td>
+<td align="center"></td>
+<td align="center"></td>
+<td align="center"></td>
+<td align="center"></td>
+</tr>
+<tr class="even">
+<td align="center"><strong>360</strong></td>
+<td align="center">265.31</td>
+<td align="center">360</td>
+<td align="center">1</td>
+<td align="center">160</td>
+</tr>
+<tr class="odd">
+<td align="center"><strong>361</strong></td>
+<td align="center">260.68</td>
+<td align="center">361</td>
+<td align="center">1</td>
+<td align="center">161</td>
+</tr>
+<tr class="even">
+<td align="center"><strong>362</strong></td>
+<td align="center">267.22</td>
+<td align="center">362</td>
+<td align="center">1</td>
+<td align="center">162</td>
+</tr>
+<tr class="odd">
+<td align="center"><strong>363</strong></td>
+<td align="center">232.51</td>
+<td align="center">363</td>
+<td align="center">1</td>
+<td align="center">163</td>
+</tr>
+<tr class="even">
+<td align="center"><strong>364</strong></td>
+<td align="center">296.84</td>
+<td align="center">364</td>
+<td align="center">1</td>
+<td align="center">164</td>
+</tr>
+<tr class="odd">
+<td align="center"><strong>365</strong></td>
+<td align="center">275</td>
+<td align="center">365</td>
+<td align="center">1</td>
+<td align="center">165</td>
+</tr>
+</tbody>
+</table>
+<p>Our model is based on the equation <a href="#eq:timeseries">(<strong>??</strong>)</a>:</p>
+<p><span class="math display" id="eq:example">\[\begin{equation} 
+\text{Y} = \text{b}_0 + \text{b}_1*Time + \text{b}_2*Treatment + \text{b}_3*Time Since Treatment + \text{e}
+  \tag{.}
+\end{equation}\]</span></p>
+<pre class="r"><code>plot( dat.ts$T, dat.ts$Y, bty=&quot;n&quot;, 
+      col=gray(0.5,0.5), cex=1.5, pch=19,
+      ylab=&quot;Well Being&quot;, xlab=&quot;Time (days)&quot; )</code></pre>
+<p><img src="EvalDataPackage_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+<p>We can run the model using the <strong>lm</strong> function in R.</p>
+<pre class="r"><code>regTS = lm ( Y ~ T + D + P, data=dat.ts )  # Our time series model
+
+stargazer( regTS, 
+           type = &quot;html&quot;, 
+           dep.var.labels = (&quot;Wellbeing&quot;),
+           column.labels = (&quot;Model results&quot;),
+           covariate.labels = c(&quot;Time&quot;, &quot;Treatment&quot;, &quot;Time Since Treatment&quot;),
+           omit.stat = &quot;all&quot;, 
+           digits = 2 )</code></pre>
+<table style="text-align:center">
+<tr>
+<td colspan="2" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+<em>Dependent variable:</em>
+</td>
+</tr>
+<tr>
+<td>
+</td>
+<td colspan="1" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+Wellbeing
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+Model results
+</td>
+</tr>
+<tr>
+<td colspan="2" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Time
+</td>
+<td>
+0.25<sup>***</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.04)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Treatment
+</td>
+<td>
+1.03
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(6.39)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Time Since Treatment
+</td>
+<td>
+0.57<sup>***</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.06)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Constant
+</td>
+<td>
+62.75<sup>***</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(4.31)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td colspan="2" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td colspan="2" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+<em>Note:</em>
+</td>
+<td style="text-align:right">
+<sup><em></sup>p&lt;0.1; <sup><strong></sup>p&lt;0.05; <sup></strong></em></sup>p&lt;0.01
+</td>
+</tr>
+</table>
+<p>Let’s interpret our coefficients:</p>
+<ul>
+<li>The <strong>Time</strong> coefficient indicates the wellbeing trend before the intervention. It’s positive and significant, indicating that students’ wellbeing increases over time. For each day that passes, the wellbeing increases of 0.19 points on the index.
+<br>
+<br></li>
+<li>The <strong>Treatment</strong> coefficient indicates the increase in the students’ wellbeing immediately after the intervention. We can see that the immediate effect is positive and significant indicating that attending the first class increased the students’ wellbeing of 13.09.
+<br>
+<br></li>
+<li>The <strong>Time Since Treatment</strong> coefficient indicates that the trend has changed after the intervention. The sustained effect is positive and significant, indicating that for each day that passes after the intervention, the wellbeing of students increases of 0.54 points on the index.</li>
+</ul>
+<div id="plotting-the-results" class="section level2">
+<h2><span class="header-section-number">0.1</span> Plotting the results</h2>
+<p>A useful exercise is to calculate outcomes at different points in time as we did in section <a href="#the-counterfactual"><strong>??</strong></a>. For instance, we can calculate the outcome right after the intervention, which occured at time = 200. Note that while <span class="math inline">\(\text{Time}\)</span> = 201, <span class="math inline">\(\text{Time Since Treatment}\)</span> is equal to 1 because it is the first day after the intervention.</p>
+<p><span class="math display" id="eq:examplet201">\[\begin{equation} 
+\text{Y} = \text{b}_0 + \text{b}_1*201 + \text{b}_2*1 + \text{b}_3*1 + \text{e}
+  \tag{.}
+\end{equation}\]</span></p>
+<p>We can also represent the point on a graph:</p>
+<pre class="r"><code># We create a small dataset with the new values
+data1 &lt;- as.data.frame( cbind( T = 201, D = 1, P = 1 )) 
+
+# We use the function predict to (1) take the coefficients estimated in regTS and (2) calculate the outcome Y based on the values we set in the new datset
+y1 &lt;- predict( regTS, data1 ) 
+
+# We plot our initial observations, the column Y in our dataset
+plot( dat.ts$Y,
+    col = &quot;gray&quot;,
+    xlim = c(1, 365), 
+    ylim = c(0, 400),
+    xlab = &quot;Time (days)&quot;, 
+    ylab = &quot;Wellbeing index&quot;)
+
+# We add a point showing the level of wellbeing at time = 201)
+points(201, y1, col = &quot;dodgerblue4&quot;, pch = 19, bg = &quot;dodgerblue4&quot;, cex = 2)
+text(201, y1, labels = &quot;t = 201&quot;, pos = 4, cex = 1)
+
+# Line marking the interruption
+abline( v=200, col=&quot;red&quot;, lty=2 )</code></pre>
+<div class="figure"><span id="fig:ft1"></span>
+<img src="EvalDataPackage_files/figure-html/ft1-1.png" alt="Wellbeing level at t = 201" width="672" />
+<p class="caption">
+Figure .: Wellbeing level at t = 201
+</p>
+</div>
+</div>
+<div id="comparing-seeds" class="section level1">
+<h1><span class="header-section-number">1</span> Comparing Seeds</h1>
+<pre class="r"><code>dat1 &lt;- build_ts( seed=123 )
+dat2 &lt;- build_ts( seed=456 )
+
+jplot( dat1$Y, dat2$Y, xlab=&quot;Y&quot;, ylab=&quot;Y&quot; )</code></pre>
+<p><img src="EvalDataPackage_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+<pre class="r"><code>jplot( dat1$T, dat2$T, main=&quot;T Not Stochastic&quot; )  # not stochastic</code></pre>
+<p><img src="EvalDataPackage_files/figure-html/unnamed-chunk-5-2.png" width="672" /></p>
+<pre class="r"><code>table( dat1$D, dat2$D )  # not stochastic</code></pre>
+<pre><code>##    
+##       0   1
+##   0 200   0
+##   1   0 165</code></pre>
+<pre class="r"><code>par( mfrow=c(1,2) )
+jplot( dat1$T, dat1$Y, main=&quot;Seed1&quot; )
+jplot( dat2$T, dat2$Y, main=&quot;Seed2&quot; )</code></pre>
+<p><img src="EvalDataPackage_files/figure-html/unnamed-chunk-6-1.png" width="672" /></p>
+<pre class="r"><code>reg1 = lm ( Y ~ T + D + P, data=dat1 )  
+reg2 = lm ( Y ~ T + D + P, data=dat2 ) 
+
+stargazer( reg1, reg2, 
+           type = &quot;html&quot;, 
+           dep.var.labels = (&quot;Wellbeing Index&quot;),
+           column.labels = c(&quot;Seed 1&quot;, &quot;Seed 2&quot;),
+           covariate.labels = c(&quot;Time&quot;, &quot;Treatment&quot;, &quot;Time Since Treatment&quot;),
+           omit.stat = &quot;all&quot;, 
+           digits = 2 )</code></pre>
+<table style="text-align:center">
+<tr>
+<td colspan="3" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td colspan="2">
+<em>Dependent variable:</em>
+</td>
+</tr>
+<tr>
+<td>
+</td>
+<td colspan="2" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td colspan="2">
+Wellbeing Index
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+Seed 1
+</td>
+<td>
+Seed 2
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(1)
+</td>
+<td>
+(2)
+</td>
+</tr>
+<tr>
+<td colspan="3" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Time
+</td>
+<td>
+0.19<sup>***</sup>
+</td>
+<td>
+0.18<sup>***</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.04)
+</td>
+<td>
+(0.04)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Treatment
+</td>
+<td>
+13.09<sup>**</sup>
+</td>
+<td>
+16.41<sup>**</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(6.12)
+</td>
+<td>
+(6.77)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Time Since Treatment
+</td>
+<td>
+0.54<sup>***</sup>
+</td>
+<td>
+0.68<sup>***</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.06)
+</td>
+<td>
+(0.07)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Constant
+</td>
+<td>
+57.15<sup>***</sup>
+</td>
+<td>
+66.69<sup>***</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(4.13)
+</td>
+<td>
+(4.56)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td colspan="3" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td colspan="3" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+<em>Note:</em>
+</td>
+<td colspan="2" style="text-align:right">
+<sup><em></sup>p&lt;0.1; <sup><strong></sup>p&lt;0.05; <sup></strong></em></sup>p&lt;0.01
+</td>
+</tr>
+</table>
+</div>
+
+<div class="footer">
+<div class="row"  align="center">
+
+  Designed by <a href=http://ds4ps.github.io target="_blank">DS4PS</a><br>
+  Powered by <a href=http://jekyllrb.com target="_blank">Jekyll</a>
+
+</div>
+</div>
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

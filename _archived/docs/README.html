@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+
+
+<title>README.utf8.md</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script src="site_libs/navigation-1.1/codefolding.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+<link rel="stylesheet" href="custom.css" type="text/css" />
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+</style>
+<script>
+$(document).ready(function () {
+  window.initializeCodeFolding("hide" === "show");
+});
+</script>
+
+
+
+
+
+
+<div class="navbar navbar-inverse  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Program Eval III</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="TimeSeries.html">Time Series</a>
+</li>
+<li>
+  <a href="InstrumentalVariables.html">Instrumental Variables</a>
+</li>
+<li>
+  <a href="Datasets_in_R.html">Data</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/DS4PS/PROG-EVAL-III/tree/master/TEXTBOOK">
+    <span class="fa fa-github fa-2x"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+<div class="btn-group pull-right">
+<button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu" style="min-width: 50px;">
+<li><a id="rmd-show-all-code" href="#">Show All Code</a></li>
+<li><a id="rmd-hide-all-code" href="#">Hide All Code</a></li>
+</ul>
+</div>
+
+
+
+
+</div>
+
+<div id="TOC">
+<ul>
+<li><a href="#instructions-for-creating-website-files"><span class="toc-section-number">1</span> Instructions for Creating Website Files</a></li>
+<li><a href="#html-settings"><span class="toc-section-number">2</span> HTML Settings</a></li>
+</ul>
+</div>
+
+<div id="instructions-for-creating-website-files" class="section level1">
+<h1><span class="header-section-number">1</span> Instructions for Creating Website Files</h1>
+<p><em>Overview of <a href="https://bookdown.org/yihui/rmarkdown/rmarkdown-site.html">RMD Websites</a> opitions in Bookdown.</em></p>
+<p>The RMD files go in TEXTBOOK folder. To render all RMD files at once for a fresh website build:</p>
+<pre class="r"><code># open RMD file from the website directory or setwd()
+# then run this in the R console in R Studio
+# render the entire site
+library( rmarkdown )
+rmarkdown::render_site()
+
+# render a single file only
+rmarkdown::render_site(&quot;about.Rmd&quot;)</code></pre>
+<p>The default rmarkdown <a href="https://eranraviv.com/syntax-highlighting-style-in-rmarkdown/">syntax highlighting options</a> are:</p>
+<ul>
+<li>default</li>
+<li>tango</li>
+<li>pygments</li>
+<li>kate</li>
+<li>monochrome</li>
+<li>espresso</li>
+<li>zenburn</li>
+<li>haddock</li>
+<li>textmate</li>
+</ul>
+<p>For more syntax highlighting styles check out this <a href="http://animation.r-forge.r-project.org/knitr/">GALLERY</a> of options from knitr.</p>
+<p>For theme options you can use the default <a href="https://bootswatch.com/3/">Bootswatch</a> selections.</p>
+<ul>
+<li>default</li>
+<li>cerulean<br />
+</li>
+<li>journal<br />
+</li>
+<li>flatly<br />
+</li>
+<li>darkly<br />
+</li>
+<li>readable</li>
+<li>spacelab</li>
+<li>united</li>
+<li>cosmo</li>
+<li>lumen</li>
+<li>paper</li>
+<li>sandstone</li>
+<li>simplex</li>
+<li>yeti</li>
+</ul>
+<p>Or scroll to the end here for some <a href="http://www.datadreaming.org/post/r-markdown-theme-gallery/">additional options</a> from custom theme pacakges.</p>
+<hr />
+</div>
+<div id="html-settings" class="section level1">
+<h1><span class="header-section-number">2</span> HTML Settings</h1>
+<p>The HTML options are set in the file called *_site.yml*.</p>
+<p>For example, we can specify where the rendered HTML files are stored. Send them to the ‘docs’ folder to keep things clean. The website is hosted from that directory.</p>
+<p>You will also add new navbar items in the _site.yml file:</p>
+<pre><code>name: &quot;Program Eval III&quot;
+output_dir: &quot;../docs&quot;
+navbar:
+  title: &quot;My Website&quot;
+  left:
+    - text: &quot;Home&quot;
+      href: index.html
+    - text: &quot;About&quot;
+      href: about.html
+    - text: &quot;Data&quot;
+      href: Datasets_in_R.html
+    - text: &quot;Specification&quot;
+      href: specification-part-I.html
+output:
+  bookdown::html_document2:
+    theme: yeti
+    toc: yes
+    toc_depth: 3
+    toc_float: true
+    number_sections: yes
+    highlight: haddock</code></pre>
+<hr />
+<p>Note that GitHub pages can render an MD or an RMD file, but they will not render the R code.</p>
+<p>To include R code convert the file to an HTML, and link to that.</p>
+<p>To link to files in other folders, you can go up a level using /../.</p>
+<p>So for example to link to a lecture file in LECTURES from here:</p>
+<pre><code>[Lecture 01](../../LECTURES/lecture-01.html)</code></pre>
+</div>
+
+<div class="footer">
+<div class="row"  align="center">
+
+  Designed by <a href=http://ds4ps.github.io target="_blank">DS4PS</a><br>
+  Powered by <a href=http://jekyllrb.com target="_blank">Jekyll</a>
+
+</div>
+</div>
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

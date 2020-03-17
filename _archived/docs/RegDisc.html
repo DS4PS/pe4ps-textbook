@@ -1,0 +1,1577 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+
+
+<title>Regression Discontinuity</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script src="site_libs/navigation-1.1/codefolding.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-5.0.13/css/fa-svg-with-js.css" rel="stylesheet" />
+<script src="site_libs/font-awesome-5.0.13/js/fontawesome-all.min.js"></script>
+<script src="site_libs/font-awesome-5.0.13/js/fa-v4-shims.min.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+<link rel="stylesheet" href="custom.css" type="text/css" />
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+</style>
+<script>
+$(document).ready(function () {
+  window.initializeCodeFolding("hide" === "show");
+});
+</script>
+
+
+
+
+
+
+<div class="navbar navbar-inverse  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Program Eval III</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="Datasets_in_R.html">Data1</a>
+</li>
+<li>
+  <a href="EvalDataPackage.html">Data2</a>
+</li>
+<li>
+  <a href="TimeSeries.html">TimeS</a>
+</li>
+<li>
+  <a href="InstrumentalVariables.html">InstrumentalVs</a>
+</li>
+<li>
+  <a href="DiffInDiff.html">Diff-in-Diff</a>
+</li>
+<li>
+  <a href="MatchingScores.html">Matching</a>
+</li>
+<li>
+  <a href="LogisticReg.html">Logistic Reg</a>
+</li>
+<li>
+  <a href="FixedEffects.html">Fixed Effects</a>
+</li>
+<li>
+  <a href="panel-model-selection.html">Panel Models</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/DS4PS/PROG-EVAL-III/tree/master/TEXTBOOK">
+    <span class="fa fa-github fa-2x"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+<div class="btn-group pull-right">
+<button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu" style="min-width: 50px;">
+<li><a id="rmd-show-all-code" href="#">Show All Code</a></li>
+<li><a id="rmd-hide-all-code" href="#">Hide All Code</a></li>
+</ul>
+</div>
+
+
+
+<h1 class="title toc-ignore">Regression Discontinuity</h1>
+
+</div>
+
+<div id="TOC">
+<ul>
+<li><a href="#the-key-concept"><span class="toc-section-number">1</span> The key concept</a><ul>
+<li><a href="#the-statistical-model"><span class="toc-section-number">1.1</span> The statistical model</a></li>
+<li><a href="#the-counterfactual"><span class="toc-section-number">1.2</span> The counterfactual</a></li>
+</ul></li>
+<li><a href="#a-regression-discontinuity-model"><span class="toc-section-number">2</span> A regression-discontinuity model</a><ul>
+<li><a href="#data"><span class="toc-section-number">2.1</span> Data</a></li>
+<li><a href="#analysis"><span class="toc-section-number">2.2</span> Analysis</a></li>
+<li><a href="#plotting-the-results"><span class="toc-section-number">2.3</span> Plotting the results</a></li>
+<li><a href="#the-counterfactual-1"><span class="toc-section-number">2.4</span> The counterfactual</a></li>
+</ul></li>
+<li><a href="#replication-of-a-study"><span class="toc-section-number">3</span> Replication of a study</a><ul>
+<li><a href="#data-1"><span class="toc-section-number">3.1</span> Data</a></li>
+<li><a href="#analysis-1"><span class="toc-section-number">3.2</span> Analysis</a></li>
+<li><a href="#plotting-results"><span class="toc-section-number">3.3</span> Plotting results</a></li>
+</ul></li>
+<li><a href="#additional-notes"><span class="toc-section-number">4</span> Additional notes</a></li>
+<li><a href="#additional-resources"><span class="toc-section-number">5</span> Additional resources</a></li>
+</ul>
+</div>
+
+<p><strong>Packages</strong></p>
+<p>Here are the packages we will use in this lecture. If you don’t remember how to install them, you can have a look at the code.</p>
+<ul>
+<li><strong>stargazer</strong> for nice tables</li>
+</ul>
+<pre class="r"><code>install.packages( stargazer )
+library( &quot;stargazer&quot; )</code></pre>
+<p><strong>Learning objectives</strong></p>
+<ul>
+<li>When is it appropriate to use a regression discontinuity design?</li>
+<li>How should you organize your data before using a regression discontinuity design?</li>
+<li>How do you interpret the coefficients of a regression discontinuity model?</li>
+<li>What are the main assumptions of a regression discontinuity model?</li>
+<li>Applying a discontinuity regression design to data in R</li>
+</ul>
+<div id="the-key-concept" class="section level1">
+<h1><span class="header-section-number">1</span> The key concept</h1>
+<p>The regression discontinuity design is used when the treatment (or intervention) is based on some continuous criteria (age, a test results, income…). Only individuals who are below or above a given cutoff point are assigned to the treatment. Examples include:</p>
+<ul>
+<li>A program designed to enhance skills of students who poorly perfom on class tests. Students with an average score of 50/100 participate in the program (treatment group), while students with an higher average are excluded (control group);
+<br>
+<br></li>
+<li>A government program (such as Medicare) where individuals can enroll only after a certain age. Individuals who are older are enrolled (treatment group) while individuals who are yourger are not enrolled (control group);
+<br>
+<br></li>
+<li>A house subsidy program to support low-income populations paying rent. Only individuals with a income below a certain level will receive the subside (treatment group) while others will not (control group);
+<br>
+<br></li>
+<li>A law that faciliates admission to college for the top 10% students from low-ranked high schools; students in the top 10% will be part of the program (treatment group), while students below the top 10% will not (control group)</li>
+</ul>
+<p>The key problem is the <strong>endogeneity between the outcome and the assignment of the treatment</strong>. Scholarships are a classical example. For instance, let’s imagine a scholarship which is offered to low income students to attend college. You can see a representation of the model in figure <a href="#fig:rdfigure">1.1</a>. The x axis is the family income based on which we assign students to the treatment or control group. We call it the <em>rating variable</em>. The y axis is the likelihood to enroll into college. It is our <em>outcome variable</em>. There is a positive relationship between the two: students from higher income families are more likely to enroll to college.</p>
+<div class="figure"><span id="fig:rdfigure"></span>
+<img src="FIGURE/RegDisc/Picture1.png" alt="Students' family income and college enrollment" width="60%" />
+<p class="caption">
+Figure 1.1: Students’ family income and college enrollment
+</p>
+</div>
+<p>We establish to give a scholarship to students below a given level of income (the <em>cutoff</em>). We have two groups: one group receive the scholarship (treatment group) while the other does not (control group).</p>
+<div class="figure"><span id="fig:rdfigure2"></span>
+<img src="FIGURE/RegDisc/Picture2.png" alt="Control and treatment group based on the cutoff" width="60%" />
+<p class="caption">
+Figure 1.2: Control and treatment group based on the cutoff
+</p>
+</div>
+<p>Comparing these two groups, however, is problematic. Students who did not receive the scholarship (the control group) are more likely to go to college even without the scholarship because of their income. Their enrollment is likely to remain higher than the enrollment of low-income students. This does not imply that the scholarship has no effect: it might be that in the absence of the treatment (i.e., without the scholarship), low-income students would have been even less likely to enroll to college.</p>
+<p>Regression discontinuity is used to solve this problem and assess whether or not we observe a treatment effect. It does so by accounting for the relationship between the outcome and the rating variable and then calculating the difference between the two groups.</p>
+<div class="figure"><span id="fig:rdfigure3"></span>
+<img src="FIGURE/RegDisc/Picture3.png" alt="Treatment effect" width="60%" />
+<p class="caption">
+Figure 1.3: Treatment effect
+</p>
+</div>
+<blockquote>
+<p>The intuition behind the regression discontinuity design is the endogeneity of the outcome to the assignment of treatment, which might bias the estimation of the effect of the treatment. Low-income students might continue to enroll to college at a lower rate even with a scholarship, leading to a downward bias of the estimates. Similarly, low-income populations receiving a subsidy to pay rent might continue to have more housing issues than higher income individuals. Individuals who receive Medicare might have greater health problems because of age, and without controlling for the relationship between age and health outcomes, we might have a downward estimates of the effect of the program. The regression discontinuity model allows us to estimate the local treatment effect, comparing individuals close by the cut off points.</p>
+</blockquote>
+<div id="the-statistical-model" class="section level2">
+<h2><span class="header-section-number">1.1</span> The statistical model</h2>
+<p>In mathematical terms, we are interested in estimating the following equation:</p>
+<p><span class="math display" id="eq:RD">\[\begin{equation} 
+\text{Y} = \beta_0 + \beta_1*Treatment + \beta_2*Rating variable_c + \text{e}
+  \tag{1.1}
+\end{equation}\]</span></p>
+<p>Where:
+<br>
+<br>
+<span class="math inline">\(\text{Y}\)</span> is our outcome variable;
+<br>
+<br>
+<span class="math inline">\(\text{Treatment}\)</span> is a dummy variable indicating the treatment (=1) and the control (=0) group;
+<br>
+<br>
+<span class="math inline">\(\text{Rating variable_c}\)</span> is the rating variable centered at the cutoff point. To center the variable, we just need to subtract the cutoff score from each individual score. The cut-off point will become the new intercept (since cut-off - cut-off = 0), which it will help to interpret the results.
+<br>
+<br></p>
+<p>Our dataset will look like this. In the figure, I reported the procedure to center the rating variable on the side for clarification purposes.</p>
+<div class="figure"><span id="fig:dataset"></span>
+<img src="FIGURE/RegDisc/Picture4.png" alt="Regression discontinuity dataset" width="60%" />
+<p class="caption">
+Figure 1.4: Regression discontinuity dataset
+</p>
+</div>
+<p>We can consider each coefficient of our equation <a href="#eq:RD">(1.1)</a> separately.</p>
+<ol style="list-style-type: decimal">
+<li><span class="math inline">\(\beta_1\)</span> represents the difference between the treatment and the control group and assesses whether the intervention had an effect.
+<br></li>
+<li><span class="math inline">\(\beta_2\)</span> represents the relationship between the outcome variable and the rating variable. It allows us to control for endogeneity in this relationship.</li>
+</ol>
+</div>
+<div id="the-counterfactual" class="section level2">
+<h2><span class="header-section-number">1.2</span> The counterfactual</h2>
+<p>The counterfactual is <em>what it would have occured to Y, had the policy intervention not happened</em>. It is very important in regression discontinuity . For instance, in our previous regression discontinuity model, the counterfactual is the students’ likelihood to enroll, if they had not received the scholarship.</p>
+<div class="figure"><span id="fig:counterfactual"></span>
+<img src="FIGURE/RegDisc/Picture5.png" alt="Counterfactual" width="60%" />
+<p class="caption">
+Figure 1.5: Counterfactual
+</p>
+</div>
+<p>If we take our equation <a href="#eq:RD">(1.1)</a>, the counterfactual is obtained by assuming that the intervetion has not occured (Treatment = 0), so that Y is only predicted by its relationship with rating variable:</p>
+<p><span class="math display" id="eq:RDCounterfactual">\[\begin{equation} 
+\text{Y} = \beta_0 + \beta_1*0 + \beta_2*Score + \text{e}
+  \tag{1.2}
+\end{equation}\]</span></p>
+</div>
+</div>
+<div id="a-regression-discontinuity-model" class="section level1">
+<h1><span class="header-section-number">2</span> A regression-discontinuity model</h1>
+<div class="figure"><span id="fig:housing"></span>
+<img src="FIGURE/RegDisc/Attendance.jpg" alt="Source: https://www.pinterest.com/youthchange/classroom-posters-121-130/" width="40%" />
+<p class="caption">
+Figure 2.1: Source: <a href="https://www.pinterest.com/youthchange/classroom-posters-121-130/" class="uri">https://www.pinterest.com/youthchange/classroom-posters-121-130/</a>
+</p>
+</div>
+<p>We are going to look at the relationship between class attendance and students’ performance. There is a lots of research and evidence that <a href="http://graphics8.nytimes.com/packages/pdf/nyregion/20110617attendancereport.pdf">class attendance has a positive and significant effect on student performance</a>. Because of this, government agencies and schools aim to design policies that incentivize students not to miss school days. Examples include tangible prizes such as <a href="https://www.nytimes.com/2011/06/17/nyregion/city-reduces-chronic-absenteeism-in-public-schools.html">colorful pendants and free tickets to event</a>, <a href="https://cityroom.blogs.nytimes.com/2011/02/10/schools-use-celebrity-robo-calls-to-battle-truancy/?scp=2&amp;sq=magic+johnson+and+fernanda&amp;st=nyt">automated calls from celebrities</a>, or <a href="https://people.ucsc.edu/~cdobkin/Papers/2010%20Skipping%20class%20in%20college%20and%20exam%20performance%20Evidence%20from%20a%20regression%20discontinuity%20classroom%20experiment.pdf">class policies that mandate attendance to students</a>.</p>
+<p>Research has used several methods to test this relationship, from <a href="https://www.sciencedirect.com/science/article/pii/S1877042816309776">simple regression analysis</a> to <a href="https://www.tandfonline.com/doi/abs/10.3200/JECE.39.3.213-227?journalCode=vece20">randomized experiments</a>. In this example, we imagine to look at three classes of college students and assign students who have an attendance rate lower than the median to the treatment group, as they would be subject to a mandatory attendance policy. Students who have an attendance rate greater than the median will be the control group.</p>
+<blockquote>
+<p><strong>Research question</strong>:
+Does a mandatory attendance policy increase student final performance?</p>
+<p><strong>Hypothesis</strong>:
+A mandatory attendance policy will increase the final performance of students enrolled in the treatment.</p>
+</blockquote>
+<div id="data" class="section level2">
+<h2><span class="header-section-number">2.1</span> Data</h2>
+<p>We can have a look at the dataset below:</p>
+<pre class="r"><code>head(data, 10)</code></pre>
+<pre><code>##    Performance Treatment Attendance Attendance_c
+## 1     77.70212         0   88.96310    9.7036967
+## 2     76.42701         0   88.84251    9.5831070
+## 3     61.50637         1   62.68434  -16.5750698
+## 4     76.46593         0   83.40147    4.1420677
+## 5     87.25544         0   94.56779   15.3083834
+## 6     67.50757         1   72.99882   -6.2605804
+## 7     64.18186         1   73.58743   -5.6719750
+## 8     70.15259         0   79.76771    0.5083037
+## 9     63.33457         1   66.31617  -12.9432372
+## 10    76.18265         0   86.46582    7.2064163</code></pre>
+<p>The dataset contains four variables.</p>
+<table>
+<colgroup>
+<col width="17%" />
+<col width="82%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>Variable name </strong></th>
+<th><strong>Description </strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(\text{Performance}\)</span></td>
+<td>Final exam grade, from 0 to 100</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\text{Treatment}\)</span></td>
+<td>Dummy variable if Treatment group (=1) or Control group (=0)</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(\text{Attendance}\)</span></td>
+<td>Percentage of classes attended from 0% (attended no class) to 100% (attended all classes) - Rating variable</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\text{Attendance_c}\)</span></td>
+<td>Attendance variable centered around the cutoff. The cutoff was fixed at the median of Attendance</td>
+</tr>
+</tbody>
+</table>
+<p>The problem with comparing the treatment and the control group is that students with lower attendance (treatment group) are more likely to have lower grades than students with higher attendance. Because of this, if we compare the means of the two groups we might observe no different between them.</p>
+<p>We can empirically see this:</p>
+<pre class="r"><code>mean(data$Performance[data$Treatment==1])</code></pre>
+<pre><code>## [1] 57.93795</code></pre>
+<pre class="r"><code>mean(data$Performance[data$Treatment==0])</code></pre>
+<pre><code>## [1] 76.67116</code></pre>
+<p>Students who did not receive the treatment have a higher mean than students who did receive the treatment. If we were just to look at these results, we would conclude that the treatment had no effect.</p>
+</div>
+<div id="analysis" class="section level2">
+<h2><span class="header-section-number">2.2</span> Analysis</h2>
+<p>Our model is based on the equation <a href="#eq:RD">(1.1)</a>:</p>
+<center>
+<span class="math inline">\(\text{Y} = \beta_0 + \beta_1*Treatment + \beta_2*Score + \text{e}\)</span>
+</center>
+<pre class="r"><code>reg = lm(Performance ~
+Treatment+
+Attendance_c, data = data)
+
+stargazer( reg, 
+           type = &quot;html&quot;, 
+           dep.var.labels = (&quot;Final exam grade&quot;),
+           column.labels = c(&quot;&quot;),
+           covariate.labels = c(&quot;Treatment&quot;, &quot;Attendance&quot;),
+           omit.stat = &quot;all&quot;, 
+           digits = 2 )</code></pre>
+<table style="text-align:center">
+<tr>
+<td colspan="2" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+<em>Dependent variable:</em>
+</td>
+</tr>
+<tr>
+<td>
+</td>
+<td colspan="1" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+Final exam grade
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td colspan="2" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Treatment
+</td>
+<td>
+7.03<sup>***</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.59)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Attendance
+</td>
+<td>
+1.16<sup>***</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.02)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Constant
+</td>
+<td>
+66.41<sup>***</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.32)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td colspan="2" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td colspan="2" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+<em>Note:</em>
+</td>
+<td style="text-align:right">
+<sup><em></sup>p&lt;0.1; <sup><strong></sup>p&lt;0.05; <sup></strong></em></sup>p&lt;0.01
+</td>
+</tr>
+</table>
+<p>We interpret each coefficients:</p>
+<p><span class="math inline">\(\beta_0\)</span> represents the Performance of a student exactly at the cut-off point
+<span class="math inline">\(\beta_1\)</span> is positive and significantly different from zero. This indicates that the Treatment had an effect and students in the treatment group saw their grade increased of 7 points.
+<br>
+<br>
+<span class="math inline">\(\beta_2\)</span> is positive and significantly different from zero. This indicates a positive relationship between attendance and the final exam grade.</p>
+<blockquote>
+<p>It’s common practice to center the score (rating) variable. Because our rating variable is centered, the intercept is located at the cutoff point and represents the average final score of a student with a median attendance. It’s possible to run the same model without centering the score variable. However, the interpretation of our intercept would change. It would be the final score of a student with 0 attendance. Centering the score variable simplying our interpretation of the results and more precisely estimate the average treatment effect right after and right before the cutoff point.</p>
+</blockquote>
+<p>We can see this by running the model with an uncentered rating variable. The coefficient of Treatment and Attendance do not change but the intercept significantly change.</p>
+<pre class="r"><code>reg = lm(Performance ~ Treatment + Attendance, data = data)
+
+stargazer( reg, 
+           type = &quot;html&quot;, 
+           dep.var.labels = (&quot;Final exam grade&quot;),
+           column.labels = c(&quot;&quot;),
+           covariate.labels = c(&quot;Treatment&quot;, &quot;Attendance&quot;),
+           omit.stat = &quot;all&quot;, 
+           digits = 2 )</code></pre>
+<table style="text-align:center">
+<tr>
+<td colspan="2" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+<em>Dependent variable:</em>
+</td>
+</tr>
+<tr>
+<td>
+</td>
+<td colspan="1" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+Final exam grade
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td colspan="2" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Treatment
+</td>
+<td>
+7.03<sup>***</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.59)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Attendance
+</td>
+<td>
+1.16<sup>***</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.02)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Constant
+</td>
+<td>
+-25.22<sup>***</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(1.89)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td colspan="2" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td colspan="2" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+<em>Note:</em>
+</td>
+<td style="text-align:right">
+<sup><em></sup>p&lt;0.1; <sup><strong></sup>p&lt;0.05; <sup></strong></em></sup>p&lt;0.01
+</td>
+</tr>
+</table>
+</div>
+<div id="plotting-the-results" class="section level2">
+<h2><span class="header-section-number">2.3</span> Plotting the results</h2>
+<p>We can visually observe the discontinuity in the following plot. The black line indicating the predicted value changes at the cutoff line. The control group (blue) is in a higher position than the treatment group, suggesting that students who had mandatory attendance performed better than we would have expected without the policy.</p>
+<pre class="r"><code># We first predict the final exam grades based on our regression discontinuity model. 
+predfit = predict(reg, data) 
+
+# We set colors for the graph
+palette( c( adjustcolor( &quot;steelblue&quot;, alpha.f=0.3), adjustcolor( &quot;darkred&quot;, alpha.f=0.3)  ) )
+
+# To differently color the treatment and control group we need to create a new Treatment variable that where the Control group = 2. 
+data$Treatment2 = ifelse(data$Treatment==0,2,1)
+
+# Plot our observed value
+plot(Attendance_c, Performance, col=data$Treatment2, pch=19, bty=&quot;n&quot;,
+      xlab=&quot;Attendance Rate (centered)&quot;, ylab=&quot;Final exam grade&quot;,  cex=2)
+
+# Plot a line at the cutoff point
+abline(v=0, col = &quot;red&quot;, lwd = 2, lty = 2)
+
+# Plot our predicted values
+points( Attendance_c, predfit, col=&quot;black&quot;, lwd=5, pch = 20 )
+
+## Add a legend
+points( 10, 26, col=&quot;steelblue&quot;, pch=19, cex=2 )
+text( 10, 26, &quot;Treatment group&quot;, col=&quot;steelblue&quot;, pos=4 )
+points( 10, 20, col=&quot;darkred&quot;, pch=19, cex=2 )
+text( 10, 20, &quot;Control group&quot;, col=&quot;darkred&quot;, pos=4 )</code></pre>
+<p><img src="RegDisc_files/figure-html/unnamed-chunk-9-1.png" width="960" /></p>
+</div>
+<div id="the-counterfactual-1" class="section level2">
+<h2><span class="header-section-number">2.4</span> The counterfactual</h2>
+<p>The discontinuity is easier to understand if we plot the counterfactual using the formula <a href="#eq:RDCounterfactual">(1.2)</a>:</p>
+<center>
+<span class="math inline">\(\text{Y} = \beta_0 + \beta_1*0 + \beta_2*Score + \text{e}\)</span>
+</center>
+<p><br>
+<br>
+The counterfactual represents the final exame grades, had the policy of mandatory attendance not been implemented. It’s the yellow group in the graph. Students in the treatment group would have performed worse without the policy. The yellow dots are - on average - in a lower position than the blue ones (which represent the score after the treatment).</p>
+<pre class="r"><code>## We create a new dataset where the variable Treatment is only equal to 0 as no student has been part of the intervention
+data2 = as.data.frame(cbind(data$Performance, Treatment = rep(0), data$Attendance_c))
+
+## Based on our previous model we predict the final grades, had the intervention not occured
+predfit2 = predict(reg, data2)
+
+data2$predfit2 = predfit2
+
+## We set a new color for representing the counterfactual
+counterfactual = adjustcolor(&quot;goldenrod1&quot;, alpha.f=0.2)
+
+## Plot the observed valies
+plot(Attendance_c, Performance, col=data$Treatment2, pch=19, bty=&quot;n&quot;,
+      xlab=&quot;Attendance Rate (centered)&quot;, ylab=&quot;Final exam grade&quot;,  cex=2)
+
+# Plot a line at the cutoff
+abline(v=0, col = &quot;red&quot;, lwd = 2, lty = 2)
+
+# Plot the counterfactual
+# Note that we add a bit of noise in the data to facilitate visualization
+points( Attendance_c[Attendance_c&lt;0], predfit2[Attendance_c&lt;0]+rnorm(500,0,5), 
+        col=counterfactual, lwd=2, pch = 19, cex = 2 )
+
+# Add a legend
+## Add a legend
+points( 10, 26, col=&quot;steelblue&quot;, pch=19, cex=2 )
+text( 10, 26, &quot;Treatment group&quot;, col=&quot;steelblue&quot;, pos=4 )
+points( 10, 20, col=&quot;darkred&quot;, pch=19, cex=2 )
+text( 10, 20, &quot;Control group&quot;, col=&quot;darkred&quot;, pos=4 )
+points( 10, 14, col=&quot;goldenrod1&quot;, pch=19, cex=2 )
+text( 10, 14, &quot;Counterfactual&quot;, col=&quot;goldenrod1&quot;, pos=4 )</code></pre>
+<p><img src="RegDisc_files/figure-html/unnamed-chunk-10-1.png" width="960" /></p>
+</div>
+</div>
+<div id="replication-of-a-study" class="section level1">
+<h1><span class="header-section-number">3</span> Replication of a study</h1>
+<p><img src="FIGURE/RegDisc/Alcohol.png" width="40%" /></p>
+<p>We are going to replicate a study conducted by <a href="http://masteringmetrics.com/wp-content/uploads/2015/01/Carpenter-and-Dobkin-2009.pdf">Carpenter and Dobkin (2009)</a> on the effect of alcohol consumption on mortality rates. Statistics related to the effect of alcohol consumption are worrisome, from <a href="https://www.nhtsa.gov/risky-driving/drunk-driving">high mortality rates due to car accidents</a> to <a href="https://www.cdc.gov/alcohol/fact-sheets/alcohol-use.htm">health realted problems</a>, especially among young adults.</p>
+<p>Regression discontinuity is an appropriate design to study this issues as young adults are “naturally” selected in two groups based on their age: young adults who are below the age of 21 are not legally allowed to drink while young adults above the age of 21 are allowed to drink. We can compare the mortality rate between these two group.</p>
+<p>Data are made available by Josh Angrist and Steve Pischke here: <a href="http://masteringmetrics.com/resources/" class="uri">http://masteringmetrics.com/resources/</a>.</p>
+<blockquote>
+<p><strong>Research question:</strong>
+Does alcohol consumption increase mortality rate?</p>
+<p><strong>Hypothesis:</strong>
+Young adults who consume alcohol have a higher mortality rate.</p>
+</blockquote>
+<div id="data-1" class="section level2">
+<h2><span class="header-section-number">3.1</span> Data</h2>
+<p>We can have a look at the first 10 rows of the data and summary statistics for the variables included.</p>
+<pre class="r"><code>head( data )</code></pre>
+<pre><code>##    agecell      all   alcohol homicide  suicide      mva    drugs
+## 1 19.06849 92.82540 0.6391380 16.31682 11.20371 35.82933 3.872425
+## 2 19.15068 95.10074 0.6774093 16.85996 12.19337 35.63926 3.236511
+## 3 19.23288 92.14429 0.8664426 15.21925 11.71581 34.20565 3.202071
+## 4 19.31507 88.42776 0.8673084 16.74282 11.27501 32.27896 3.280689
+## 5 19.39726 88.70494 1.0191631 14.94773 10.98431 32.65097 3.548198
+## 6 19.47945 90.19179 1.1713219 15.64282 12.16663 32.72144 3.211689
+##   externalother
+## 1      8.534373
+## 2      8.655786
+## 3      8.513741
+## 4      8.258285
+## 5      8.417533
+## 6      7.972546</code></pre>
+<pre class="r"><code>stargazer( data,  
+           type = &quot;html&quot;, 
+           omit.summary.stat = c(&quot;p25&quot;, &quot;p75&quot;),
+           digits = 2 )</code></pre>
+<table style="text-align:center">
+<tr>
+<td colspan="6" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Statistic
+</td>
+<td>
+N
+</td>
+<td>
+Mean
+</td>
+<td>
+St. Dev.
+</td>
+<td>
+Min
+</td>
+<td>
+Max
+</td>
+</tr>
+<tr>
+<td colspan="6" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+agecell
+</td>
+<td>
+50
+</td>
+<td>
+21.00
+</td>
+<td>
+1.13
+</td>
+<td>
+19.07
+</td>
+<td>
+22.93
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+all
+</td>
+<td>
+48
+</td>
+<td>
+95.67
+</td>
+<td>
+3.83
+</td>
+<td>
+88.43
+</td>
+<td>
+105.27
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+alcohol
+</td>
+<td>
+48
+</td>
+<td>
+1.26
+</td>
+<td>
+0.35
+</td>
+<td>
+0.64
+</td>
+<td>
+2.52
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+homicide
+</td>
+<td>
+48
+</td>
+<td>
+16.91
+</td>
+<td>
+0.73
+</td>
+<td>
+14.95
+</td>
+<td>
+18.41
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+suicide
+</td>
+<td>
+48
+</td>
+<td>
+12.35
+</td>
+<td>
+1.06
+</td>
+<td>
+10.89
+</td>
+<td>
+14.83
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+mva
+</td>
+<td>
+48
+</td>
+<td>
+31.62
+</td>
+<td>
+2.38
+</td>
+<td>
+26.86
+</td>
+<td>
+36.39
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+drugs
+</td>
+<td>
+48
+</td>
+<td>
+4.25
+</td>
+<td>
+0.62
+</td>
+<td>
+3.20
+</td>
+<td>
+5.56
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+externalother
+</td>
+<td>
+48
+</td>
+<td>
+9.60
+</td>
+<td>
+0.75
+</td>
+<td>
+7.97
+</td>
+<td>
+11.48
+</td>
+</tr>
+<tr>
+<td colspan="6" style="border-bottom: 1px solid black">
+</td>
+</tr>
+</table>
+<p>Variables include:</p>
+<table>
+<colgroup>
+<col width="23%" />
+<col width="76%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>Variable name </strong></th>
+<th><strong>Description </strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>agecell</td>
+<td>Age of individual (the study focuses on adults between 19-22 year)</td>
+</tr>
+<tr class="even">
+<td>all</td>
+<td>Overall mortality rate</td>
+</tr>
+<tr class="odd">
+<td>alcohol</td>
+<td>Mortality rate for alcohol-related causes</td>
+</tr>
+<tr class="even">
+<td>homicide</td>
+<td>Mortality rate for homicides</td>
+</tr>
+<tr class="odd">
+<td>suicide</td>
+<td>Mortality rate for suicide</td>
+</tr>
+<tr class="even">
+<td>mva</td>
+<td>Mortality rate for car accidents</td>
+</tr>
+<tr class="odd">
+<td>drugs</td>
+<td>Mortality rate for drug-related causes (alcohol excluded)</td>
+</tr>
+<tr class="even">
+<td>externalother</td>
+<td>Mortality rate for other external causes</td>
+</tr>
+</tbody>
+</table>
+<p>Before running our model we need to create two variables. One variable indicating young adults over than 21 (=1) and younger than 21 (=0). A second variable indicating the centered rating score, which in this case is age.</p>
+<pre class="r"><code># First we create a dummy Treatment variable, where individuals older than 21 are = 1 and younger than 21 = 0
+data$Treatment = data$agecell
+data$Treatment = ifelse(data$Treatment&gt;21, 1, 0 )
+
+# Second we create a centered age variable, which will be the rating variable in our model. 
+data$age_c = data$agecell - 21
+
+stargazer( data,  
+           type = &quot;html&quot;, 
+           omit.summary.stat = c(&quot;p25&quot;, &quot;p75&quot;),
+           keep = c(&quot;Treatment&quot;, &quot;age_c&quot;),
+           digits = 2 )</code></pre>
+<table style="text-align:center">
+<tr>
+<td colspan="6" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Statistic
+</td>
+<td>
+N
+</td>
+<td>
+Mean
+</td>
+<td>
+St. Dev.
+</td>
+<td>
+Min
+</td>
+<td>
+Max
+</td>
+</tr>
+<tr>
+<td colspan="6" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Treatment
+</td>
+<td>
+50
+</td>
+<td>
+0.48
+</td>
+<td>
+0.50
+</td>
+<td>
+0
+</td>
+<td>
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+age_c
+</td>
+<td>
+50
+</td>
+<td>
+-0.0000
+</td>
+<td>
+1.13
+</td>
+<td>
+-1.93
+</td>
+<td>
+1.93
+</td>
+</tr>
+<tr>
+<td colspan="6" style="border-bottom: 1px solid black">
+</td>
+</tr>
+</table>
+</div>
+<div id="analysis-1" class="section level2">
+<h2><span class="header-section-number">3.2</span> Analysis</h2>
+<p>We specify the model based on the equation <a href="#eq:RD">(1.1)</a>. We estimate the effect of alcohol consumption on four outcomes: mortality rate for all causes, car accidents, alcohol-related causes, and drug-related causes.</p>
+<pre class="r"><code>reg1 = lm(all ~ Treatment + age_c, data = data)
+reg2 = lm(mva ~ Treatment + age_c, data = data)
+reg3 = lm(alcohol ~ Treatment + age_c, data = data)
+reg4 = lm(drugs ~ Treatment + age_c, data = data)
+
+
+stargazer( reg1, reg2, reg3, reg4,
+           type = &quot;html&quot;, 
+           dep.var.labels = c(&quot;All causes&quot;, &quot;Car accidents&quot;, &quot;Alcohol&quot;, &quot;Drugs&quot;),
+           column.labels = &quot;&quot;,
+           covariate.labels = c(&quot;Treatment&quot;, &quot;Age&quot;),
+           omit.stat = &quot;all&quot;, 
+           digits = 3 )</code></pre>
+<table style="text-align:center">
+<tr>
+<td colspan="5" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td colspan="4">
+<em>Dependent variable:</em>
+</td>
+</tr>
+<tr>
+<td>
+</td>
+<td colspan="4" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+All causes
+</td>
+<td>
+Car accidents
+</td>
+<td>
+Alcohol
+</td>
+<td>
+Drugs
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(1)
+</td>
+<td>
+(2)
+</td>
+<td>
+(3)
+</td>
+<td>
+(4)
+</td>
+</tr>
+<tr>
+<td colspan="5" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Treatment
+</td>
+<td>
+7.663<sup>***</sup>
+</td>
+<td>
+4.534<sup>***</sup>
+</td>
+<td>
+0.442<sup>***</sup>
+</td>
+<td>
+0.218
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(1.440)
+</td>
+<td>
+(0.768)
+</td>
+<td>
+(0.157)
+</td>
+<td>
+(0.181)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Age
+</td>
+<td>
+-0.975
+</td>
+<td>
+-3.149<sup>***</sup>
+</td>
+<td>
+0.004
+</td>
+<td>
+0.378<sup>***</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.632)
+</td>
+<td>
+(0.337)
+</td>
+<td>
+(0.069)
+</td>
+<td>
+(0.080)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Constant
+</td>
+<td>
+91.841<sup>***</sup>
+</td>
+<td>
+29.356<sup>***</sup>
+</td>
+<td>
+1.036<sup>***</sup>
+</td>
+<td>
+4.141<sup>***</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.805)
+</td>
+<td>
+(0.429)
+</td>
+<td>
+(0.088)
+</td>
+<td>
+(0.101)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td colspan="5" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td colspan="5" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+<em>Note:</em>
+</td>
+<td colspan="4" style="text-align:right">
+<sup><em></sup>p&lt;0.1; <sup><strong></sup>p&lt;0.05; <sup></strong></em></sup>p&lt;0.01
+</td>
+</tr>
+</table>
+<p>We interpret the results based on our question and hypothesis: does alcohol consumption increase mortality rate?</p>
+<ol style="list-style-type: decimal">
+<li>In three models we observe a significant and positive difference between the control and treatment group.
+<br>
+<br></li>
+<li>The Treatment coefficient is significant in the first model, showing that young adults who consume alcohol have a higher mortality rate compared to young adults below the drinking age.
+<br>
+<br></li>
+<li>The Treatment coefficient is significant in the second model, showing that young adults who consume alcohol have a higher mortality rate for car accidents compared to young adults below the drinking age.
+<br>
+<br></li>
+<li>The Treatment coefficient is significant in the third model, showing that young adults who consume alcohol have a higher mortality rate for alcohol-related causes compared to young adults below the drinking age.
+<br>
+<br></li>
+<li>The Treatment coefficient is not significant in the fourth model, showing that young adults who consume alcohol <em>do not</em> have a higher mortality rate for drug-related causes compared to young adults below the drinking age.</li>
+</ol>
+</div>
+<div id="plotting-results" class="section level2">
+<h2><span class="header-section-number">3.3</span> Plotting results</h2>
+<p>As before we can plot the results on a graph, so that we can visualize the discontinuity. We plot results car accidents model.</p>
+<pre class="r"><code># We first predict the final exam grades based on our regression discontinuity model. 
+predfit = predict(reg2, data) 
+
+# We set colors for the graph
+palette( c( adjustcolor( &quot;steelblue&quot;, alpha.f=1), adjustcolor( &quot;darkred&quot;, alpha.f=1)  ) )
+
+# To differently color the treatment and control group we need to create a new Treatment variable that where the Control group = 2. 
+data$Treatment2 = ifelse(data$Treatment==0,2,1)
+
+# Plot our observed value
+plot(data$age_c, data$mva, col=data$Treatment2, pch=19, bty=&quot;n&quot;,
+      xlab=&quot;Age (centered)&quot;, ylab=&quot;Car accidents&quot;,  cex=2)
+
+# Plot a line at the cutoff point
+abline(v=0, col = &quot;red&quot;, lwd = 2, lty = 2)
+
+# Plot our predicted values
+points( data$age_c, predfit, col=&quot;black&quot;, lwd=5, pch = 20 )
+
+## Add a legend
+points( 1.5, 36, col=&quot;steelblue&quot;, pch=19, cex=2 )
+text( 1.5, 36, &quot;Treatment group&quot;, col=&quot;steelblue&quot;, pos=4 )
+points( 1.5, 30, col=&quot;darkred&quot;, pch=19, cex=2 )
+text( 1.5, 30, &quot;Control group&quot;, col=&quot;darkred&quot;, pos=4 )</code></pre>
+<p><img src="RegDisc_files/figure-html/unnamed-chunk-16-1.png" width="960" /></p>
+</div>
+</div>
+<div id="additional-notes" class="section level1">
+<h1><span class="header-section-number">4</span> Additional notes</h1>
+<p>There are two main threats to validity in a regression discontinuity design.</p>
+<p>First, we assumed that the the <strong>relationship between the rating variable and the outcome variable is linear</strong>.</p>
+<div class="figure"><span id="fig:Linear1"></span>
+<img src="FIGURE/RegDisc/Linear1.png" alt="Source: http://econ.lse.ac.uk/staff/spischke/mhe/ex_ch6.pdf" width="80%" />
+<p class="caption">
+Figure 4.1: Source: <a href="http://econ.lse.ac.uk/staff/spischke/mhe/ex_ch6.pdf" class="uri">http://econ.lse.ac.uk/staff/spischke/mhe/ex_ch6.pdf</a>
+</p>
+</div>
+<p>Yet this assumption might not be met. It might happen that the relationship between the rating and the outcome variable is non linear. If this is case you need to properly model it in your formula. For instance, you might need to include quadratic term or more complex polymers if the relationship is curvilinear.</p>
+<div class="figure"><span id="fig:Linear2"></span>
+<img src="FIGURE/RegDisc/Linear2.png" alt="Source: http://econ.lse.ac.uk/staff/spischke/mhe/ex_ch6.pdf" width="80%" />
+<p class="caption">
+Figure 4.2: Source: <a href="http://econ.lse.ac.uk/staff/spischke/mhe/ex_ch6.pdf" class="uri">http://econ.lse.ac.uk/staff/spischke/mhe/ex_ch6.pdf</a>
+</p>
+</div>
+<p>It could also happen that once a nonlinear relationship is modelled correctly, the “discontinuity” disappears as it was caused by a misspecification in the model. You can see this case in figure <a href="#fig:Linear3">4.3</a>. The correct relationship is specified by the curve. But if we model it as a linear relationship, we might observe a discontinity that is not in the data.</p>
+<div class="figure"><span id="fig:Linear3"></span>
+<img src="FIGURE/RegDisc/Linear3.png" alt="Source: http://econ.lse.ac.uk/staff/spischke/mhe/ex_ch6.pdf" width="80%" />
+<p class="caption">
+Figure 4.3: Source: <a href="http://econ.lse.ac.uk/staff/spischke/mhe/ex_ch6.pdf" class="uri">http://econ.lse.ac.uk/staff/spischke/mhe/ex_ch6.pdf</a>
+</p>
+</div>
+<p>The second threat is the <strong>diffusion of the treatment</strong>.</p>
+<p>Regression discontinuity assumes that all individuals below (or above) the cutoff point received the treatment and none of the individuals above (or below) the cutoff received it. This might occur in some cases where the rating variable deterministically defines who receives the treatment and who does not (e.g., programs based on income).</p>
+<p>However, in some circumstances the treatment and the control group might be contaminated. For instance, despite the mandatory attendance policy some students might have decided not to regularly attend classes. When enforcing a law at the international level, some countries might not implement it right away, despite being eligible. In some other cases, individuals below (or above) the cutoff might be allowed to attend special classes or programs.</p>
+<p>Contamination of the control group or crossovers of the treatment group might affect the estimation of the main effect. In this case, the regression discontinuity is defined as “fuzzy” as the cut off is not deterministic but probabilistic (we assume that individuals who should receive the treatment are actually receiving it and viceversa). To solve the problem, you can:</p>
+<ul>
+<li>acknowledge possible issues related to contamination and crossover but still run your regression discontinuity comparing eligible vs ineligible individuals</li>
+<li>use eligibility as an instrumental variable. First you estimate you receive the treatment and then use regression discontinuity to estimate the treatment on the treated.</li>
+</ul>
+</div>
+<div id="additional-resources" class="section level1">
+<h1><span class="header-section-number">5</span> Additional resources</h1>
+<p>Additional resources are made available to help you to explore more advanced topics. In some cases, additional resources might also help you to better understand the topic by reading additional explanations and examples.</p>
+<p>Additional slides on regression discontinuity can be found <a href="https://www.ipr.northwestern.edu/workshops/past-workshops/quasi-experimental-design-and-analysis-in-education/quasi-experiments/docs/QE-Day2.pdf">here</a>, <a href="http://erikgahner.dk/slides/2015-aas/12-rdd.pdf">here</a> or <a href="http://faculty.smu.edu/kyler/courses/7312/presentations/baumer/Baumer_RD.pdf">here</a>.</p>
+<p>Little explanation, but nice graphs: <a href="https://vizdatar.wordpress.com/author/vizdatar/">here</a>.</p>
+<p>More on <a href="http://econ.lse.ac.uk/staff/spischke/mhe/ex_ch6.pdf">nonlinear relationships</a> and <a href="http://cega.berkeley.edu/assets/cega_events/39/Regression_Discontinuity.pdf">fuzzy regression discontinuity</a>.</p>
+<p><a href="http://dev.mdrc.org/sites/default/files/RDD%20Guide_Full%20rev%202016_0.pdf">A complete guide to regression discontinuity for practitioners</a></p>
+<style type="text/css">
+p {
+color: black;
+margin: 0 0 20px 0;
+}
+
+td {
+    padding: 3px 10px 3px 10px;
+    }
+
+table
+{ 
+    margin-left: auto;
+    margin-right: auto;
+    margin-top:80px;
+    margin-bottom:100px;
+}
+
+h1, h2{
+  margin-top:100px;
+  margin-bottom:20px;
+}
+
+H5{
+    text-align: center;
+    color: gray;
+    font-size:0.8em;
+}
+
+img {
+    max-width: 90%;
+    display: block;
+    margin-right: auto;
+    margin-left: auto;
+    margin-top:30px;
+    margin-bottom:20px;
+}
+
+pre {
+  overflow-x: auto;
+}
+
+pre code {
+   display: block; 
+   padding: 0.5em;
+   margin-bottom:20px;
+}
+
+code {
+  font-size: 92%;
+  border: 10px solid #F8F8F8;
+  margin-bottom: 2px;
+}
+
+code[class] {
+  background-color: #F8F8F8;
+}
+
+
+caption {
+  font-style: bold;
+}
+
+</style>
+</div>
+
+<div class="footer">
+<div class="row"  align="center">
+
+  Designed by <a href=http://ds4ps.github.io target="_blank">DS4PS</a><br>
+  Powered by <a href=http://jekyllrb.com target="_blank">Jekyll</a>
+
+</div>
+</div>
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

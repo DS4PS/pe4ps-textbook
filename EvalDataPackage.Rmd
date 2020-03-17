@@ -1,0 +1,189 @@
+---
+title: "Datasets for Program Evaluation"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set( echo = TRUE, messages=F, warning=F )
+
+library( stargazer )
+library( dplyr )
+library( pander )
+library( scales )
+
+jplot <- function( x1, x2, cex=3.5, draw.line=T, ... )
+{
+
+	plot( x1, x2,
+	      pch=19, 
+	      col=gray(0.6, alpha = 0.2), 
+	      bty = "n",
+	      cex.lab=1.5,
+        ... )
+
+	if( draw.line==T ){ 
+		ok <- is.finite(x1) & is.finite(x2)
+		lines( lowess(x2[ok]~x1[ok]), col="red", lwd=3 ) }
+
+}
+
+
+```
+
+
+
+```{r}
+build_ts <- function( seed=123 )
+{
+  set.seed( seed )
+  
+  T = rep(1:365)
+  D = ifelse(T > 200, 1, 0)
+  P = ifelse(T <= 200, 0, rep(1:200))
+  
+  err = rnorm(365, 150, 70)
+  Y = 5.4 + 0.5*T + 20*D + 1.2*P + err
+  Y <- rescale( Y, to = c(0, 300)) %>% round(2)
+  dat <- as.data.frame(cbind(Y, T, D, P)) 
+  
+  return(dat)
+}
+
+dat.ts <- build_ts( seed=04172019 )  # seed set as date of assignment build
+
+# build_rd  - regression discontinuity?
+# build_iv  - instrumental variables
+
+```
+
+
+
+
+The dataset contains four variables:
+
+**Column** | **Variable name ** | **Description**                                  | 
+-----------|--------------------- | -----------------------------------------------------|
+$\text{Y}$ |$\text{Wellbeing}$    | Wellbeing index (from 0 to 300)                       |
+$\text{T}$ |$\text{Time}$         | Time (from 1 to 365)                                  |
+$\text{D}$ |$\text{Treatment}$    | Observation post (=1) and pre (=0) intervention       |
+$\text{P}$ |$\text{Time Since Treatment}$   | Time passed since the intervention                    |
+
+```{r, echo=F}
+rbind( head(dat.ts), 
+       c("","","",""), 
+       dat.ts[ 198:204, ] , 
+       c("","","",""), 
+       tail(dat.ts) ) %>%
+  pander()
+```
+
+
+
+
+Our model is based on the equation \@ref(eq:timeseries):
+
+\begin{equation} 
+\text{Y} = \text{b}_0 + \text{b}_1*Time + \text{b}_2*Treatment + \text{b}_3*Time Since Treatment + \text{e}
+  (\#eq:example)
+\end{equation} 
+
+
+```{r}
+plot( dat.ts$T, dat.ts$Y, bty="n", 
+      col=gray(0.5,0.5), cex=1.5, pch=19,
+      ylab="Well Being", xlab="Time (days)" )
+```
+
+
+We can run the model using the **lm** function in R.
+
+```{r, echo=T, results='asis'}
+regTS = lm ( Y ~ T + D + P, data=dat.ts )  # Our time series model
+
+stargazer( regTS, 
+           type = "html", 
+           dep.var.labels = ("Wellbeing"),
+           column.labels = ("Model results"),
+           covariate.labels = c("Time", "Treatment", "Time Since Treatment"),
+           omit.stat = "all", 
+           digits = 2 )
+```
+
+Let's interpret our coefficients:
+
+* The **Time** coefficient indicates the wellbeing trend before the intervention. It's positive and significant, indicating that students' wellbeing increases over time. For each day that passes, the wellbeing increases of 0.19 points on the index.
+<br>
+<br>
+* The **Treatment** coefficient indicates the increase in the students' wellbeing immediately after the intervention. We can see that the immediate effect is positive and significant indicating that attending the first class increased the students' wellbeing of 13.09.
+<br>
+<br>
+* The **Time Since Treatment** coefficient indicates that the trend has changed after the intervention. The sustained effect is positive and significant, indicating that for each day that passes after the intervention, the wellbeing of students increases of 0.54 points on the index. 
+
+## Plotting the results 
+
+A useful exercise is to calculate outcomes at different points in time as we did in section \@ref(the-counterfactual). For instance, we can calculate the outcome right after the intervention, which occured at time = 200. Note that while $\text{Time}$ = 201, $\text{Time Since Treatment}$ is equal to 1 because it is the first day after the intervention.
+
+\begin{equation} 
+\text{Y} = \text{b}_0 + \text{b}_1*201 + \text{b}_2*1 + \text{b}_3*1 + \text{e}
+  (\#eq:examplet201)
+\end{equation} 
+
+We can also represent the point on a graph:
+
+```{r ft1, fig.cap="Wellbeing level at t = 201"}
+
+# We create a small dataset with the new values
+data1 <- as.data.frame( cbind( T = 201, D = 1, P = 1 )) 
+
+# We use the function predict to (1) take the coefficients estimated in regTS and (2) calculate the outcome Y based on the values we set in the new datset
+y1 <- predict( regTS, data1 ) 
+
+# We plot our initial observations, the column Y in our dataset
+plot( dat.ts$Y,
+    col = "gray",
+    xlim = c(1, 365), 
+    ylim = c(0, 400),
+    xlab = "Time (days)", 
+    ylab = "Wellbeing index")
+
+# We add a point showing the level of wellbeing at time = 201)
+points(201, y1, col = "dodgerblue4", pch = 19, bg = "dodgerblue4", cex = 2)
+text(201, y1, labels = "t = 201", pos = 4, cex = 1)
+
+# Line marking the interruption
+abline( v=200, col="red", lty=2 )
+
+```
+
+
+# Comparing Seeds
+
+```{r}
+
+dat1 <- build_ts( seed=123 )
+dat2 <- build_ts( seed=456 )
+
+jplot( dat1$Y, dat2$Y, xlab="Y", ylab="Y" )
+jplot( dat1$T, dat2$T, main="T Not Stochastic" )  # not stochastic
+table( dat1$D, dat2$D )  # not stochastic
+```
+
+
+```{r}
+par( mfrow=c(1,2) )
+jplot( dat1$T, dat1$Y, main="Seed1" )
+jplot( dat2$T, dat2$Y, main="Seed2" )
+```
+
+
+```{r, echo=T, results='asis'}
+reg1 = lm ( Y ~ T + D + P, data=dat1 )  
+reg2 = lm ( Y ~ T + D + P, data=dat2 ) 
+
+stargazer( reg1, reg2, 
+           type = "html", 
+           dep.var.labels = ("Wellbeing Index"),
+           column.labels = c("Seed 1", "Seed 2"),
+           covariate.labels = c("Time", "Treatment", "Time Since Treatment"),
+           omit.stat = "all", 
+           digits = 2 )
+```

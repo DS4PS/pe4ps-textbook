@@ -1,0 +1,10 @@
+
+<table style="text-align:center"><tr><td colspan="7" style="border-bottom: 1px solid black"></td></tr><tr><td style="text-align:left"></td><td colspan="2">Matthew Effect</td><td colspan="2">Artificial Impact</td><td colspan="2">Simpson's Paradox</td></tr>
+<tr><td style="text-align:left"></td><td>(1)</td><td>(2)</td><td>(3)</td><td>(4)</td><td>(5)</td><td>(6)</td></tr>
+<tr><td colspan="7" style="border-bottom: 1px solid black"></td></tr><tr><td style="text-align:left">x</td><td>2.36<sup>***</sup></td><td>0.98<sup>***</sup></td><td>2.03<sup>***</sup></td><td>-0.02</td><td>-1.39<sup>***</sup></td><td>0.98<sup>***</sup></td></tr>
+<tr><td style="text-align:left"></td><td>(0.19)</td><td>(0.05)</td><td>(0.27)</td><td>(0.05)</td><td>(0.32)</td><td>(0.05)</td></tr>
+<tr><td style="text-align:left"></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td colspan="7" style="border-bottom: 1px solid black"></td></tr><tr><td style="text-align:left">True Slope</td><td>1</td><td>1</td><td>0</td><td>0</td><td>1</td><td>1</td></tr>
+<tr><td style="text-align:left">Fixed Effects?</td><td>NO</td><td>YES</td><td>NO</td><td>YES</td><td>NO</td><td>YES</td></tr>
+<tr><td colspan="7" style="border-bottom: 1px solid black"></td></tr><tr><td style="text-align:left"><em>Note:</em></td><td colspan="6" style="text-align:right"><sup>*</sup>p<0.1; <sup>**</sup>p<0.05; <sup>***</sup>p<0.01</td></tr>
+</table>

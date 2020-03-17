@@ -1,0 +1,1762 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+
+
+<title>Panel Model Selection</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script src="site_libs/navigation-1.1/codefolding.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+<link rel="stylesheet" href="custom.css" type="text/css" />
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #ffffff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+</style>
+<script>
+$(document).ready(function () {
+  window.initializeCodeFolding("hide" === "show");
+});
+</script>
+
+
+
+
+
+<div class="navbar navbar-inverse  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Program Eval III</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="Datasets_in_R.html">Data1</a>
+</li>
+<li>
+  <a href="EvalDataPackage.html">Data2</a>
+</li>
+<li>
+  <a href="TimeSeries.html">TimeS</a>
+</li>
+<li>
+  <a href="InstrumentalVariables.html">InstrumentalVs</a>
+</li>
+<li>
+  <a href="DiffInDiff.html">Diff-in-Diff</a>
+</li>
+<li>
+  <a href="MatchingScores.html">Matching</a>
+</li>
+<li>
+  <a href="LogisticReg.html">Logistic Reg</a>
+</li>
+<li>
+  <a href="FixedEffects.html">Fixed Effects</a>
+</li>
+<li>
+  <a href="panel-model-selection.html">Panel Models</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/DS4PS/PROG-EVAL-III/tree/master/TEXTBOOK">
+    <span class="fa fa-github fa-2x"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+<div class="btn-group pull-right">
+<button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu" style="min-width: 50px;">
+<li><a id="rmd-show-all-code" href="#">Show All Code</a></li>
+<li><a id="rmd-hide-all-code" href="#">Hide All Code</a></li>
+</ul>
+</div>
+
+
+
+<h1 class="title toc-ignore">Panel Model Selection</h1>
+
+</div>
+
+<div id="TOC">
+<ul>
+<li><a href="#overview-of-panel-models"><span class="toc-section-number">1</span> OVERVIEW OF PANEL MODELS</a></li>
+<li><a href="#time-effects"><span class="toc-section-number">2</span> TIME EFFECTS</a></li>
+<li><a href="#fixed-effects-by-de-meaning-data"><span class="toc-section-number">3</span> FIXED EFFECTS BY DE-MEANING DATA</a></li>
+<li><a href="#taxonomy-of-bias-from-group-structure"><span class="toc-section-number">4</span> TAXONOMY OF BIAS FROM GROUP STRUCTURE</a></li>
+</ul>
+</div>
+
+<pre class="r"><code>library( dplyr )
+library( stargazer )</code></pre>
+<div id="overview-of-panel-models" class="section level1">
+<h1><span class="header-section-number">1</span> OVERVIEW OF PANEL MODELS</h1>
+<pre class="r"><code># e &lt;- rnorm(30)
+# this one works well:
+e &lt;- c(-0.217265337508781, 0.0996074731855418, 0.0800275276849036, 
+-0.178488399013339, -0.496420526595239, -1.7168471976976, -0.405092050237224, 
+-0.115710342436631, -0.371092702457788, 0.822415948208485, 0.85135450577188, 
+0.171227422217835, 0.123875567283242, 1.40368293360846, 1.2581671356454, 
+0.62810338038335, -0.887705537863198, 0.757750779879804, 1.08763122728127, 
+0.575576369638848, 0.28709316244214, -0.375428732568683, 0.663417542179713, 
+1.04134503360736, -0.16471947215554, 2.4753832533224, -1.11870402193226, 
+0.32517135445685, -1.07233215548999, -0.0896477846333077)
+
+id &lt;- rep( 1:3, each=10 )
+org.id &lt;- factor(id)
+
+
+
+# MODEL 1 - OLS
+
+x1  &lt;- 9 + 1:10 + 0*id
+y1  &lt;- 25 + x1 + 0*id + e
+
+
+x &lt;- x1
+y &lt;- y1
+m1 &lt;- lm( y ~ x )
+
+
+# MODEL 2 - Random Effect
+
+x2  &lt;- 9 + 1:10 + 0*id
+y2  &lt;- 5 + x2 + 10*id + e
+
+
+
+x &lt;- x2
+y &lt;- y2
+m2.ols &lt;- lm( y ~ x )
+m2.re &lt;- lm( y ~ x + org.id )
+
+
+# MODEL 3
+
+x3  &lt;- 1:10 + 5*id
+y3  &lt;- 5 + x3 + 10*id + e
+
+x &lt;- x3
+y &lt;- y3
+m3.ols &lt;- lm( y ~ x )
+m3.fe &lt;- lm( y ~ x + org.id )
+
+
+
+# MODEL 4 - Dynamic
+
+y4 &lt;- y3[c(F,rep(T,9))]
+y.lagged &lt;- y3[c(rep(T,9),F)]
+x4 &lt;- x3[c(F,rep(T,9))]
+
+x &lt;- x4
+y &lt;- y4
+m4 &lt;- lm( y ~ x + y.lagged )</code></pre>
+<pre class="r"><code>par( mfrow=c(1,3) )
+
+
+plot( x1, y1, pch=19, col=org.id, cex=2, 
+      ylim=c(20,60), xlim=c(0,30),
+      bty=&quot;n&quot;, axes=F,
+      xlab=&quot;Fertilizer&quot;, ylab=&quot;Tons of Corn Per Acre&quot;, 
+      line=1.5, cex.lab=1.5 ) 
+axis( side = 1, labels = FALSE )
+axis( side = 2, labels = FALSE )
+title( main=&quot;Scenario 1: All Farms Equal&quot;, line=1, cex.main=2 )
+
+
+plot( x2, y2, pch=19, col=org.id, cex=2, 
+      ylim=c(20,60), xlim=c(1,30),
+      bty=&quot;n&quot;, axes=F,
+      xlab=&quot;Fertilizer&quot;, ylab=&quot;Tons of Corn Per Acre&quot;, 
+      line=1.5, cex.lab=1.5 ) 
+axis( side = 1, labels = FALSE )
+axis( side = 2, labels = FALSE )
+title( main=&quot;Scenario 2: Land Quality Varies&quot;, line=1, cex.main=2 )
+
+
+plot( x3, y3, pch=19, col=org.id, cex=2, 
+      ylim=c(20,60), xlim=c(1,30),
+      bty=&quot;n&quot;, axes=F,
+      xlab=&quot;Fertilizer&quot;, ylab=&quot;Tons of Corn Per Acre&quot;, 
+      line=1.5, cex.lab=1.5 ) 
+axis( side = 1, labels = FALSE )
+axis( side = 2, labels = FALSE )
+title( main=&quot;Scenario 3: Land Management Varies&quot;, line=1, cex.main=2 )</code></pre>
+<p><img src="panel-model-selection_files/figure-html/unnamed-chunk-4-1.png" width="1344" /></p>
+<pre class="r"><code>par( mfrow=c(1,3), mar=c(5.1, 4.1, 4.1, 15) )
+
+plot( x1, y1, pch=19, col=gray(0.5,0.5), cex=3, 
+      ylim=c(20,70), xlim=c(0,25),
+      bty=&quot;n&quot;, axes=F,
+      xlab=&quot;Pooled Model is UNBIASED + EFFICIENT&quot;, ylab=&quot;&quot;, 
+      line=1.5, cex.lab=1.5, col.lab=&quot;gray20&quot;, cex.lab=1.5 )  
+axis( side = 1, labels = FALSE )
+axis( side = 2, labels = FALSE )
+title( main=&quot;Scenario 1&quot;, line=1, cex.main=2 )
+abline( m1, lwd=2 )
+b &lt;- m1$coefficients
+mtext( &quot;  Pooled Model&quot;, side=4, outer=F, at=b[1]+25*b[2]+3, cex=1.5, las=2 )
+
+
+plot( x2, y2, pch=19, col=gray(0.5,0.5), cex=3, 
+      ylim=c(20,70), xlim=c(1,25),
+      bty=&quot;n&quot;, axes=F,
+      xlab=&quot;Pooled Model is UNBIASED + INEFFICIENT&quot;, ylab=&quot;&quot;, 
+      line=1.5, cex.lab=1.5, col.lab=&quot;gray20&quot;, cex.lab=1.5 ) 
+axis( side = 1, labels = FALSE )
+axis( side = 2, labels = FALSE )
+title( main=&quot;Scenario 2&quot;, line=1, cex.main=2 )
+abline( m2.ols, lwd=2 )
+for(i in 1:3){ abline( lm(y2[id==i]~x2[id==i]), lty=3, lwd=3, col=&quot;darkgray&quot; ) } 
+
+# mtext( &quot; OLS Slope&quot;, side=4, outer=F, at=m2.ols$fitted.values[30]+3, cex=1.5, las=2 )
+b &lt;- m2.re$coefficients
+mtext( &quot;  RE Slope&quot;, side=4, outer=F, at=b[1]+25*b[2]+2, cex=1, las=2 )
+mtext( &quot;  Pooled Model&quot;, side=4, outer=F, at=b[1]+25*b[2]+b[3]+2, cex=1.5, las=2 )
+mtext( &quot;  RE Slope&quot;, side=4, outer=F, at=b[1]+25*b[2]+b[4]+2, cex=1, las=2 )
+
+
+
+plot( x3, y3, pch=19, col=gray(0.5,0.5), cex=3, 
+      ylim=c(20,70), xlim=c(1,25),
+      bty=&quot;n&quot;, axes=F,
+      xlab=&quot;Pooled Model is BIASED + INEFFICIENT&quot;, ylab=&quot;&quot;, 
+      line=1.5, cex.lab=1.5, col.lab=&quot;gray20&quot;, cex.lab=1.5 ) 
+axis( side = 1, labels = FALSE )
+axis( side = 2, labels = FALSE )
+title( main=&quot;Scenario 3&quot;, line=1, cex.main=2 )
+abline( m3.ols, lwd=2 )
+for(i in 1:3){ abline( lm(y3[id==i]~x3[id==i]), lty=3, lwd=3, col=&quot;darkgray&quot; ) } 
+
+mtext( &quot; Pooled Model&quot;, side=4, outer=F, at=m3.ols$fitted.values[30]+5, cex=1.5, las=2 )
+b &lt;- m3.fe$coefficients
+mtext( &quot;  FE Slope&quot;, side=4, outer=F, at=b[1]+25*b[2]+2, cex=1, las=2 )
+mtext( &quot;  FE Slope&quot;, side=4, outer=F, at=b[1]+25*b[2]+b[3]+2, cex=1, las=2 )
+mtext( &quot;  FE Slope&quot;, side=4, outer=F, at=b[1]+25*b[2]+b[4]+2, cex=1, las=2 )</code></pre>
+<p><img src="panel-model-selection_files/figure-html/unnamed-chunk-5-1.png" width="1344" /></p>
+<pre class="r"><code>stargazer( m1, m2.ols, m2.re, m3.ols, m3.fe, m4,
+           type=&quot;text&quot;,
+           intercept.bottom=FALSE, 
+           column.labels   = c(&quot;Scenario 1&quot;, &quot;Scenario 2&quot;, &quot;Scenario 3&quot;),
+           column.separate = c(1,2,3),
+           add.lines = list(c(&quot;True Slope&quot;,
+                              &quot;1&quot;,&quot;1&quot;,&quot;1&quot;,&quot;1&quot;,&quot;1&quot;,&quot;1&quot;),
+                            c(&quot;Fixed Effects?&quot;,&quot;NO&quot;,&quot;NO&quot;,&quot;YES&quot;,&quot;NO&quot;,&quot;YES&quot;,&quot;NO&quot;),
+                            c(&quot;Dynamic Model&quot;,&quot;NO&quot;,&quot;NO&quot;,&quot;NO&quot;,&quot;NO&quot;,&quot;NO&quot;,&quot;YES&quot;) ),
+           omit=c(&quot;Constant&quot;,&quot;org.id&quot;),
+           omit.stat=c(&quot;f&quot;,&quot;ser&quot;,&quot;adj.rsq&quot;,&quot;rsq&quot;,&quot;n&quot;),
+           dep.var.labels.include = FALSE,
+           dep.var.caption = &quot;&quot;,
+           digits=2 )</code></pre>
+<pre class="r"><code>stargazer( m1, m2.ols, m2.re, m3.ols, m3.fe, m4,
+           type=&quot;html&quot;,
+           intercept.bottom=FALSE, 
+           column.labels   = c(&quot;Scenario 1&quot;, &quot;Scenario 2&quot;, &quot;Scenario 3&quot;),
+           column.separate = c(1,2,3),
+           add.lines = list(c(&quot;True Slope&quot;,
+                              &quot;1&quot;,&quot;1&quot;,&quot;1&quot;,&quot;1&quot;,&quot;1&quot;,&quot;1&quot;),
+                            c(&quot;Fixed Effects?&quot;,&quot;NO&quot;,&quot;NO&quot;,&quot;YES&quot;,&quot;NO&quot;,&quot;YES&quot;,&quot;NO&quot;),
+                            c(&quot;Dynamic Model&quot;,&quot;NO&quot;,&quot;NO&quot;,&quot;NO&quot;,&quot;NO&quot;,&quot;NO&quot;,&quot;YES&quot;) ),
+           omit=c(&quot;Constant&quot;,&quot;org.id&quot;),
+           omit.stat=c(&quot;f&quot;,&quot;ser&quot;,&quot;adj.rsq&quot;,&quot;rsq&quot;,&quot;n&quot;),
+           dep.var.labels.include = FALSE,
+           dep.var.caption = &quot;&quot;,
+           digits=2, 
+           out=&quot;Baseline.doc&quot;)</code></pre>
+<table style="text-align:center">
+<tr>
+<td colspan="7" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+Scenario 1
+</td>
+<td colspan="2">
+Scenario 2
+</td>
+<td colspan="3">
+Scenario 3
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(1)
+</td>
+<td>
+(2)
+</td>
+<td>
+(3)
+</td>
+<td>
+(4)
+</td>
+<td>
+(5)
+</td>
+<td>
+(6)
+</td>
+</tr>
+<tr>
+<td colspan="7" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+x
+</td>
+<td>
+0.98<sup>***</sup>
+</td>
+<td>
+0.98<sup>*</sup>
+</td>
+<td>
+0.98<sup>***</sup>
+</td>
+<td>
+2.36<sup>***</sup>
+</td>
+<td>
+0.98<sup>***</sup>
+</td>
+<td>
+0.13
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.06)
+</td>
+<td>
+(0.55)
+</td>
+<td>
+(0.05)
+</td>
+<td>
+(0.19)
+</td>
+<td>
+(0.05)
+</td>
+<td>
+(0.14)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+y.lagged
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+0.94<sup>***</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+(0.05)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td colspan="7" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+True Slope
+</td>
+<td>
+1
+</td>
+<td>
+1
+</td>
+<td>
+1
+</td>
+<td>
+1
+</td>
+<td>
+1
+</td>
+<td>
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Fixed Effects?
+</td>
+<td>
+NO
+</td>
+<td>
+NO
+</td>
+<td>
+YES
+</td>
+<td>
+NO
+</td>
+<td>
+YES
+</td>
+<td>
+NO
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Dynamic Model
+</td>
+<td>
+NO
+</td>
+<td>
+NO
+</td>
+<td>
+NO
+</td>
+<td>
+NO
+</td>
+<td>
+NO
+</td>
+<td>
+YES
+</td>
+</tr>
+<tr>
+<td colspan="7" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+<em>Note:</em>
+</td>
+<td colspan="6" style="text-align:right">
+<sup><em></sup>p&lt;0.1; <sup><strong></sup>p&lt;0.05; <sup></strong></em></sup>p&lt;0.01
+</td>
+</tr>
+</table>
+</div>
+<div id="time-effects" class="section level1">
+<h1><span class="header-section-number">2</span> TIME EFFECTS</h1>
+<pre class="r"><code>time.effect &lt;- rep( c(-1,1,2,3,2,1,0,-1,-2,0), 3 )
+e.new &lt;- 
+  c(0.717752254188994, 1.46351044875319, 0.545085270634742, 0.398709885310457, 
+  0.509880154168709, 1.12550062156401, -1.38757100156204, 0.199452611009322, 
+  0.909229008764255, -0.191497620829187, 1.92890813350955, -0.195505507481137, 
+  -0.206714709910741, 0.700838318157092, -0.651743403883677, 0.743503199376542, 
+  1.07098487453718, -0.298184876026821, -0.322110555305533, 1.33356616169561, 
+  2.22524178992114, 0.34393523837206, -0.00781897594284145, -0.454827433881235, 
+  1.91734908738423, 2.51779087685677, 0.066017323821991, 0.345542463689957, 
+  0.258480442909562, 0.415665805192596)
+e2 &lt;- e.new + time.effect
+time &lt;- factor( rep( 2001:2010, 3 ) )
+
+
+# MODEL ZERO - NO TIME EFFECTS
+
+x0  &lt;- 9 + 1:10 + 0*id
+y0  &lt;- 25 + x1 + 0*id + e.new
+
+
+x &lt;- x0
+y &lt;- y0
+m0.ols &lt;- lm( y ~ x )
+m0.time &lt;- lm( y ~ x + time )
+
+
+# MODEL 1 - OLS
+
+x1  &lt;- 9 + 1:10 + 0*id
+y1  &lt;- 25 + x1 + 0*id + e2
+
+
+x &lt;- x1
+y &lt;- y1
+m1.ols &lt;- lm( y ~ x )
+m1.time &lt;- lm( y ~ x + time )
+
+
+# MODEL 2 - Random Effect
+
+x2  &lt;- 9 + 1:10 + 0*id
+y2  &lt;- 5 + x2 + 10*id + e2
+
+x &lt;- x2
+y &lt;- y2
+m2.ols &lt;- lm( y ~ x )
+m2.re &lt;- lm( y ~ x + org.id )
+m2.time &lt;- lm( y ~ x + org.id + time )
+
+
+# MODEL 3
+
+x3  &lt;- 1:10 + 5*id
+y3  &lt;- 5 + x3 + 10*id + e2
+
+x &lt;- x3
+y &lt;- y3
+m3.ols &lt;- lm( y ~ x )
+m3.fe &lt;- lm( y ~ x + org.id )
+m3.time &lt;- lm( y ~ x + org.id + time )
+
+
+# MODEL 4 - Dynamic
+
+y4 &lt;- y3[c(F,rep(T,9))]
+y.lagged &lt;- y3[c(rep(T,9),F)]
+x4 &lt;- x3[c(F,rep(T,9))]
+time2 &lt;- factor( rep( 2002:2010, 3 ) )
+
+x &lt;- x4
+y &lt;- y4
+m4 &lt;- lm( y ~ x + y.lagged )
+m4.time &lt;- lm( y ~ x + y.lagged + time2 )</code></pre>
+<pre class="r"><code>par( mar=c(5.1, 4.1, 4.1, 15), mfcol=c(1,2) )
+
+
+plot( x0[1:30], y0[1:30], pch=19, col=gray(0.5,0.5), cex=3, 
+      ylim=c(30,60), xlim=c(5,25),
+      bty=&quot;n&quot;, axes=F, 
+      xlab=&quot;Steady Growth&quot;, ylab=&quot;&quot;, 
+      line=1.5, cex.lab=1.5, col.lab=&quot;gray20&quot;, cex.lab=1.5 )  
+axis( side = 1, labels = FALSE )
+axis( side = 2, labels = FALSE )
+title( main=&quot;Case A: No Time Effects&quot;, line=1, cex.main=2 )
+abline( m0.ols, lwd=2 )
+b &lt;- m0.ols$coefficients
+mtext( &quot;  OLS Model&quot;, side=4, outer=F, at=b[1]+25*b[2]-0, cex=1.5, las=2 )
+abline( m0.time, col=&quot;red&quot;, lwd=2 )
+mtext( &quot;  With Time Fixed Effects&quot;, side=4, outer=F, at=b[1]+25*b[2]+4, cex=1.5, las=2, col=&quot;red&quot; )
+
+
+plot( x1[1:30], y1[1:30], pch=19, col=gray(0.5,0.5), cex=3, 
+      ylim=c(30,60), xlim=c(5,25),
+      bty=&quot;n&quot;, axes=F, 
+      xlab=&quot;Boom-Bust Cycles&quot;, ylab=&quot;&quot;, 
+      line=1.5, cex.lab=1.5, col.lab=&quot;gray20&quot;, cex.lab=1.5 )  
+axis( side = 1, labels = FALSE )
+axis( side = 2, labels = FALSE )
+title( main=&quot;Case B: Time Effects&quot;, line=1, cex.main=2 )
+abline( m1.ols, lwd=2 )
+b &lt;- m1.ols$coefficients
+mtext( &quot;  OLS Model&quot;, side=4, outer=F, at=b[1]+25*b[2]-0, cex=1.5, las=2 )
+abline( m1.time, col=&quot;red&quot;, lwd=2 )
+mtext( &quot;  With Time Fixed Effects&quot;, side=4, outer=F, at=b[1]+25*b[2]+4, cex=1.5, las=2, col=&quot;red&quot; )</code></pre>
+<p><img src="panel-model-selection_files/figure-html/unnamed-chunk-9-1.png" width="1344" /></p>
+<pre class="r"><code>stargazer( m1.ols, m1.time, m2.re, m2.time, m3.fe, m3.time,
+           type=&quot;text&quot;,
+           intercept.bottom=FALSE,
+           column.labels   = c(&quot;Scenario 1&quot;, &quot;Scenario 2&quot;, &quot;Scenario 3&quot;),
+           column.separate = c(2,2,2),
+           add.lines = list(c(&quot;True Slope&quot;,
+                              &quot;1&quot;,&quot;1&quot;,&quot;1&quot;,&quot;1&quot;,&quot;1&quot;,&quot;1&quot;),
+                            c(&quot;Org Fixed Effects?&quot;,
+                              &quot;YES&quot;,&quot;YES&quot;,&quot;YES&quot;,&quot;YES&quot;,&quot;YES&quot;,&quot;YES&quot;),
+                            c(&quot;Time Fixed Effects?&quot;,
+                              &quot;NO&quot;,&quot;YES&quot;,&quot;NO&quot;,&quot;YES&quot;,&quot;NO&quot;,&quot;YES&quot;) ),           
+           omit=c(&quot;org.id&quot;,&quot;time&quot;,&quot;time2&quot;),
+           omit.stat=c(&quot;f&quot;,&quot;ser&quot;,&quot;adj.rsq&quot;,&quot;rsq&quot;,&quot;n&quot;),
+           dep.var.labels.include = FALSE,
+           dep.var.caption = &quot;&quot;,
+           digits=2 )</code></pre>
+<pre class="r"><code>stargazer( m1, m1.time, m2.re, m2.time, m3.fe, m3.time, 
+           type=&quot;html&quot;,
+           intercept.bottom=FALSE, 
+           column.labels   = c(&quot;Scenario 1&quot;, &quot;Scenario 2&quot;, &quot;Scenario 3&quot;),
+           column.separate = c(2,2,2),
+           add.lines = list(c(&quot;True Slope&quot;,
+                              &quot;1&quot;,&quot;1&quot;,&quot;1&quot;,&quot;1&quot;,&quot;1&quot;,&quot;1&quot;),
+                            c(&quot;Org Fixed Effects?&quot;,
+                              &quot;YES&quot;,&quot;YES&quot;,&quot;YES&quot;,&quot;YES&quot;,&quot;YES&quot;,&quot;YES&quot;),
+                            c(&quot;Time Fixed Effects?&quot;,
+                              &quot;NO&quot;,&quot;YES&quot;,&quot;NO&quot;,&quot;YES&quot;,&quot;NO&quot;,&quot;YES&quot;) ),            
+           omit=c(&quot;Constant&quot;,&quot;org.id&quot;,&quot;time&quot;,&quot;time2&quot;),
+           omit.stat=c(&quot;f&quot;,&quot;ser&quot;,&quot;adj.rsq&quot;,&quot;rsq&quot;,&quot;n&quot;),
+           dep.var.labels.include = FALSE,
+           dep.var.caption = &quot;&quot;,
+           digits=2,
+           out=&quot;TimeFixedEffects.doc&quot;)</code></pre>
+<table style="text-align:center">
+<tr>
+<td colspan="7" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td colspan="2">
+Scenario 1
+</td>
+<td colspan="2">
+Scenario 2
+</td>
+<td colspan="2">
+Scenario 3
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(1)
+</td>
+<td>
+(2)
+</td>
+<td>
+(3)
+</td>
+<td>
+(4)
+</td>
+<td>
+(5)
+</td>
+<td>
+(6)
+</td>
+</tr>
+<tr>
+<td colspan="7" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+x
+</td>
+<td>
+0.98<sup>***</sup>
+</td>
+<td>
+0.99<sup>***</sup>
+</td>
+<td>
+0.70<sup>***</sup>
+</td>
+<td>
+0.99<sup>***</sup>
+</td>
+<td>
+0.70<sup>***</sup>
+</td>
+<td>
+0.99<sup>***</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.06)
+</td>
+<td>
+(0.08)
+</td>
+<td>
+(0.10)
+</td>
+<td>
+(0.08)
+</td>
+<td>
+(0.10)
+</td>
+<td>
+(0.08)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td colspan="7" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+True Slope
+</td>
+<td>
+1
+</td>
+<td>
+1
+</td>
+<td>
+1
+</td>
+<td>
+1
+</td>
+<td>
+1
+</td>
+<td>
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Org Fixed Effects?
+</td>
+<td>
+YES
+</td>
+<td>
+YES
+</td>
+<td>
+YES
+</td>
+<td>
+YES
+</td>
+<td>
+YES
+</td>
+<td>
+YES
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Time Fixed Effects?
+</td>
+<td>
+NO
+</td>
+<td>
+YES
+</td>
+<td>
+NO
+</td>
+<td>
+YES
+</td>
+<td>
+NO
+</td>
+<td>
+YES
+</td>
+</tr>
+<tr>
+<td colspan="7" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+<em>Note:</em>
+</td>
+<td colspan="6" style="text-align:right">
+<sup><em></sup>p&lt;0.1; <sup><strong></sup>p&lt;0.05; <sup></strong></em></sup>p&lt;0.01
+</td>
+</tr>
+</table>
+<pre class="r"><code>par( mfrow=c(1,3) )
+
+plot( x1, y1, pch=19, col=org.id, cex=2, 
+      ylim=c(20,60), xlim=c(0,30),
+      bty=&quot;n&quot;, axes=F,
+      xlab=&quot;Fertilizer&quot;, ylab=&quot;Tons of Corn Per Acre&quot;, 
+      line=1.5, cex.lab=1.5 ) 
+axis( side = 1, labels = FALSE )
+axis( side = 2, labels = FALSE )
+title( main=&quot;Scenario 1: All Farms Equal&quot;, line=1, cex.main=2 )
+
+plot( x2, y2, pch=19, col=org.id, cex=2, 
+      ylim=c(20,60), xlim=c(1,30),
+      bty=&quot;n&quot;, axes=F,
+      xlab=&quot;Fertilizer&quot;, ylab=&quot;Tons of Corn Per Acre&quot;, 
+      line=1.5, cex.lab=1.5 ) 
+axis( side = 1, labels = FALSE )
+axis( side = 2, labels = FALSE )
+title( main=&quot;Scenario 2: Land Quality Varies&quot;, line=1, cex.main=2 )
+
+plot( x3, y3, pch=19, col=org.id, cex=2, 
+      ylim=c(20,60), xlim=c(1,30),
+      bty=&quot;n&quot;, axes=F,
+      xlab=&quot;Fertilizer&quot;, ylab=&quot;Tons of Corn Per Acre&quot;, 
+      line=1.5, cex.lab=1.5 ) 
+axis( side = 1, labels = FALSE )
+axis( side = 2, labels = FALSE )
+title( main=&quot;Scenario 3: Management Varies&quot;, line=1, cex.main=2 )</code></pre>
+<p><img src="panel-model-selection_files/figure-html/unnamed-chunk-12-1.png" width="1344" /></p>
+</div>
+<div id="fixed-effects-by-de-meaning-data" class="section level1">
+<h1><span class="header-section-number">3</span> FIXED EFFECTS BY DE-MEANING DATA</h1>
+<pre class="r"><code># MODEL 1 - OLS
+
+x1  &lt;- 9 + 1:10 + 0*id
+y1  &lt;- 25 + x1 + 0*id + e
+
+x &lt;- x1
+y &lt;- y1
+m1.ols &lt;- lm( y ~ x )
+
+
+# MODEL 3
+
+x3  &lt;- 1:10 + 5*id
+y3  &lt;- 5 + x3 + 10*id + e
+
+x3.mean &lt;- ave( x3, org.id )
+x3.centered &lt;- x3 - x3.mean
+
+y3.mean &lt;- ave( y3, org.id )
+y3.centered &lt;- y3 - y3.mean
+
+x &lt;- x3
+y &lt;- y3
+m3.ols &lt;- lm( y ~ x )
+m3.fe &lt;- lm( y ~ x + org.id )
+
+x &lt;- x3.centered
+y &lt;- y3.centered
+m3.centered &lt;- lm( y ~ x )</code></pre>
+<pre class="r"><code>stargazer( m1.ols, m3.fe, m3.centered, 
+           type=&quot;text&quot;,
+           intercept.bottom=FALSE, 
+           column.labels   = c(&quot;OLS on Data w No Groups&quot;, 
+                               &quot;FE on Data w Groups&quot;, 
+                               &quot;OLS on De-Meaned Data&quot;),
+           column.separate = c(1,1,1),
+           add.lines = list(c(&quot;True Slope&quot;,
+                              &quot;1&quot;,&quot;1&quot;,&quot;1&quot;) ),            
+           omit=c(&quot;Constant&quot;,&quot;org.id&quot;,&quot;time&quot;,&quot;time2&quot;),
+           omit.stat=c(&quot;f&quot;,&quot;ser&quot;,&quot;adj.rsq&quot;,&quot;rsq&quot;,&quot;n&quot;),
+           dep.var.labels.include = FALSE,
+           dep.var.caption = &quot;&quot;,
+           digits=2 )</code></pre>
+<pre class="r"><code>stargazer( m1.ols, m3.fe, m3.centered, 
+           type=&quot;html&quot;,
+           intercept.bottom=FALSE, 
+           column.labels   = c(&quot;OLS on Data &lt;br&gt; w No Groups&quot;, 
+                               &quot;FE on Data &lt;br&gt; w Groups&quot;, 
+                               &quot;OLS on &lt;br&gt; De-Meaned Data&quot;),
+           column.separate = c(1,1,1),
+           add.lines = list(c(&quot;True Slope&quot;,
+                              &quot;1&quot;,&quot;1&quot;,&quot;1&quot;) ),            
+           omit=c(&quot;Constant&quot;,&quot;org.id&quot;,&quot;time&quot;,&quot;time2&quot;),
+           omit.stat=c(&quot;f&quot;,&quot;ser&quot;,&quot;adj.rsq&quot;,&quot;rsq&quot;,&quot;n&quot;),
+           dep.var.labels.include = FALSE,
+           dep.var.caption = &quot;&quot;,
+           digits=2,
+           out=&quot;DemeanedData.doc&quot; )</code></pre>
+<table style="text-align:center">
+<tr>
+<td colspan="4" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+OLS on Data <br> w No Groups
+</td>
+<td>
+FE on Data <br> w Groups
+</td>
+<td>
+OLS on <br> De-Meaned Data
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(1)
+</td>
+<td>
+(2)
+</td>
+<td>
+(3)
+</td>
+</tr>
+<tr>
+<td colspan="4" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+x
+</td>
+<td>
+0.98<sup>***</sup>
+</td>
+<td>
+0.98<sup>***</sup>
+</td>
+<td>
+0.98<sup>***</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.06)
+</td>
+<td>
+(0.05)
+</td>
+<td>
+(0.05)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td colspan="4" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+True Slope
+</td>
+<td>
+1
+</td>
+<td>
+1
+</td>
+<td>
+1
+</td>
+</tr>
+<tr>
+<td colspan="4" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+<em>Note:</em>
+</td>
+<td colspan="3" style="text-align:right">
+<sup><em></sup>p&lt;0.1; <sup><strong></sup>p&lt;0.05; <sup></strong></em></sup>p&lt;0.01
+</td>
+</tr>
+</table>
+<pre class="r"><code>## GRAPHICS
+
+par( mfrow=c(1,3) )
+
+plot( x1, y1, pch=19, col=gray(0.5,0.5), cex=3, 
+      ylim=c(34,46), xlim=c(mean(x1)-5,mean(x1)+5),
+      bty=&quot;n&quot;, axes=F,
+      xlab=&quot;&quot;, ylab=&quot;&quot;, 
+      cex.lab=1.5 ) 
+axis( side = 1, cex.axis=2, at=c(10.5,12.5,14.5,16.5,18.5), labels=c(10,12,14,16,18) )
+axis( side = 2, cex.axis=2 )
+title( main=&quot;Scenario 1: No Group Structure)&quot;, line=1, cex.main=2 )
+abline( h=40, lty=3, col=&quot;gray&quot;, lwd=3 )
+abline( v=mean(x), lty=3, col=&quot;gray&quot;, lwd=3 )
+text( 17, 39, expression( paste( &quot;( &quot;, bar( x ), &quot; , &quot;, bar( y ), &quot; )&quot; ) ), 
+      cex=2, col=&quot;black&quot; )
+
+
+plot( x3, y3, 
+      pch=19, col=gray(0.5,0.5), cex=3,
+      ylim=c(20,60), xlim=c(1,30),
+      bty=&quot;n&quot;, axes=F,
+      xlab=&quot;&quot;, ylab=&quot;&quot;, 
+      cex.lab=1.5 ) 
+axis( side = 1, cex.axis=2 )
+axis( side = 2, cex.axis=2 )
+title( main=&quot;Baseline FE Data&quot;, line=1, cex.main=2 )
+for( i in 1:3 )
+{ 
+   segments( x0=min(x3[id==i])-1, x1=max(x3[id==i])+1, 
+             y0=mean(y3[id==i]), 
+             lty=3, col=&quot;gray&quot;, lwd=3 )
+
+   segments( x0=mean(x3[id==i]),
+             y0=min(y3[id==i])-1, y1=max(y3[id==i])+1,
+             lty=3, col=&quot;gray&quot;, lwd=3 )
+
+   text( mean(x3[id==i])-3, mean(y3[id==i])+3, 
+         expression( paste( &quot;( &quot;, bar( x )[j], &quot; , &quot;, bar( y )[j], &quot; )&quot; ) ), 
+         cex=1.5, col=&quot;black&quot; )
+}
+
+
+
+plot( x3.centered, y3.centered, 
+      pch=19, col=gray(0.5,0.5), cex=3, 
+      ylim=c(-6,6), 
+      bty=&quot;n&quot;, axes=F,
+      xlab=&quot;&quot;, ylab=&quot;&quot;, 
+      cex.lab=1.5 ) 
+axis( side = 1, cex.axis=2 )
+axis( side = 2, cex.axis=2 )
+title( main=&quot;Mean Centered FE Data&quot;, line=1, cex.main=2 )
+abline( h=0, lty=3, col=&quot;gray&quot;, lwd=3 )
+abline( v=0, lty=3, col=&quot;gray&quot;, lwd=3 )
+text( -2.3, 1.5, expression( paste( &quot;( &quot;, x[ij] - bar( x )[j], &quot; , &quot;, y[ij] - bar( y )[j], &quot; )&quot; ) ), 
+      cex=2, col=&quot;black&quot; )</code></pre>
+<p><img src="panel-model-selection_files/figure-html/unnamed-chunk-16-1.png" width="1344" /></p>
+</div>
+<div id="taxonomy-of-bias-from-group-structure" class="section level1">
+<h1><span class="header-section-number">4</span> TAXONOMY OF BIAS FROM GROUP STRUCTURE</h1>
+<pre class="r"><code># SIMPSON&#39;S PARADOX
+
+
+# MODEL 1 - OLS
+
+x1  &lt;- 9 + 1:10 + 0*id
+y1  &lt;- 25 + x1 + 0*id + e
+
+
+x &lt;- x1
+y &lt;- y1
+m1 &lt;- lm( y ~ x )
+
+
+# MODEL 2 - Random Effect
+
+x2  &lt;- 9 + 1:10 + 0*id
+y2  &lt;- 5 + x2 + 10*id + e
+
+
+
+x &lt;- x2
+y &lt;- y2
+m2.ols &lt;- lm( y ~ x )
+m2.re &lt;- lm( y ~ x + org.id )
+
+
+# FE CASE 1
+
+x11  &lt;- 1:10 + 5*id
+y11  &lt;- 5 + x11 + 10*id + e
+
+x &lt;- x11
+y &lt;- y11
+m11.ols &lt;- lm( y ~ x )
+m11.fe &lt;- lm( y ~ x + org.id )
+
+
+# FE CASE 2
+
+x12  &lt;- 1:10 + 5*id
+y12  &lt;- 10 + 15*id + e
+
+x &lt;- x12
+y &lt;- y12
+m12.ols &lt;- lm( y ~ x )
+m12.fe  &lt;- lm( y ~ x + org.id )
+
+
+# FE CASE 3
+
+x13  &lt;- 1:10 + 5*id
+y13  &lt;- 60 + x13 - 18*id + e
+
+x &lt;- x13
+y &lt;- y13
+m13.ols &lt;- lm( y ~ x )
+m13.fe  &lt;- lm( y ~ x + org.id )
+
+
+
+## GRAPHICS
+
+par( mfrow=c(1,3) )
+
+
+plot( x11, y11, pch=19, col=org.id, cex=2, 
+      ylim=c(20,60), xlim=c(0,30),
+      bty=&quot;n&quot;, axes=F,
+      xlab=&quot;Hours of Private Tutoring&quot;, ylab=&quot;Math Scores&quot;, 
+      line=1.5, cex.lab=1.5 ) 
+axis( side = 1, labels = FALSE )
+axis( side = 2, labels = FALSE )
+title( main=&quot;Matthew Effect&quot;, line=1, cex.main=2 )
+
+
+plot( x12, y12, pch=19, col=org.id, cex=2, 
+      ylim=c(20,60), xlim=c(1,30),
+      bty=&quot;n&quot;, axes=F,
+      xlab=&quot;Hours of Private Tutoring&quot;, ylab=&quot;Math Scores&quot;, 
+      line=1.5, cex.lab=1.5 ) 
+axis( side = 1, labels = FALSE )
+axis( side = 2, labels = FALSE )
+title( main=&quot;Artificial Program Impact&quot;, line=1, cex.main=2 )
+
+
+plot( x13, y13, pch=19, col=org.id, cex=2, 
+      ylim=c(20,60), xlim=c(1,30),
+      bty=&quot;n&quot;, axes=F,
+      xlab=&quot;Hours of Private Tutoring&quot;, ylab=&quot;Math Scores&quot;,  
+      line=1.5, cex.lab=1.5 ) 
+axis( side = 1, labels = FALSE )
+axis( side = 2, labels = FALSE )
+title( main=&quot;Simpson&#39;s Paradox&quot;, line=1, cex.main=2 )</code></pre>
+<p><img src="panel-model-selection_files/figure-html/unnamed-chunk-17-1.png" width="1344" /></p>
+<pre class="r"><code>###
+
+
+
+
+par( mfrow=c(1,3), mar=c(5.1, 4.1, 4.1, 15) )
+
+plot( x11, y11, pch=19, col=gray(0.5,0.5), cex=3, 
+      ylim=c(20,70), xlim=c(1,25),
+      bty=&quot;n&quot;, axes=F,
+      xlab=&quot;Program Impact Over-Stated&quot;, ylab=&quot;&quot;, 
+      line=1.5, cex.lab=1.5, col.lab=&quot;gray50&quot;, cex.lab=1.5 ) 
+axis( side = 1, labels = FALSE )
+axis( side = 2, labels = FALSE )
+title( main=&quot;Matthew Effect&quot;, line=1, cex.main=2 )
+abline( m11.ols, lwd=2 )
+for(i in 1:3){ abline( lm(y11[id==i]~x11[id==i]), lty=3, lwd=3, col=&quot;darkgray&quot; ) } 
+
+mtext( &quot; Pooled Model&quot;, side=4, outer=F, at=m11.ols$fitted.values[30]+5, cex=1.5, las=2 )
+b &lt;- m11.fe$coefficients
+mtext( &quot;  FE Slope&quot;, side=4, outer=F, at=b[1]+25*b[2]+2, cex=1, las=2 )
+mtext( &quot;  FE Slope&quot;, side=4, outer=F, at=b[1]+25*b[2]+b[3]+2, cex=1, las=2 )
+mtext( &quot;  FE Slope&quot;, side=4, outer=F, at=b[1]+25*b[2]+b[4]+2, cex=1, las=2 )
+
+
+
+plot( x12, y12, pch=19, col=gray(0.5,0.5), cex=3, 
+      ylim=c(20,70), xlim=c(1,25),
+      bty=&quot;n&quot;, axes=F,
+      xlab=&quot;Program Impact Over-Stated&quot;, ylab=&quot;&quot;, 
+      line=1.5, cex.lab=1.5, col.lab=&quot;gray50&quot;, cex.lab=1.5 ) 
+axis( side = 1, labels = FALSE )
+axis( side = 2, labels = FALSE )
+title( main=&quot;Artificial Program Impact&quot;, line=1, cex.main=2 )
+abline( m12.ols, lwd=2 )
+for(i in 1:3){ abline( lm(y12[id==i]~x12[id==i]), lty=3, lwd=3, col=&quot;darkgray&quot; ) } 
+
+mtext( &quot; Pooled Model&quot;, side=4, outer=F, at=m12.ols$fitted.values[30]+5, cex=1.5, las=2 )
+b &lt;- m12.fe$coefficients
+mtext( &quot;  FE Slope&quot;, side=4, outer=F, at=b[1]+25*b[2]+2, cex=1, las=2 )
+mtext( &quot;  FE Slope&quot;, side=4, outer=F, at=b[1]+25*b[2]+b[3]+2, cex=1, las=2 )
+mtext( &quot;  FE Slope&quot;, side=4, outer=F, at=b[1]+25*b[2]+b[4]+2, cex=1, las=2 )
+
+
+plot( x13, y13, pch=19, col=gray(0.5,0.5), cex=3, 
+      ylim=c(20,70), xlim=c(1,25),
+      bty=&quot;n&quot;, axes=F,
+      xlab=&quot;Impact has Wrong Sign&quot;, ylab=&quot;&quot;, 
+      line=1.5, cex.lab=1.5, col.lab=&quot;gray50&quot;, cex.lab=1.5 ) 
+axis( side = 1, labels = FALSE )
+axis( side = 2, labels = FALSE )
+title( main=&quot;Simpson&#39;s Paradox&quot;, line=1, cex.main=2 )
+abline( m13.ols, lwd=2 )
+for(i in 1:3){ abline( lm(y13[id==i]~x13[id==i]), lty=3, lwd=3, col=&quot;darkgray&quot; ) } 
+
+mtext( &quot; Pooled Model&quot;, side=4, outer=F, at=m13.ols$fitted.values[30]-3, cex=1.5, las=2 )
+b &lt;- m13.fe$coefficients
+mtext( &quot;  FE Slope&quot;, side=4, outer=F, at=b[1]+25*b[2]+2, cex=1, las=2 )
+mtext( &quot;  FE Slope&quot;, side=4, outer=F, at=b[1]+25*b[2]+b[3]+2, cex=1, las=2 )
+mtext( &quot;  FE Slope&quot;, side=4, outer=F, at=b[1]+25*b[2]+b[4]+2, cex=1, las=2 )</code></pre>
+<p><img src="panel-model-selection_files/figure-html/unnamed-chunk-17-2.png" width="1344" /></p>
+<pre class="r"><code>stargazer( m11.ols, m11.fe, m12.ols, m12.fe, m13.ols, m13.fe,
+           type=&quot;text&quot;,
+           intercept.bottom=TRUE,
+           column.labels   = c(&quot;Matthew Effect&quot;, 
+                               &quot;Artificial Impact&quot;, 
+                               &quot;Simpson&#39;s Paradox&quot;),
+           column.separate = c(2,2,2),
+           add.lines = list(c(&quot;True Slope&quot;,
+                              &quot;1&quot;,&quot;1&quot;,&quot;0&quot;,&quot;0&quot;,&quot;1&quot;,&quot;1&quot;), 
+                            c(&quot;Fixed Effects?&quot;,
+                              &quot;NO&quot;,&quot;YES&quot;,&quot;NO&quot;,&quot;YES&quot;,&quot;NO&quot;,&quot;YES&quot;) ), 
+           omit=c(&quot;Constant&quot;,&quot;org.id&quot;,&quot;time&quot;,&quot;time2&quot;),
+           omit.stat=c(&quot;f&quot;,&quot;ser&quot;,&quot;adj.rsq&quot;,&quot;rsq&quot;,&quot;n&quot;),
+           dep.var.labels.include = FALSE,
+           dep.var.caption = &quot;&quot;,
+           digits=2 )</code></pre>
+<pre class="r"><code>stargazer( m11.ols, m11.fe, m12.ols, m12.fe, m13.ols, m13.fe,
+           type=&quot;html&quot;,
+           intercept.bottom=TRUE,
+           column.labels   = c(&quot;Matthew Effect&quot;, 
+                               &quot;Artificial Impact&quot;, 
+                               &quot;Simpson&#39;s Paradox&quot;),
+           column.separate = c(2,2,2),
+           add.lines = list(c(&quot;True Slope&quot;,
+                              &quot;1&quot;,&quot;1&quot;,&quot;0&quot;,&quot;0&quot;,&quot;1&quot;,&quot;1&quot;), 
+                            c(&quot;Fixed Effects?&quot;,
+                              &quot;NO&quot;,&quot;YES&quot;,&quot;NO&quot;,&quot;YES&quot;,&quot;NO&quot;,&quot;YES&quot;) ), 
+           omit=c(&quot;Constant&quot;,&quot;org.id&quot;,&quot;time&quot;,&quot;time2&quot;),
+           omit.stat=c(&quot;f&quot;,&quot;ser&quot;,&quot;adj.rsq&quot;,&quot;rsq&quot;,&quot;n&quot;),
+           dep.var.labels.include = FALSE,
+           dep.var.caption = &quot;&quot;,
+           digits=2,
+           out=&quot;BiasModels.doc&quot;)</code></pre>
+<table style="text-align:center">
+<tr>
+<td colspan="7" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td colspan="2">
+Matthew Effect
+</td>
+<td colspan="2">
+Artificial Impact
+</td>
+<td colspan="2">
+Simpson’s Paradox
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(1)
+</td>
+<td>
+(2)
+</td>
+<td>
+(3)
+</td>
+<td>
+(4)
+</td>
+<td>
+(5)
+</td>
+<td>
+(6)
+</td>
+</tr>
+<tr>
+<td colspan="7" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+x
+</td>
+<td>
+2.36<sup>***</sup>
+</td>
+<td>
+0.98<sup>***</sup>
+</td>
+<td>
+2.03<sup>***</sup>
+</td>
+<td>
+-0.02
+</td>
+<td>
+-1.39<sup>***</sup>
+</td>
+<td>
+0.98<sup>***</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.19)
+</td>
+<td>
+(0.05)
+</td>
+<td>
+(0.27)
+</td>
+<td>
+(0.05)
+</td>
+<td>
+(0.32)
+</td>
+<td>
+(0.05)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td colspan="7" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+True Slope
+</td>
+<td>
+1
+</td>
+<td>
+1
+</td>
+<td>
+0
+</td>
+<td>
+0
+</td>
+<td>
+1
+</td>
+<td>
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Fixed Effects?
+</td>
+<td>
+NO
+</td>
+<td>
+YES
+</td>
+<td>
+NO
+</td>
+<td>
+YES
+</td>
+<td>
+NO
+</td>
+<td>
+YES
+</td>
+</tr>
+<tr>
+<td colspan="7" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+<em>Note:</em>
+</td>
+<td colspan="6" style="text-align:right">
+<sup><em></sup>p&lt;0.1; <sup><strong></sup>p&lt;0.05; <sup></strong></em></sup>p&lt;0.01
+</td>
+</tr>
+</table>
+</div>
+
+<div class="footer">
+<div class="row"  align="center">
+
+  Designed by <a href=http://ds4ps.github.io target="_blank">DS4PS</a><br>
+  Powered by <a href=http://jekyllrb.com target="_blank">Jekyll</a>
+
+</div>
+</div>
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
