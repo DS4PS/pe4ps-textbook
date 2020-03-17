@@ -1,4 +1,4 @@
-# pe4ps-textbook
+# Program Eval for Public Service Organizations 
 
 Open source textbook for Program Evaluation for the Public Sector
 
