@@ -1,0 +1,415 @@
+---
+title: "Interrupted Time Series"
+output: 
+  bookdown::html_document2:
+    df_print: paged
+    theme: cerulean
+    highlight: haddock
+    toc: yes
+    toc_float: yes
+    code_fold: hid
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message=F, warning=F, fig.width = 10)
+```
+
+Note: replication of these dataset require to install two packages in R
+
+```{r, echo=FALSE, results="hide"}
+
+install.packages("scales", repos="https://cran.cnr.berkeley.edu")
+install.packages("fastDummes", repos="https://cran.cnr.berkeley.edu")
+
+```
+
+```{r, echo=FALSE, results="hide"}
+
+library("scales")
+library("fastDummes")
+
+```
+
+# INSTRUMENT VARIABLE
+
+## PublicHousing (lab data)
+
+```{r, eval = F}
+
+set.seed(765)
+
+Supply  <- rnorm(1000, 15000, 20000)
+WaitingTime  <- rnorm(1000, 15000, 20000)
+Age <- rnorm(1000, 15000, 20000)
+Stamp <- rnorm(1000, 12000, 18000)
+Race  <- sample(rep(c(1,2,3,4), 250))
+Education  <- sample(rep(c(1,2,3,4), 250))
+MaritalStatus  <- sample(rep(c(1,2,3,4), 250))
+err = rnorm(1000, 7, 2.5)
+err2 = rnorm(1000, 5, 4)
+
+ParentsHealthStatus <- rnorm(1000, 13000, 19000)
+ParentsHealthStatus <- rescale(ParentsHealthStatus, to = c(1,20))
+
+HealthBehavior = 9 + 3.5 * ParentsHealthStatus + 36 * err
+HealthBehavior <- rescale(HealthBehavior, to = c(0,25))
+
+Supply <- rescale(Supply, to = c(0.3, 10))    
+WaitingTime <- rescale(WaitingTime, to = c(5, 46))   
+Age  <- rescale(Age,  to = c(20, 63)) 
+Stamp <- rescale(Stamp, to = c(120, 300))
+
+data <- data.frame(Supply, WaitingTime, HealthBehavior, Stamp, ParentsHealthStatus, Age, Race, Education, MaritalStatus, err, err2)
+
+data = dummy_cols(data, select_columns = c("Race", "MaritalStatus"))
+
+PublicHousing <- 2.7 + 
+6.5 * data$Supply + 
+8.7 * data$WaitingTime + 
+0.6 * data$ParentsHealthStatus + 
+14 * data$HealthBehavior +
+1.2 * data$Age + 
+0.3 * data$Race_3 + 
+0.8 * data$Race_2 + 
+0.5 * data$Race_1 + 
+0.2 * data$Race_4 -
+1.6 * data$Education - 
+2.1 * data$MaritalStatus_1 + 
+0.9 * data$MaritalStatus_2 + 
+1.5 * data$MaritalStatus_3 + 
+1.9 * data$MaritalStatus_4 +
+7.5 * data$err
+
+HealthStatus  <- 5.3 + 
+1.3 * PublicHousing +
+17 * data$HealthBehavior +
+3.9 * data$Age + 
+2.6 * data$Race_3 + 
+3.8 * data$Race_2 + 
+1.5 * data$Race_1 + 
+1.2 * data$Race_4 -
+2.8 * data$Education - 
+2.7 * data$MaritalStatus_1 + 
+2.9 * data$MaritalStatus_2 - 
+3.3 * data$MaritalStatus_3 + 
+2.9 * data$MaritalStatus_4 +
+4.31 * data$err2
+
+PublicHousing <- rescale(PublicHousing,  to = c(0, 60)) 
+HealthStatus <- rescale(HealthStatus, to = c(1, 20))    
+
+data <- data.frame(PublicHousing, HealthStatus, data)
+
+data$err <- NULL
+data$err2 <- NULL
+data$X <- NULL
+data$X <- NULL
+
+```
+
+## FatherEduc (lecture data)
+
+```{r, eval = F}
+
+x3 <- rnorm(1000, 50000, 10000)    #Control variable
+
+x2 <- rnorm(1000, 35000, 10000)    #Ability
+
+z  <- rnorm(1000, 15000, 20000)    #Father's education (IV)
+
+ex1 = rnorm(1000, 26000, 10000)
+
+ey = 0.43*rnorm(1000, 50000, 10000)
+
+x1 <- 3.7 + 0.52*z + 0.40*x2 + 0.33*x3 + ex1 #Education
+
+y  <- 5 + 0.23*x1 + 0.5*x2 + 0.2*x3 - ey #Wage
+
+y  <- rescale(y,  to = c(7.75, 300)) #Rescale from minimum wage to Director wage (hourly)
+
+x3 <- rescale(x3, to = c(0, 15))     #Rescale as experience
+
+x1 <- rescale(x1, to = c(10, 23))    #Rescale as years of school. Min 10 to max 23 (PhD)
+
+x2 <- rescale(x2, to = c(0, 600))    #Hypothetical test scores for ability
+
+z  <- rescale(z,  to = c(10, 23))  #Father's education
+
+dat <- data.frame(y, x1, x2, x3, z)
+
+```
+
+# REGRESSION DISCONTINUITY
+
+##  Attendance (lecture data)
+
+```{r, eval = F}
+
+set.seed(650)
+Attendance1 = rbeta(1000, shape1 = 7, shape2 = 2,  ncp = 0)
+Attendance = rescale(Attendance1, to = c(20,100))
+
+Treatment = Attendance
+Treatment = ifelse(Treatment>median(Treatment), 0, 1)
+
+Attendance_c = Attendance - median(Attendance)
+
+err = rnorm(1000, 600, 100)
+
+Y = 40 + 120*Treatment + 20*Attendance_c + err
+
+Performance = rescale(Y, to = c(0,100))
+
+data = as.data.frame(cbind(Performance, Treatment, Attendance, Attendance_c))
+
+```
+
+##SummerSchool (lab data)
+
+```{r, eval = F}
+
+set.seed(963)
+STD_math_7 = rbeta(1000, shape1 = 7, shape2 = 2,  ncp = 0)
+STD_math_7 = rescale(STD_math_7, to = c(0, 100))
+
+STD_math_8 = rbeta(1000, shape1 = 11, shape2 = 2,  ncp = 0)
+STD_math_8 = rescale(STD_math_8, to = c(0, 100))
+
+Treatment = STD_math_8
+Treatment = ifelse(Treatment < 60, 1, 0)
+
+STD_math_8c = STD_math_8 - 60
+
+err = rnorm(1000, 600, 100)
+
+GPA_8 = 13 + 52 * STD_math_7 + 2.1 * err
+
+GPA_9 = 15 + 183.5 * Treatment + 46 * STD_math_8c + 2.2 * err
+
+GPA_9 = rescale(GPA_9, to = c(0, 4))
+GPA_8 = rescale(GPA_8, to = c(0, 4))
+
+data = as.data.frame(cbind(GPA_9, GPA_8, Treatment, STD_math_7, STD_math_8, STD_math_8c))
+
+data$STD_math_c <- NULL
+
+```
+
+# TIME SERIES 
+
+## Wellbeing (lecture data)
+
+```{r, eval = F}
+
+set.seed(123) #Change seed to slightly modify results
+
+T = rep(1:365) #Time
+D = ifelse(T > 200, 1, 0) #Intervention occur at time 201
+P = ifelse(T <= 200, 0, rep(1:200)) #Time before and after treatment
+
+err = rnorm(365, 150, 70) # add error term
+
+Y = 5.4 + 0.5*T + 20*D + 1.2*P + err
+
+Y <- rescale( Y, to = c(0, 300)) #Wellbeing is represented on an index from 0 to 300. Variable can be rescaled for any value. 
+
+dataTS = as.data.frame(cbind(Y, T, D, P))
+
+```
+
+## Ridership (lab data)
+
+```{r, eval = F}
+
+set.seed(372)
+Time = rep(1:365)
+Treatment = ifelse(Time > 120, 1, 0)
+TimeSince = c(rep(0, 120), rep(1:245))
+
+err = rnorm(365, 150, 70)
+
+passengers = 3.7 + 0.25*Time + 16*Treatment + 0.35*TimeSince + err
+
+passengers <- rescale( passengers, to = c(1100, 1700))
+
+data = as.data.frame(cbind(passengers, Time, Treatment, TimeSince))
+
+data$Time <- NULL #For lab purposes, we eliminate these variables and ask students to create tem
+data$Treatment <- NULL
+data$TimeSince <- NULL
+
+```
+
+# DIFFERENCE IN DIFFERENCE
+
+## Greening (lab data)
+
+```{r, eval = F}
+
+set.seed(69)
+
+Group <- sample( c(0,1), 2000, T )
+Months <- sample( c(0,10,20), 2000, T )
+
+e = rnorm(2000, 500, 7000)
+Income = rnorm(2000, 200, 5000)
+Inequality = rnorm(2000, 320, 6500)
+
+e <- rescale(e, to = c(0, 10500))
+Income <- rescale(Income, to = c(20, 300))
+Inequality <- rescale(Inequality, to = c(0,1))
+
+Vandalism <- 57 + 151 * Group + 159 * Months - 521 * Group * Months + e 
+
+Vandalism <- rescale(Vandalism, to = c(130, 3540))
+Post <- ifelse( Months==0, 0, 1 )
+
+dat <- as.data.frame( cbind( Vandalism, Months, Group, Post))
+
+```
+
+
+## Housing (lecture data)
+
+```{r, eval = F}
+
+set.seed(98)
+
+Post_Treatment = rep(c(0,1), 500) #Post- and pre-treatment varaible
+Group = rep(c(0,0,1,1), 250) #Great four groups: pre/post treatment, treatment/control
+
+e = rnorm(1000, 500, 7000)
+
+y = 5000 + 1500 * Group + 4300* Post_Treatment + 4000 * Group * Post_Treatment + e
+
+House_Price <- rescale(y, to = c(50000, 500000))
+#House_Price = log(Y) House price variable can be used in log form
+
+data = as.data.frame(cbind(House_Price, Group, Post_Treatment))
+
+```
+
+# LOGIT MODEL
+
+## Vaccination (lab data)
+
+```{r, eval = F}
+
+set.seed(555)
+
+Democrats = rnorm(49)           
+Evangelics = rnorm(49)            
+Catholics = rnorm(49)
+Media = rnorm(49)
+Merck = rnorm(49)
+
+err = rnorm(49)
+
+z = - 1.5 - 1.8 * Evangelics - 0.4 * Democrats - 0.3 * Catholics - 5 * Media - 0.2 * Merck + err            # linear combination with a bias
+
+pr = 1/(1+exp(-z))         # pass through an inv-logit function
+
+Adoption = rbinom(49,1,pr)      # bernoulli response variable
+
+Democrats = rescale(Democrats, to=c(0,1))
+Evangelics = rescale(Evangelic, to=c(0,1))
+Catholics = rescale(Catholic, to=c(0,1))
+Media = rescale(Media, to=c(0,800))
+Merck = rescale(Merck, to=c(0, 5000))
+
+df = data.frame(Adoption, Democrats, Evangelics, Catholics, Media, Merck)
+
+colnames(df) <- c("Adoption", "Democrats", "Evangelics", "Catholics", "Media", "Merck")
+
+```
+
+## LSAT (lecture data)
+
+```{r, eval = F}
+
+set.seed(666)
+
+LSAT = rnorm(1000)           
+Essay = rnorm(1000)            
+GPA = rnorm(1000)
+err = rnorm(1000)
+
+z = 1 + 1.8*LSAT + 1.4 * Essay + 1.1 * GPA + err            # linear combination with a bias
+
+pr = 1/(1+exp(-z))         # pass through an inv-logit function
+
+Admission = rbinom(1000,1,pr)      # bernoulli response variable
+
+LSAT = rescale(LSAT, to=c(120,180))
+Essay = rescale(Essay, to=c(1,100))
+GPA = rescale(GPA, to=c(0,5))
+
+df = data.frame(y = Admission, x1 = LSAT, x2 = Essay, x3 = GPA)
+
+colnames(df) <- c("Admission", "LSAT", "Essay", "GPA")
+
+```
+
+# FIXED EFFECT
+
+## Beer taxes (lab data)
+
+```{r, eval = F}
+
+set.seed(596)
+state = rep(c(1:7), 7)
+state = sort(state)
+year = rep(c(2010:2016), 7)
+
+state = dummy_cols(state) # Create dummies
+year = dummy_cols(year)
+
+taxes = rnorm(49, 35, 120)
+err = rnorm(49, 31800, 12480)
+
+data = as.data.frame(cbind(state, year, taxes))
+colnames(data) <- c("state", "S1", "S2", "S3", "S4", "S5", "S6", "S7", "year", "Y1", "Y2", "Y3", "Y4", "Y5", "Y6", "Y7", "taxes")
+
+accidents = (300 - 110*data$taxes + 1121130*data$S1 + 1124217*data$S2 + 1113612*data$S3 - 1231716*data$S4 + 1135213*data$S5 - 121327*data$S6 + 112320*data$S7 + 1.6*err)
+
+taxes = rescale(taxes, to = c(5,35))
+accidents = rescale(accidents, to = c(900,2100))
+
+data = as.data.frame(cbind(data, accidents))
+
+```
+
+## Companies (lecture data)
+
+```{r, eval = F}
+
+set.seed(133)
+
+CompanyR = rep("Company", 50)
+CompanyN = rep(1:10, 5)
+Company = paste(CompanyR, CompanyN, sep = "", collapse = NULL)
+Company = sort(Company)
+
+Year = rep(c("2010", "2011", "2012", "2013", "2014"), 10)
+
+data = as.data.frame(cbind(Company, Year))
+
+data = dummy_cols(data)
+
+
+RDPub = rnorm(50, 35000, 12000)
+
+err = rnorm(50, 31000, 7000)
+
+data = as.data.frame(cbind(data, RDPub))
+
+RD = (30000 + 1.4*RDPub - 13000*data$Company_Company1 + 17000*data$Company_Company2 + 21000*data$Company_Company3 - 3690*data$Company_Company4 + 13600*data$Company_Company5 
+- 25870*data$Company_Company6 
++ 24500*data$Company_Company7 - 8963*data$Company_Company8 + 11596*data$Company_Company9 + 17800*data$Company_Company10 - 12000*data$Year_2010 - 5000*data$Year_2011 - 2896*data$Year_2012 + 12175*data$Year_2013  + 17000*data$Year_2014 + err)
+
+data = as.data.frame(cbind(data, RD))
+
+```
+
+
+
