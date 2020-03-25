@@ -1,10 +1,12 @@
 ---
 title: "Difference in Difference"
+output: html_document
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, message=F, warning=F, fig.width = 10)
 ```
+
 **Packages**
 
 Here are the packages we will use in this lecture. If you don't remember how to install them, you can have a look at the code. 
@@ -25,14 +27,14 @@ library( "stargazer" )
 * What is the parallel trend assumption?
 * Applying a difference-in-difference model to data in R
 
-```{r, echo=FALSE, results="hide"}
+```{r, eval=F, echo=FALSE, results="hide"}
 install.packages("stargazer", repos="https://cran.cnr.berkeley.edu")
 install.packages("scales", repos="https://cran.cnr.berkeley.edu")
 ```
 
 ```{r, echo=FALSE, results="hide"}
-library("stargazer")
-library("scales")
+library( "stargazer" )
+library( "scales" )
 ```
 
 # The key concept
@@ -659,7 +661,7 @@ They collected data before and after the minimum wage was approved. Data used in
 We start by uploading the data
 
 ```{r, echo=T}
-data = read.csv("DATA/DID_Example.csv")
+data <- read.csv( "data/DID_Example.csv" )
 ```
 
 These are the variables contained in the dataset. 
@@ -1070,7 +1072,7 @@ text( 1.1, CF+5, "Counterfactual", col=cf.col, pos=4, cex=1 )
 
 There is no easy way to test the parallel line assumption. You can (1) use theory to make and argument or (2) if you have longitudinal data compare the trend of the control and treatment group before the intervention to see if they are similar. 
 
-```{css, echo=F}
+```{css, echo=F, eval=F}
 p {
 color: black;
 margin: 0 0 20px 0;
