@@ -21,11 +21,13 @@ knitr::opts_chunk$set( echo = TRUE, message=F, warning=F, fig.width = 10 )
 library(stargazer)
 ```
 
+
+# Instructions 
+
 This lab is loosely based on Branas et al. (2011) article, entitled ["A Difference-in-Differences Analysis of Health, Safety, and Greening Vacant Urban Space"](https://academic.oup.com/aje/article/174/11/1296/111352).
 
-For this lab you need to upload the DiffInDiff_lab data available in the class R package. 
 
-There are **4 sets of questions** to be answered. You can get up to 100 points + bonus questions. Points are indicated next to each question. 
+There are **4 sets of questions**. You can earn up to 100 points + bonus questions. Points are indicated next to each question. 
 
 Remember to:
 
@@ -33,14 +35,8 @@ Remember to:
 * Submit the r markdown file with all your codes. 
 * Bold your answers.
 
-```{r, echo=FALSE, results="hide"}
 
-setwd("O:/Users/ffusi/Jesse/Labs/DiffInDiff")
-data = read.csv("DiffInDiff_lab.csv")
- 
-```
-
-# The policy problem
+## The policy problem
 
 > **Research question**: 
 > Does greening vacant lots decreases vandalism in City A? 
@@ -54,9 +50,17 @@ Three years after its implementation, the city wants to know whether the program
 > **Hypothesis**: 
 > Greening vacant lots will decrease vandalism in City A.
 
-# Data
+## Data
 
 Data on vandalism acts were reported by the local police and include the total number of calls about vandalism acts that the police has received during the year before and after the greening from households near the vacant lots. 
+
+```{r, echo=TRUE}
+
+URL <- "https://raw.githubusercontent.com/DS4PS/pe4ps-textbook/master/labs/DATA/diff-in-diff-lab.csv"
+data <- read.csv( URL, stringsAsFactors=F )
+ 
+```
+
 
  **Variable name**       | **Description    **                                   
 ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------
@@ -64,9 +68,16 @@ Vandalism                |Number of calls about vandalism acts near to the vacan
 Group                    |Treatment (=1) and control group (=0)
 Post_Treatment           |Observation three years before the treatment (=0) and three years after the treatment (=1)
 
-# Analysis
+
+# Lab Questions 
+
+
+## Question 1 
 
 **Q1: Write down the difference-in-difference model** (5 points)
+
+
+## Question 2
 
 **Q2: Run the regression in R and present results in a nice table with stargazer** (5 + 5 points)
 
@@ -77,6 +88,8 @@ Post_Treatment           |Observation three years before the treatment (=0) and 
 * **Q2e:** What is the average number of calls in the control group after the intervention? (5 points)
 * **Q2f:** Does greening help to reduce vandalism? Report the coefficient that you need to look. (5 + 5 points)
 * **Q2g:** What is the average number of calls in the treatment group after the intervention? (5 points)
+
+## Question 3
 
 **Q3: Let's now look at the counterfactual.** 
 
@@ -91,12 +104,53 @@ $$
 $$
 Where Group indicates the treatment (=1) and the control group (=0) and time is the time passed since the intervention (in days).
 
+
+## Question 4
+
 * **Q4a:** How do you interpret coefficient b2 and b3? (5 + 5 points)
 * **Q4b:** HOw are b2 and b3 in this model different from b2 and b3 in the diff-in-diff model you estimated before? (5 + 5 points)
 
-**BONUS QUESTIONS**
+
+## BONUS QUESTIONS
 
 * **BQ1**: Re-write the above formula imaging the starting number of calls to be different between the treatment and the control group, the overall trend over time to be positive, but no annual increase differences between the two groups exist. (5 points)
+
 * **BQ2:** Between the diff-in-diff model and the grouped data regression, which of these is a more convincing counter-factual, in your opinion? (5 points)
+
+
+
+
+---
+
+
+<br>
+
+# Submission Instructions
+
+When you have completed your assignment, knit your RMD file to generate your rendered HTML file. 
+
+Login to Canvas at <http://canvas.asu.edu> and navigate to the assignments tab in the course repository. Upload your HTML and RMD files to the appropriate lab submission link.
+
+
+Remember to:
+
+* name your files according to the convention: **Lab-##-LastName.Rmd**.
+* show your solution, include your code.
+* format your regression tables using stargazer 
+* bold your answers. 
+* do NOT print excessive output (like a full data set).
+* follow appropriate style guidelines (spaces between arguments, etc.).
+
+
+*Platforms like Canvas and Blackboard sometimes disallow you from submitting HTML files when there is embedded computer code. If this happens create a zipped folder with both the RMD and HTML files.*
+
+
+<br>
+
+-----
+
+<br>
+
+
 
 
