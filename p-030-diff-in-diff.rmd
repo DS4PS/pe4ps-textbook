@@ -33,8 +33,10 @@ install.packages("scales", repos="https://cran.cnr.berkeley.edu")
 ```
 
 ```{r, echo=FALSE, results="hide"}
-library( "stargazer" )
-library( "scales" )
+library( stargazer )
+library( scales )
+library( pander )
+library( dplyr )
 ```
 
 # The key concept
@@ -518,7 +520,7 @@ We are going to simulate some housing prices data for 2 groups of houses: houses
 We can have a look at the dataset
 
 ```{r}
-head(data, 10)
+head( data, 10 ) %>% pander()
 ```
 
 The dataset contains three variables:
@@ -661,7 +663,8 @@ They collected data before and after the minimum wage was approved. Data used in
 We start by uploading the data
 
 ```{r, echo=T}
-data <- read.csv( "data/DID_Example.csv" )
+URL <- "https://raw.githubusercontent.com/DS4PS/pe4ps-textbook/master/DATA/DID_Example.csv"
+data <- read.csv( URL, stringsAsFactors=F )
 ```
 
 These are the variables contained in the dataset. 
