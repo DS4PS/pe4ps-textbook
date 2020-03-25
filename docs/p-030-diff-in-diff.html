@@ -281,6 +281,9 @@ $(document).ready(function () {
         <li>
   <a href="p-020-time-series.html">TimeSeries</a>
 </li>
+<li>
+  <a href="p-030-diff-in-diff.html">Diff-in-Diff</a>
+</li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
         <li>
@@ -325,7 +328,7 @@ $(document).ready(function () {
 <li><a href="#the-counterfactual-1"><span class="toc-section-number">2.4</span> The counterfactual</a></li>
 </ul></li>
 <li><a href="#replication-of-a-study"><span class="toc-section-number">3</span> Replication of a study</a><ul>
-<li><a href="#data-1"><span class="toc-section-number">3.1</span> Data</a></li>
+<li><a href="#replication-data"><span class="toc-section-number">3.1</span> Replication Data</a></li>
 <li><a href="#analysis-1"><span class="toc-section-number">3.2</span> Analysis</a></li>
 <li><a href="#discussion-of-the-results-1"><span class="toc-section-number">3.3</span> Discussion of the results</a></li>
 </ul></li>
@@ -339,10 +342,15 @@ $(document).ready(function () {
 <p><strong>Packages</strong></p>
 <p>Here are the packages we will use in this lecture. If you don’t remember how to install them, you can have a look at the code.</p>
 <ul>
-<li><strong>stargazer</strong> for nice tables</li>
+<li><strong>stargazer</strong> for nice regression tables</li>
+<li><strong>pander</strong> for nice data tables</li>
+<li><strong>dplyr</strong> for data manipulation</li>
+<li><strong>scales</strong> to adjust values in simulated data</li>
 </ul>
-<pre class="r"><code>install.packages( stargazer )
-library( &quot;stargazer&quot; )</code></pre>
+<pre class="r"><code>library( stargazer )
+library( pander )
+library( dplyr )
+library( scales )</code></pre>
 <p><strong>Learning objectives</strong></p>
 <ul>
 <li>What is the scope of a difference-in-difference model?</li>
@@ -435,9 +443,13 @@ stargazer( reg,
            type = &quot;html&quot;, 
            dep.var.labels = (&quot;Outcome&quot;),
            column.labels = c(&quot;&quot;),
-           covariate.labels = c(&quot;Intercept (B0)&quot;, &quot;Treatment (B1)&quot;, &quot;Post-treatment (B2)&quot;, &quot;Diff in Diff (B3)&quot;),
+           covariate.labels = c(&quot;Intercept (B0)&quot;, 
+                                &quot;Treatment (B1)&quot;, 
+                                &quot;Post-treatment (B2)&quot;, 
+                                &quot;Diff in Diff (B3)&quot;),
            omit.stat = &quot;all&quot;, 
-           digits = 2, intercept.bottom = FALSE )</code></pre>
+           digits = 2, 
+           intercept.bottom = FALSE )</code></pre>
 <table style="text-align:center">
 <tr>
 <td colspan="2" style="border-bottom: 1px solid black">
@@ -707,8 +719,10 @@ Houses nearby affordable housing projects will report a greater decrease in pric
 </blockquote>
 <div id="data" class="section level2">
 <h2><span class="header-section-number">2.1</span> Data</h2>
-<p>We can have a look at the dataset</p>
-<pre class="r"><code>head( data, 10 ) %&gt;% pander()</code></pre>
+<p>We can have a look at the data:</p>
+<pre class="r"><code>URL &lt;- &quot;https://raw.githubusercontent.com/DS4PS/pe4ps-textbook/master/data/diff-in-diff-housing-example.csv&quot;
+data &lt;- read.csv( URL, stringsAsFactors=FALSE )
+head( data, 10 ) %&gt;% pander()</code></pre>
 <table style="width:54%;">
 <colgroup>
 <col width="19%" />
@@ -798,7 +812,7 @@ Houses nearby affordable housing projects will report a greater decrease in pric
 </tr>
 <tr class="odd">
 <td><span class="math inline">\(\text{Post_Treatment}\)</span></td>
-<td>Subsized housing site is not constructed (=0) or subsized housing site is open (=1)</td>
+<td>Prior to construction of new site (=0) or after subsized housing is built (=1)</td>
 </tr>
 </tbody>
 </table>
@@ -809,6 +823,19 @@ Houses nearby affordable housing projects will report a greater decrease in pric
 <center>
 <span class="math inline">\(\text{Y} = \beta_0 + \beta_1*Group + \beta_2*Treatment + \beta_3 * Group * Treatment + \text{e}\)</span>
 </center>
+<pre class="r"><code>reg &lt;- lm( House_Price ~ Group + Post_Treatment + Group * Post_Treatment )
+
+stargazer( reg, 
+           type = &quot;html&quot;, 
+           dep.var.labels = (&quot;Housing prices&quot;),
+           column.labels = c(&quot;&quot;),
+           covariate.labels = c(&quot;Intercept (B0)&quot;, 
+                                &quot;Treatment group (B1)&quot;, 
+                                &quot;Post-treatment (B2)&quot;, 
+                                &quot;Diff in Diff (B3)&quot;),
+           omit.stat = &quot;all&quot;, 
+           digits = 0, 
+           intercept.bottom = FALSE )</code></pre>
 <table style="text-align:center">
 <tr>
 <td colspan="2" style="border-bottom: 1px solid black">
@@ -849,14 +876,14 @@ Housing prices
 Intercept (B0)
 </td>
 <td>
-216,672.60<sup>***</sup>
+216,673<sup>***</sup>
 </td>
 </tr>
 <tr>
 <td style="text-align:left">
 </td>
 <td>
-(3,742.00)
+(3,742)
 </td>
 </tr>
 <tr>
@@ -870,14 +897,14 @@ Intercept (B0)
 Treatment group (B1)
 </td>
 <td>
-16,461.22<sup>***</sup>
+16,461<sup>***</sup>
 </td>
 </tr>
 <tr>
 <td style="text-align:left">
 </td>
 <td>
-(5,291.98)
+(5,292)
 </td>
 </tr>
 <tr>
@@ -891,14 +918,14 @@ Treatment group (B1)
 Post-treatment (B2)
 </td>
 <td>
-35,230.86<sup>***</sup>
+35,231<sup>***</sup>
 </td>
 </tr>
 <tr>
 <td style="text-align:left">
 </td>
 <td>
-(5,291.98)
+(5,292)
 </td>
 </tr>
 <tr>
@@ -912,14 +939,14 @@ Post-treatment (B2)
 Diff in Diff (B3)
 </td>
 <td>
-34,066.02<sup>***</sup>
+34,066<sup>***</sup>
 </td>
 </tr>
 <tr>
 <td style="text-align:left">
 </td>
 <td>
-(7,484.00)
+(7,484)
 </td>
 </tr>
 <tr>
@@ -957,11 +984,40 @@ Diff in Diff (B3)
 </ol>
 <p>Answers:</p>
 <ol style="list-style-type: decimal">
-<li><p>The coefficient <span class="math inline">\(\beta_0\)</span> (the constant) is significant and different from zero. Houses in the control group have an average price of 216,672.60$ in time = 1.</p></li>
-<li><p>The coefficient <span class="math inline">\(\beta_1\)</span> (Treatment group) is also significant and different from zero, telling us that at time = 1, houses in the treatment and control group had a different average price. Specifically, houses in the treatment group cost 16,461.22$ more than houses in the control group. The average price of houses in the treatment group is 216,672.6 + 16,461.22 = 233,133.80.</p></li>
-<li><p>The coefficient <span class="math inline">\(\beta_2\)</span> (Post-treatment) is significant and different from zero. We can conclude that the price of houses in the control group increased from time = 1 to time = 2. The average price of houses in the control group increases of 35,230.86$ at time = 2. The average price of houses in the control group at time = 2 is 216,672.6 + 35,230.86 = 251,903.5</p></li>
-<li><p>Finally, the coefficient <span class="math inline">\(\beta_3\)</span> (Diff-in-Diff) is significant and different from zero, which means that the construction of an affordable housing site change the price of nearby houses. Particularly, the price increases of 34,066.02$ more than it would have without the construction of the housing site.</p></li>
+<li><p>The coefficient <span class="math inline">\(\beta_0\)</span> (the constant) is significant and different from zero. Houses in the control group have an average price of $216,672 in time = 1.</p></li>
+<li><p>The coefficient <span class="math inline">\(\beta_1\)</span> (Treatment group) is also significant and different from zero, telling us that at time = 1, houses in the treatment and control group had a different average price. Specifically, houses in the treatment group cost $16,461 more than houses in the control group prior to the new projects. The average price of houses in the treatment group is 216,672 + 16,461 = $233,133.</p></li>
+<li><p>The coefficient <span class="math inline">\(\beta_2\)</span> (Post-treatment) is significant and different from zero. We can conclude that the price of houses in the control group increased from time = 1 to time = 2. The average price of houses in the control group increases of $35,230 at time = 2. The average price of houses in the control group at time = 2 is 216,672 + 35,230 = $251,903</p></li>
+<li><p>Finally, the coefficient <span class="math inline">\(\beta_3\)</span> (Diff-in-Diff) is significant and different from zero, which means that the construction of an affordable housing site change the price of nearby houses. Particularly, the price increases of $34,066 more than it would have without the construction of the housing site.</p></li>
 </ol>
+<p><strong>Notes on hypothesis-testing in the Diff-in-Diff Model:</strong></p>
+<p>Recall that the regression output by default always reports the statistical significance for the hypothesis:</p>
+<blockquote>
+<p>B = 0 (the slope is zero)</p>
+</blockquote>
+<p>If we are looking at the relationship between milligrams of a drug (like caffeine) and heart rate then the test will tell us if the drug has any measurable impact on heart rate (slope=0 means no impact).</p>
+<p>In some cases the default hypothesis test is not very meaningful. For example, in this model <strong>B0</strong> is statistically significant, which means the average value of a home is different than zero. Is this a useful test? Not really. There would be no reason to assume homes have no value.</p>
+<p>The difference-in-difference model can be a little disorienting at first because the coefficients represent group averages, and not slopes. Even more confusing, most groups are constructed from several coefficients. If the comparison group in the post-treatment period is comprised of <strong>B0 + B2</strong> then is the test <strong>B2=0</strong> meaningful? Actually, it is.</p>
+<p>Note that for each question above we would formulate a contrast. Do the houses in the treatment and control groups cost the same before new public housing is built?</p>
+<p>B0 = cost of houses in control group prior to construction = $216,672</p>
+<p>B0 + B1 = cost of hosues in treatment goup prior to construction = 216,672 + 16,461 = $233,133</p>
+<p><em>Do the houses in the treatment and control groups cost the same before new construction?</em></p>
+<p>B0 + B1 = B0<br />
+B1 = 0</p>
+<p>So the test of B1=0 is actually the test for pre-treatment differences.</p>
+<p>Similarly, do we observe a significant secular trend in the data?</p>
+<p>B0 = control group in time=1<br />
+B0 + B2 = control group in time=2</p>
+<p>Trend = B2 + B0 - B0 = B2</p>
+<p>So the test B2=0 is a test of whether we see any secular trends in the data.</p>
+<p>Does the program have an impact? Or stated differently, after the treatment does the outcome of the treatment group depart from our counterfactual expectations?</p>
+<p>We construct the counterfactual by looking at the average level of the treatment group before the intervention and adjusting for the secular trend to predict where we expect the group to be in the second time period if the program has no impact.</p>
+<p>T1 + trend = (B0 + B1) + B2 = counterfactual<br />
+B0 + B1 + B2 + B3 = actual observed treatment group outcome</p>
+<p>The contrast for comparing the treated group to its counterfactual is:</p>
+<p>B0 + B1 + B2 + B3 = B0 + B1 + B2<br />
+B3 = 0 (after simplification)</p>
+<p>Which is the significance test associated with B3 that is reported in the model.</p>
+<p>So the coefficients on B1, B2, and B3 all represent meaningful contrasts that map onto useful hypotheses.</p>
 </div>
 <div id="the-counterfactual-1" class="section level2">
 <h2><span class="header-section-number">2.4</span> The counterfactual</h2>
@@ -970,7 +1026,7 @@ Diff in Diff (B3)
 \text{Counterfactual} = \beta_0 + \beta_1 + \beta_2
   \tag{1.2}
 \end{equation}\]</span></p>
-<p>The counterfactual represents the price of the houses in the treatment group, had the construction of the housing site never happend. It is equal to 268,364.7. But because the intervention did occur the price of the houses is equal to 302,430.7 (the counterfactual + the diff-in-diff).</p>
+<p>The counterfactual represents the price of the houses in the treatment group, had the construction of the housing site never happend. It is equal to 268,364. But because the intervention did occur the price of the houses is equal to 302,430 (the counterfactual + the diff-in-diff).</p>
 <p>We can map all these numbers in a graph:</p>
 <div class="figure"><span id="fig:Example"></span>
 <img src="p-030-diff-in-diff_files/figure-html/Example-1.png" alt="Results from the working example" width="960" />
@@ -1000,17 +1056,183 @@ Figure 3.1: Source: <a href="http://factsmaps.com/minimum-wage-us-states-july-20
 <li>fast-food restaurants in New Jersey where the minimum wage increased from 4.25$ to 5.05$ per hour (treatment group) AND</li>
 <li>fast-food restaurants in Pennsylvania where the minimum wage did not increase (control group).</li>
 </ul>
-<p>They collected data before and after the minimum wage was approved. Data used in the study can be download here. #PROVIDE LINK</p>
+<p>They collected employment data before and after the minimum wage was approved.</p>
 <blockquote>
 <p><strong>Research question:</strong>
 Do increases in the minimum wage affect employment?</p>
 <p><strong>Hypothesis:</strong>
 An increase in the minimum wage is negatively correlated with employment.</p>
 </blockquote>
-<div id="data-1" class="section level2">
-<h2><span class="header-section-number">3.1</span> Data</h2>
-<p>We start by uploading the data</p>
-<pre class="r"><code>URL &lt;- &quot;https://raw.githubusercontent.com/DS4PS/pe4ps-textbook/master/DATA/DID_Example.csv&quot;</code></pre>
+<div id="replication-data" class="section level2">
+<h2><span class="header-section-number">3.1</span> Replication Data</h2>
+<pre class="r"><code>URL &lt;- &quot;https://raw.githubusercontent.com/DS4PS/pe4ps-textbook/master/data/DID_Example.csv&quot; 
+data &lt;- read.csv( URL, stringsAsFactors=F )
+head( data ) %&gt;% pander()</code></pre>
+<table style="width:100%;">
+<caption>Table continues below</caption>
+<colgroup>
+<col width="7%" />
+<col width="10%" />
+<col width="11%" />
+<col width="13%" />
+<col width="11%" />
+<col width="7%" />
+<col width="7%" />
+<col width="10%" />
+<col width="10%" />
+<col width="10%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="center">ID</th>
+<th align="center">Chain</th>
+<th align="center">SouthJ</th>
+<th align="center">CentralJ</th>
+<th align="center">NorthJ</th>
+<th align="center">PA1</th>
+<th align="center">PA2</th>
+<th align="center">Shore</th>
+<th align="center">Group</th>
+<th align="center">Empl</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">46</td>
+<td align="center">1</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">1</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">30</td>
+</tr>
+<tr class="even">
+<td align="center">49</td>
+<td align="center">2</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">1</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">6.5</td>
+</tr>
+<tr class="odd">
+<td align="center">506</td>
+<td align="center">2</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">1</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">3</td>
+</tr>
+<tr class="even">
+<td align="center">56</td>
+<td align="center">4</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">1</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">20</td>
+</tr>
+<tr class="odd">
+<td align="center">61</td>
+<td align="center">4</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">1</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">6</td>
+</tr>
+<tr class="even">
+<td align="center">62</td>
+<td align="center">4</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">1</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">0</td>
+<td align="center">0</td>
+</tr>
+</tbody>
+</table>
+<table style="width:74%;">
+<colgroup>
+<col width="13%" />
+<col width="22%" />
+<col width="9%" />
+<col width="11%" />
+<col width="16%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="center">C.Owned</th>
+<th align="center">Hours.Opening</th>
+<th align="center">Soda</th>
+<th align="center">Fries</th>
+<th align="center">Treatment</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">0</td>
+<td align="center">16.5</td>
+<td align="center">1.03</td>
+<td align="center">1.03</td>
+<td align="center">0</td>
+</tr>
+<tr class="even">
+<td align="center">0</td>
+<td align="center">13</td>
+<td align="center">1.01</td>
+<td align="center">0.9</td>
+<td align="center">0</td>
+</tr>
+<tr class="odd">
+<td align="center">1</td>
+<td align="center">10</td>
+<td align="center">0.95</td>
+<td align="center">0.74</td>
+<td align="center">0</td>
+</tr>
+<tr class="even">
+<td align="center">1</td>
+<td align="center">12</td>
+<td align="center">0.87</td>
+<td align="center">0.82</td>
+<td align="center">0</td>
+</tr>
+<tr class="odd">
+<td align="center">1</td>
+<td align="center">12</td>
+<td align="center">0.87</td>
+<td align="center">0.77</td>
+<td align="center">0</td>
+</tr>
+<tr class="even">
+<td align="center">1</td>
+<td align="center">12</td>
+<td align="center">0.87</td>
+<td align="center">0.77</td>
+<td align="center">0</td>
+</tr>
+</tbody>
+</table>
 <p>These are the variables contained in the dataset.</p>
 <table>
 <thead>
@@ -1426,22 +1648,29 @@ Treatment
 <div id="analysis-1" class="section level2">
 <h2><span class="header-section-number">3.2</span> Analysis</h2>
 <p>We now estimate the difference-in-difference model based on the equation <a href="#eq:did">(1.2)</a>; note that along with the Group and Treatment variables, we also include a set of control variables to account for differences across restaurants. For instance, we include the variable “opening hours” (if fast food restaurants are open more hours they might need more employees) or prices for fries and sodas (more expensive fast food might have more money to hire more employees).</p>
-<pre class="r"><code>reg = lm(Empl ~
-Group +
-Treatment +           
-Treatment * Group +
-C.Owned +             
-Hours.Opening +      
-Soda +                 
-Fries +               
-as.factor(Chain) +               
-SouthJ +              
-CentralJ +             
-NorthJ +               
-PA1 +                 
-PA2 +                 
-Shore, 
-data = data)</code></pre>
+<pre class="r"><code>reg &lt;- lm( Empl ~ Group + Treatment + Treatment * Group + 
+            C.Owned + Hours.Opening + 
+            Soda + Fries +  as.factor(Chain) +  
+            SouthJ +  CentralJ +  NorthJ +  
+            PA1 +  PA2 +  Shore, data = data)
+
+stargazer( reg, 
+           type = &quot;html&quot;, 
+           dep.var.labels = (&quot;Full-time Employees&quot;),
+           omit = c(&quot;PA2&quot;, &quot;NorthJ&quot;),
+           column.labels = (&quot;Model results&quot;), 
+           intercept.bottom = FALSE,
+           covariate.labels = c(&quot;Constant (b0)&quot;, 
+                                &quot;Treatment (b1)&quot;, 
+                                &quot;Post-treatment (b2)&quot;, 
+                                &quot;C.Owned&quot;,&quot;Hours.Opening&quot;, 
+                                &quot;Soda&quot;,&quot;Fries&quot;, 
+                                &quot;Burger King&quot;,&quot;Roys&quot;, &quot;Wendy&#39;s&quot;,
+                                &quot;SouthJ&quot;, &quot;CentralJ&quot;,
+                                &quot;PA1&quot;, &quot;Shore&quot;,
+                                &quot;Diff-in-Diff estimator (b3)&quot;),
+           omit.stat = &quot;all&quot;, 
+           digits = 2)</code></pre>
 <table style="text-align:center">
 <tr>
 <td colspan="2" style="border-bottom: 1px solid black">
@@ -1810,7 +2039,7 @@ Diff-in-Diff estimator (b3)
 </td>
 </tr>
 </table>
-<p>Note that two variables were omitted because of multiple</p>
+<p>Note that two variables were omitted because of collinearity.</p>
 </div>
 <div id="discussion-of-the-results-1" class="section level2">
 <h2><span class="header-section-number">3.3</span> Discussion of the results</h2>

@@ -585,7 +585,7 @@ Figure 1.13: Time series counterfactual, T=18
 <p>We are going to have a look at a simulated dataset describing the wellbeing of a class of students. Students’ wellbeing is an increasingly discussed topic in <a href="http://oecdeducationtoday.blogspot.com/2018/03/mental-health-students-school.html">policy debates</a> and some states are introducing <a href="https://www.nbcnews.com/better/health/fall-all-new-york-students-will-be-learning-about-mental-ncna911031">mental health education classes</a> (even some <a href="https://www.nytimes.com/2018/01/26/nyregion/at-yale-class-on-happiness-draws-huge-crowd-laurie-santos.html">universities</a>).</p>
 <p>The dataset contains 365 daily observations of the wellbeing of a class of students. Wellbeing is measured by a index from 0 to 300. At t = 201 students will start attend a mental health education class. We want to understand how (and if) their wellbeing improves.</p>
 <pre class="r"><code># load data from GitHub
-URL &lt;- &quot;https://github.com/DS4PS/PROG-EVAL-III/blob/master/LECTURES/DATA/time-series-example.rds?raw=true&quot;
+URL &lt;- &quot;https://github.com/DS4PS/PROG-EVAL-III/blob/master/LECTURES/data/time-series-example.rds?raw=true&quot;
 dataTS &lt;- readRDS(gzcon(url( URL )))</code></pre>
 <p>First, we have a look at how the dataset is structured using the <em>head</em> and <em>tail</em> function. We can also look at rows 198-204 where the interruption occurs.</p>
 <pre class="r"><code>dataTS$Y &lt;- round(dataTS$Y,1)
@@ -807,7 +807,8 @@ stargazer( regTS,
            type = &quot;html&quot;, 
            dep.var.labels = (&quot;Wellbeing&quot;),
            column.labels = (&quot;Model results&quot;),
-           covariate.labels = c(&quot;Time&quot;, &quot;Treatment&quot;, &quot;Time Since Treatment&quot;),
+           covariate.labels = c(&quot;Time&quot;, &quot;Treatment&quot;, 
+                                &quot;Time Since Treatment&quot;),
            omit.stat = &quot;all&quot;, 
            digits = 2 )</code></pre>
 <table style="text-align:center">
@@ -968,7 +969,10 @@ Constant
 <pre class="r"><code># We create a small dataset with the new values
 data1 &lt;- as.data.frame( cbind( T = 201, D = 1, P = 1 )) 
 
-# We use the function predict to (1) take the coefficients estimated in regTS and (2) calculate the outcome Y based on the values we set in the new datset
+# We use the function predict to (1) take the 
+#  coefficients estimated in regTS and 
+#  (2) calculate the outcome Y based on the 
+#  values we set in the new datset
 y1 &lt;- predict( regTS, data1 ) 
 
 # We plot our initial observations, the column Y in our dataset
@@ -981,8 +985,9 @@ plot( Y,
       ylab = &quot;Wellbeing Index&quot;)
 
 # We add a point showing the level of wellbeing at time = 201)
-points(201, y1, col = &quot;dodgerblue4&quot;, pch = 19, bg = &quot;dodgerblue4&quot;, cex = 2)
-text(201, y1, labels = &quot;t = 201&quot;, pos = 4, cex = 1)
+points( 201, y1, col = &quot;dodgerblue4&quot;, 
+        pch = 19, bg = &quot;dodgerblue4&quot;, cex = 2 )
+text( 201, y1, labels = &quot;t = 201&quot;, pos = 4, cex = 1 )
 
 # Line marking the interruption
 abline( v=200, col=&quot;red&quot;, lty=2 )</code></pre>

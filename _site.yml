@@ -6,6 +6,8 @@ navbar:
   left:
     - text: "TimeSeries"
       href: p-020-time-series.html
+    - text: "Diff-in-Diff"
+      href: p-030-diff-in-diff.html
   right:
     - icon: fa-github fa-2x
       href: https://github.com/DS4PS/pe4ps-textbook

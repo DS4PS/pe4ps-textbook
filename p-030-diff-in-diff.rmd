@@ -4,18 +4,23 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, message=F, warning=F, fig.width = 10)
+knitr::opts_chunk$set( echo=TRUE, message=F, warning=F, fig.width = 10 )
 ```
 
 **Packages**
 
 Here are the packages we will use in this lecture. If you don't remember how to install them, you can have a look at the code. 
 
-* **stargazer** for nice tables
+* **stargazer** for nice regression tables
+* **pander** for nice data tables 
+* **dplyr** for data manipulation 
+* **scales** to adjust values in simulated data 
 
 ```{r, eval=F}
-install.packages( stargazer )
-library( "stargazer" )
+library( stargazer )
+library( pander )
+library( dplyr )
+library( scales )
 ```
 
 **Learning objectives**
@@ -162,9 +167,13 @@ stargazer( reg,
            type = "html", 
            dep.var.labels = ("Outcome"),
            column.labels = c(""),
-           covariate.labels = c("Intercept (B0)", "Treatment (B1)", "Post-treatment (B2)", "Diff in Diff (B3)"),
+           covariate.labels = c("Intercept (B0)", 
+                                "Treatment (B1)", 
+                                "Post-treatment (B2)", 
+                                "Diff in Diff (B3)"),
            omit.stat = "all", 
-           digits = 2, intercept.bottom = FALSE )
+           digits = 2, 
+           intercept.bottom = FALSE )
 ```
 
 Each coefficient represents a group mean or a difference between two means. To facilitate the understanding of each coefficient, we can use the following graphs of our equation \@ref(eq:did) and look at each coefficient individually (you can see the values of the coefficients on the left side of the graph). 
@@ -474,22 +483,8 @@ text( 1.1, CF, expression(paste(beta[0] + beta[1] + beta[2])), col=cf.col, pos=4
 ```
 
 
-```{r, echo=F}
-set.seed(98)
-Post_Treatment = rep(c(0,1), 500)
 
-Group = rep(c(0,0,1,1), 250)
 
-e = rnorm(1000, 500, 7000)
-
-y = 5000 + 1500 * Group + 4300* Post_Treatment + 4000 * Group * Post_Treatment + e
-
-House_Price <- rescale(y, to = c(50000, 500000))
-#House_Price = log(Y)
-
-data = as.data.frame(cbind(House_Price, Group, Post_Treatment))
-
-```
 
 # A Difference-in-Difference model
 
@@ -517,9 +512,31 @@ We are going to simulate some housing prices data for 2 groups of houses: houses
 
 ## Data
 
-We can have a look at the dataset
+```{r, echo=F}
+set.seed(98)
+Post_Treatment = rep(c(0,1), 500)
+
+Group = rep(c(0,0,1,1), 250)
+
+e = rnorm(1000, 500, 7000)
+
+y = 5000 + 1500 * Group + 4300* Post_Treatment + 4000 * Group * Post_Treatment + e
+
+House_Price <- rescale(y, to = c(50000, 500000))
+House_Price <- round(House_Price,0)
+#House_Price = log(Y)
+
+data <- as.data.frame(cbind(House_Price, Group, Post_Treatment))
+
+# write.csv( data, "data/diff-in-diff-housing-example.csv", row.names=F )
+```
+
+
+We can have a look at the data: 
 
 ```{r}
+URL <- "https://raw.githubusercontent.com/DS4PS/pe4ps-textbook/master/data/diff-in-diff-housing-example.csv"
+data <- read.csv( URL, stringsAsFactors=FALSE )
 head( data, 10 ) %>% pander()
 ```
 
@@ -529,7 +546,7 @@ The dataset contains three variables:
 ----------------------- | ------------------------------------------------------------------------------------------- |
 $\text{House Price}$    |House pricing                                                                                |
 $\text{Group}$          |Houses close to a subsized housing site (=1) and houses far from a subsized housing site (=0)|
-$\text{Post_Treatment}$ |Subsized housing site is not constructed (=0) or subsized housing site is open (=1)          |
+$\text{Post_Treatment}$ |Prior to construction of new site (=0) or after subsized housing is built (=1)          |
 
 ## Analysis
 
@@ -537,17 +554,21 @@ Our model is based on the equation \@ref(eq:did):
 
 <center>$\text{Y} = \beta_0 + \beta_1*Group + \beta_2*Treatment + \beta_3 * Group * Treatment + \text{e}$</center>
 
-```{r, echo=T, results='asis'}
+```{r, results='asis'}
 
-reg = lm(House_Price ~ Group + Post_Treatment + Group * Post_Treatment)
+reg <- lm( House_Price ~ Group + Post_Treatment + Group * Post_Treatment )
 
 stargazer( reg, 
            type = "html", 
            dep.var.labels = ("Housing prices"),
            column.labels = c(""),
-           covariate.labels = c("Intercept (B0)", "Treatment group (B1)", "Post-treatment (B2)", "Diff in Diff (B3)"),
+           covariate.labels = c("Intercept (B0)", 
+                                "Treatment group (B1)", 
+                                "Post-treatment (B2)", 
+                                "Diff in Diff (B3)"),
            omit.stat = "all", 
-           digits = 2, intercept.bottom = FALSE )
+           digits = 0, 
+           intercept.bottom = FALSE )
 ```
 
 ## Discussion of the results
@@ -561,13 +582,66 @@ As we discussed in our section \@ref(the-statistical-model) each coefficient tes
 
 Answers:
 
-1. The coefficient $\beta_0$ (the constant) is significant and different from zero. Houses in the control group have an average price of 216,672.60$ in time = 1.
+1. The coefficient $\beta_0$ (the constant) is significant and different from zero. Houses in the control group have an average price of \$216,672 in time = 1.
 
-2. The coefficient $\beta_1$ (Treatment group) is also significant and different from zero, telling us that at time = 1, houses in the treatment and control group had a different average price. Specifically, houses in the treatment group cost 16,461.22$ more than houses in the control group. The average price of houses in the treatment group is 216,672.6 + 16,461.22 = 233,133.80.
+2. The coefficient $\beta_1$ (Treatment group) is also significant and different from zero, telling us that at time = 1, houses in the treatment and control group had a different average price. Specifically, houses in the treatment group cost \$16,461 more than houses in the control group prior to the new projects. The average price of houses in the treatment group is 216,672 + 16,461 = \$233,133.
 
-3. The coefficient $\beta_2$ (Post-treatment) is significant and different from zero. We can conclude that the price of houses in the control group increased from time = 1 to time = 2. The average price of houses in the control group increases of 35,230.86$ at time = 2. The average price of houses in the control group at time = 2 is 216,672.6 + 35,230.86 = 251,903.5 
+3. The coefficient $\beta_2$ (Post-treatment) is significant and different from zero. We can conclude that the price of houses in the control group increased from time = 1 to time = 2. The average price of houses in the control group increases of \$35,230 at time = 2. The average price of houses in the control group at time = 2 is 216,672 + 35,230 = \$251,903 
 
-4. Finally, the coefficient $\beta_3$ (Diff-in-Diff) is significant and different from zero, which means that the construction of an affordable housing site change the price of nearby houses. Particularly, the price increases of 34,066.02$ more than it would have without the construction of the housing site. 
+4. Finally, the coefficient $\beta_3$ (Diff-in-Diff) is significant and different from zero, which means that the construction of an affordable housing site change the price of nearby houses. Particularly, the price increases of \$34,066 more than it would have without the construction of the housing site. 
+
+**Notes on hypothesis-testing in the Diff-in-Diff Model:**
+
+Recall that the regression output by default always reports the statistical significance for the hypothesis: 
+
+> B = 0  (the slope is zero)
+
+If we are looking at the relationship between milligrams of a drug (like caffeine) and heart rate then the test will tell us if the drug has any measurable impact on heart rate (slope=0 means no impact). 
+
+In some cases the default hypothesis test is not very meaningful. For example, in this model **B0** is statistically significant, which means the average value of a home is different than zero. Is this a useful test? Not really. There would be no reason to assume homes have no value. 
+
+The difference-in-difference model can be a little disorienting at first because the coefficients represent group averages, and not slopes. Even more confusing, most groups are constructed from several coefficients. If the comparison group in the post-treatment period is comprised of **B0 + B2** then is the test **B2=0** meaningful? Actually, it is. 
+
+Note that for each question above we would formulate a contrast. Do the houses in the treatment and control groups cost the same before new public housing is built? 
+
+B0 = cost of houses in control group prior to construction = \$216,672 
+
+B0 + B1 = cost of hosues in treatment goup prior to construction =  216,672 + 16,461 = \$233,133
+
+*Do the houses in the treatment and control groups cost the same before new construction?*
+
+B0 + B1 = B0  
+B1 = 0
+
+So the test of B1=0 is actually the test for pre-treatment differences. 
+
+Similarly, do we observe a significant secular trend in the data? 
+
+B0 = control group in time=1   
+B0 + B2 = control group in time=2    
+
+Trend = B2 + B0 - B0 = B2  
+
+So the test B2=0 is a test of whether we see any secular trends in the data. 
+
+Does the program have an impact? Or stated differently, after the treatment does the outcome of the treatment group depart from our counterfactual expectations? 
+
+We construct the counterfactual by looking at the average level of the treatment group before the intervention and adjusting for the secular trend to predict where we expect the group to be in the second time period if the program has no impact. 
+
+T1 + trend = (B0 + B1) + B2 = counterfactual   
+B0 + B1 + B2 + B3 = actual observed treatment group outcome    
+
+The contrast for comparing the treated group to its counterfactual is:  
+
+B0 + B1 + B2 + B3 = B0 + B1 + B2  
+B3 = 0  (after simplification) 
+
+Which is the significance test associated with B3 that is reported in the model. 
+
+So the coefficients on B1, B2, and B3 all represent meaningful contrasts that map onto useful hypotheses. 
+
+
+
 
 ## The counterfactual
 
@@ -578,7 +652,7 @@ Based on our results, we can calculate the counterfactual using the formula \@re
   (\#eq:did)
 \end{equation}
 
-The counterfactual represents the price of the houses in the treatment group, had the construction of the housing site never happend. It is equal to 268,364.7. But because the intervention did occur the price of the houses is equal to 302,430.7 (the counterfactual + the diff-in-diff).
+The counterfactual represents the price of the houses in the treatment group, had the construction of the housing site never happend. It is equal to 268,364. But because the intervention did occur the price of the houses is equal to 302,430 (the counterfactual + the diff-in-diff).
 
 We can map all these numbers in a graph:
 
@@ -650,7 +724,7 @@ One of the first study looking at this policy problem was Card and Krueger's. Th
 * fast-food restaurants in New Jersey where the minimum wage increased from 4.25$ to 5.05$ per hour (treatment group) AND
 * fast-food restaurants in Pennsylvania where the minimum wage did not increase (control group).
 
-They collected data before and after the minimum wage was approved. Data used in the study can be download here. #PROVIDE LINK
+They collected employment data before and after the minimum wage was approved. 
 
 > **Research question:** 
 > Do increases in the minimum wage affect employment?
@@ -658,13 +732,12 @@ They collected data before and after the minimum wage was approved. Data used in
 > **Hypothesis:** 
 > An increase in the minimum wage is negatively correlated with employment.
 
-## Data
+## Replication Data
 
-We start by uploading the data
-
-```{r, echo=T}
-URL <- "https://raw.githubusercontent.com/DS4PS/pe4ps-textbook/master/DATA/DID_Example.csv"
+```{r}
+URL <- "https://raw.githubusercontent.com/DS4PS/pe4ps-textbook/master/data/DID_Example.csv" 
 data <- read.csv( URL, stringsAsFactors=F )
+head( data ) %>% pander()
 ```
 
 These are the variables contained in the dataset. 
@@ -702,43 +775,36 @@ From the descriptive statistics table, you can see that the fast-food restaurant
 
 We now estimate the difference-in-difference model based on the equation \@ref(eq:did); note that along with the Group and Treatment variables, we also include a set of control variables to account for differences across restaurants. For instance, we include the variable "opening hours" (if fast food restaurants are open more hours they might need more employees) or prices for fries and sodas (more expensive fast food might have more money to hire more employees). 
 
-```{r, echo=T, results='asis'}
-reg = lm(Empl ~
-Group +
-Treatment +           
-Treatment * Group +
-C.Owned +             
-Hours.Opening +      
-Soda +                 
-Fries +               
-as.factor(Chain) +               
-SouthJ +              
-CentralJ +             
-NorthJ +               
-PA1 +                 
-PA2 +                 
-Shore, 
-data = data)
+```{r, results='asis'}
+
+reg <- lm( Empl ~ Group + Treatment + Treatment * Group + 
+            C.Owned + Hours.Opening + 
+            Soda + Fries +  as.factor(Chain) +  
+            SouthJ +  CentralJ +  NorthJ +  
+            PA1 +  PA2 +  Shore, data = data)
 
 stargazer( reg, 
            type = "html", 
            dep.var.labels = ("Full-time Employees"),
            omit = c("PA2", "NorthJ"),
-           column.labels = ("Model results"), intercept.bottom = FALSE,
+           column.labels = ("Model results"), 
+           intercept.bottom = FALSE,
            covariate.labels = c("Constant (b0)", 
-            "Treatment (b1)", "Post-treatment (b2)", "C.Owned",
-            "Hours.Opening", "Soda",
-            "Fries", "Burger King",
-            "Roys", "Wendy's",
-            "SouthJ", "CentralJ",
-            "PA1", "Shore",
-            "Diff-in-Diff estimator (b3)"),
+                                "Treatment (b1)", 
+                                "Post-treatment (b2)", 
+                                "C.Owned","Hours.Opening", 
+                                "Soda","Fries", 
+                                "Burger King","Roys", "Wendy's",
+                                "SouthJ", "CentralJ",
+                                "PA1", "Shore",
+                                "Diff-in-Diff estimator (b3)"),
            omit.stat = "all", 
            digits = 2)
 
+
 ```
 
-Note that two variables were omitted because of multiple
+Note that two variables were omitted because of collinearity. 
 
 
 ## Discussion of the results
