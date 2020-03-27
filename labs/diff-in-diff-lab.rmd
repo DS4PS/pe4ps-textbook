@@ -24,8 +24,6 @@ library(stargazer)
 
 # Instructions 
 
-This lab is loosely based on Branas et al. (2011) article, entitled ["A Difference-in-Differences Analysis of Health, Safety, and Greening Vacant Urban Space"](https://academic.oup.com/aje/article/174/11/1296/111352).
-
 
 There are **4 sets of questions**. You can earn up to 100 points + bonus questions. Points are indicated next to each question. 
 
@@ -38,12 +36,19 @@ Remember to:
 
 ## The policy problem
 
+This lab is loosely based on Branas et al. (2011) article, entitled ["A Difference-in-Differences Analysis of Health, Safety, and Greening Vacant Urban Space"](https://academic.oup.com/aje/article/174/11/1296/111352).
+
+The ‘broken windows’ theory suggests that “vacant lots offer refuge to criminal and other illegal activity and visibly symbolize that a neighborhood has deteriorated, that no one is in control, and that unsafe or criminal behavior is welcome to proceed with little if any supervision” (p. 1297). 
+
+To prevent these problems, city A has decided to implement a public program that will green some of the city’s vacant lots in 4 different neighborhoods. ‘Greening’ includes removing trash and debris and planting grass and trees to create a park.
+
+Simulated data on vandalism acts include the total number of calls about vandalism acts that the police has
+received during the year before and after the greening from households near the vacant lots.
+
+
 > **Research question**: 
 > Does greening vacant lots decreases vandalism in City A? 
 
-The 'broken windows' theory suggests that "vacant lots offer refuge to criminal and other illegal activity and visibly symbolize that a neighborhood has deteriorated, that no one is in control, and that unsafe or criminal behavior is welcome to proceed with little if any supervision" (p. 1297). 
-
-To prevent these problems, city A has decided to implement a public program that will green some of the city's vacant lots in 4 different neighborhoods. 'Greening' includes removing trash and debris and planting grass and trees to create a park.   
 
 Three years after its implementation, the city wants to know whether the program has been successful and propose to compare lots that have been 'greened' and lots that are still vacants within the same neighborhoods but could have been chosen for greening. 
 
@@ -55,10 +60,9 @@ Three years after its implementation, the city wants to know whether the program
 Data on vandalism acts were reported by the local police and include the total number of calls about vandalism acts that the police has received during the year before and after the greening from households near the vacant lots. 
 
 ```{r, echo=TRUE}
-
 URL <- "https://raw.githubusercontent.com/DS4PS/pe4ps-textbook/master/labs/DATA/diff-in-diff-lab.csv"
 data <- read.csv( URL, stringsAsFactors=F )
- 
+head( data ) %>% pander()
 ```
 
 
@@ -97,7 +101,16 @@ Post_Treatment           |Observation three years before the treatment (=0) and 
 * **Q3b:** Calculate the counterfactual, i.e., how many calls for vandalism acts we would expect, had the intervention not occured. (5 points)
 * **Q3c:** What is the main assumption behind the counterfactual? (5 points)
 
-Now let's imagine that you have daily data about the number of calls for vandalism that the police has received after the intervention for the following 3 years. The mayor asks another analyst to evaluate the impact of the intervention. The analyst uses an OLS grouped data regression, as illustrated in the the following model:
+
+## Question 4
+
+Let's consider the same study design but now let's compare two different approaches to analyzing the data. 
+
+We will use a slightly different dataset, one that contains the monthly number of vandalism crimes that the police has received in the four study neighborhoods over a four-year period. 
+
+
+
+The mayor asks an analyst to evaluate the impact of the intervention. The analyst c
 
 $$
 \text{Vandalism} = b_0 + b_1 \cdot Group + b_2 \cdot Time + b_3 \cdot Group \cdot Time + e
@@ -105,10 +118,10 @@ $$
 Where Group indicates the treatment (=1) and the control group (=0) and time is the time passed since the intervention (in days).
 
 
-## Question 4
+
 
 * **Q4a:** How do you interpret coefficient b2 and b3? (5 + 5 points)
-* **Q4b:** HOw are b2 and b3 in this model different from b2 and b3 in the diff-in-diff model you estimated before? (5 + 5 points)
+* **Q4b:** How are b2 and b3 in this model different from b2 and b3 in the diff-in-diff model you estimated before? (5 + 5 points)
 
 
 ## BONUS QUESTIONS
