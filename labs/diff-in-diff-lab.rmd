@@ -267,7 +267,10 @@ stargazer( m2, type="html", digits=2,
 * **Q4e:** Do the two models make the same predictions regarding the size of secular trends (approximately)? Show your math. (2 points)
 
 
-Note that you would run an interrupted time series with a comparison group as follows: 
+----
+
+
+Not pertinent to the questions above but useful to note, you can run an interrupted time series with a comparison group as follows: 
 
 ```{r}
 m3 <- lm( crimes ~ time + treat + post.treat*treat + 
