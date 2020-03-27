@@ -2521,7 +2521,8 @@ Observations
 <li><strong>Q4d:</strong> Which coefficient in each model captures the secular trend in the data (changes we can expect independent of the treatment)? (4 points)</li>
 <li><strong>Q4e:</strong> Do the two models make the same predictions regarding the size of secular trends (approximately)? Show your math. (2 points)</li>
 </ul>
-<p>Note that you would run an interrupted time series with a comparison group as follows:</p>
+<hr />
+<p>Not pertinent to the questions above but useful to note, you can run an interrupted time series with a comparison group as follows:</p>
 <div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb9-1" title="1">m3 &lt;-<span class="st"> </span><span class="kw">lm</span>( crimes <span class="op">~</span><span class="st"> </span>time <span class="op">+</span><span class="st"> </span>treat <span class="op">+</span><span class="st"> </span>post.treat<span class="op">*</span>treat <span class="op">+</span><span class="st"> </span></a>
 <a class="sourceLine" id="cb9-2" title="2"><span class="st">            </span>time.since <span class="op">+</span><span class="st"> </span>time.since<span class="op">*</span>treat, <span class="dt">data=</span>dat )</a>
 <a class="sourceLine" id="cb9-3" title="3"></a>
