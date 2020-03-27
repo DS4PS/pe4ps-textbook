@@ -292,7 +292,7 @@ stargazer( m3, type="html", digits=2,
 
 * **BQ1:** Explain why the difference-in-difference model reports a smaller program impact (a3) than the post-treatment coefficient (b2) in the time-series model. (3 points)
 * **BQ2**: Is a3 to b2 a fair comparison? Construct a treatment group prediction from the interrupted time series regression that would be a better comparison for a3. Show your math. (4 points)
-* **BQ3:** Assuming you have the data to run either model, which of these is a more convincing counter-factual, in your opinion? (5 points)
+* **BQ3:** Assuming you have the data to run either model, which of these is a more convincing counter-factual, in your opinion? (3 points)
 
 
 ## CHALLENGE QUESTION
@@ -333,6 +333,17 @@ points( c(6.5,18.5,30.5,42.5), c(T1,T2,T3,T4),
 points( c(12.5,36.5), c(dd.C1,dd.C2+3), col="steelblue", pch=19, cex=4 )
 points( c(12.5,36.5), c(dd.T1,dd.T2-3), col="firebrick", pch=19, cex=4 )
 ```
+
+The parallel lines assumption must be met for the difference-in-difference approach to produce unbiased estimates of program impact. 
+
+Does the interrupted time series have a similar assumption? Why or why not? Hint, what type of research design estimator does the ITS operationalize? 
+
+```{r}
+plot( dat$time, m3$fitted.values, 
+      col=dat$group, pch=19, bty="n",
+      xlab="Time", ylab="Crimes" )
+```
+
 
 ---
 
