@@ -178,8 +178,10 @@ m1 <- lm( crimes ~ treat + post.treat + treat.x.post, data=dat )
 stargazer( m1, type="html", digits=2,
            omit.stat=c("f","rsq","adj.rsq","ser"),
            intercept.bottom = FALSE,
-           covariate.labels = c("Intercept (a0)", "Treatment Group (a1)",
-                                "Post-Treatment Period (a2)", "Treat x Post (a3)" ) )
+           covariate.labels = c("Intercept (a0)", 
+                                "Treatment Group (a1)",
+                                "Post-Treatment Period (a2)", 
+                                "Treat x Post (a3)" ) )
 ```
 
 
@@ -235,7 +237,9 @@ m2 <- lm( crimes ~ time + post.treat + time.since, data=d2 )
 
 plot( d2$time, d2$crimes, pch=19, 
       col=adjustcolor("firebrick",alph=0.5), cex=1.5, bty="n",
-      xlab="Time (months)", ylab="Count of Crimes Per Quadrant", xlim=c(0,50) )
+      xlab="Time (months)", 
+      ylab="Count of Crimes Per Quadrant", 
+      xlim=c(0,50) )
 abline( v=c(12,36,48), lty=2, col="gray" )
 abline( v=24.5, lty=3, col="gray", lwd=3 )
 points( d2$time, m2$fitted.values, pch=19, type="l", lwd=3 )
@@ -245,8 +249,10 @@ points( d2$time, m2$fitted.values, pch=19, type="l", lwd=3 )
 stargazer( m2, type="html", digits=2,
            omit.stat=c("f","rsq","adj.rsq","ser"),
            intercept.bottom = FALSE,
-           covariate.labels = c("Intercept (b0)", "Time in Month (b1)",
-                                "Post-Treatment Period (b2)", "Months Since Treatment (b3)" ))
+           covariate.labels = c("Intercept (b0)", 
+                                "Time in Month (b1)",
+                                "Post-Treatment Period (b2)", 
+                                "Months Since Treatment (b3)" ))
 ```
 
 
@@ -264,9 +270,11 @@ stargazer( m2, type="html", digits=2,
 Note that you would run an interrupted time series with a comparison group as follows: 
 
 ```{r}
-m3 <- lm( crimes ~ time + treat + post.treat*treat + time.since + time.since*treat, data=dat )
+m3 <- lm( crimes ~ time + treat + post.treat*treat + 
+            time.since + time.since*treat, data=dat )
 
-plot( dat$time, m3$fitted.values, col=dat$group, pch=19, bty="n",
+plot( dat$time, m3$fitted.values, 
+      col=dat$group, pch=19, bty="n",
       xlab="Time", ylab="Crimes" )
 
 ```
@@ -287,9 +295,44 @@ stargazer( m3, type="html", digits=2,
 * **BQ3:** Assuming you have the data to run either model, which of these is a more convincing counter-factual, in your opinion? (5 points)
 
 
+## CHALLENGE QUESTION
 
+How would you test the parallel lines assumption for the difference-in-difference model with this data? Write the code to create the appropriate data subset and model. Report your results. 
 
+```{r, echo=F}
+C1 <- mean( dat$crimes[ dat$year == 1994 & dat$group == "control" ] )
+C2 <- mean( dat$crimes[ dat$year == 1995 & dat$group == "control" ] )
+C3 <- mean( dat$crimes[ dat$year == 1996 & dat$group == "control" ] )
+C4 <- mean( dat$crimes[ dat$year == 1997 & dat$group == "control" ] )
 
+T1 <- mean( dat$crimes[ dat$year == 1994 & dat$group == "treat" ] )
+T2 <- mean( dat$crimes[ dat$year == 1995 & dat$group == "treat" ] )
+T3 <- mean( dat$crimes[ dat$year == 1996 & dat$group == "treat" ] )
+T4 <- mean( dat$crimes[ dat$year == 1997 & dat$group == "treat" ] )
+
+dd.C1 <- mean( dat$crimes[ dat$post == 0 & dat$group == "control" ] )
+dd.C2 <- mean( dat$crimes[ dat$post == 1 & dat$group == "control" ] )
+
+dd.T1 <- mean( dat$crimes[ dat$post == 0 & dat$group == "treat" ] )
+dd.T2 <- mean( dat$crimes[ dat$post == 1 & dat$group == "treat" ] )
+
+plot( ts1$time, ts1$ave, type="b", pch=19, col="steelblue", bty="n",
+      xlab="Time (months)", ylab="Number of Crimes", 
+      main="Difference-in-Difference Group Means",
+      xlim=c(0,50), ylim=c(60,225) )
+points( ts2$time, ts2$ave, type="b", pch=19, col="firebrick" ) 
+abline( v=c(12,36,48), lty=2, col="gray" )
+abline( v=24.5, lty=3, col="gray", lwd=3 )
+abline( h=c(y.24,y.25), lty=3, col="firebrick" )
+
+points( c(6.5,18.5,30.5,42.5), c(C1,C2,C3,C4), 
+        pch=19, col=adjustcolor("steelblue",alpha=0.5), cex=2 )
+points( c(6.5,18.5,30.5,42.5), c(T1,T2,T3,T4), 
+        pch=19, col=adjustcolor("firebrick",alpha=0.5), cex=2 )
+
+points( c(12.5,36.5), c(dd.C1,dd.C2+3), col="steelblue", pch=19, cex=4 )
+points( c(12.5,36.5), c(dd.T1,dd.T2-3), col="firebrick", pch=19, cex=4 )
+```
 
 ---
 
