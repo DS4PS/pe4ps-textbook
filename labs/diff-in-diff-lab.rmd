@@ -175,7 +175,7 @@ $$
 
 ```{r, results="asis"}
 m1 <- lm( crimes ~ treat + post.treat + treat.x.post, data=dat )
-stargazer( m1, type="text", digits=2,
+stargazer( m1, type="html", digits=2,
            omit.stat=c("f","rsq","adj.rsq","ser"),
            intercept.bottom = FALSE,
            covariate.labels = c("Intercept (a0)", "Treatment Group (a1)",
@@ -242,7 +242,7 @@ points( d2$time, m2$fitted.values, pch=19, type="l", lwd=3 )
 ```
 
 ```{r, results="asis"}
-stargazer( m2, type="text", digits=2,
+stargazer( m2, type="html", digits=2,
            omit.stat=c("f","rsq","adj.rsq","ser"),
            intercept.bottom = FALSE,
            covariate.labels = c("Intercept (b0)", "Time in Month (b1)",
@@ -274,7 +274,7 @@ plot( dat$time, m3$fitted.values, col=dat$group, pch=19, bty="n",
 How would you interpret the results of this model? Which coefficient reprents the immediate effects? And which represents sustained effects? 
 
 ```{r, results="asis"}
-stargazer( m3, type="text", digits=2,
+stargazer( m3, type="html", digits=2,
            omit.stat=c("f","rsq","adj.rsq","ser"),
            intercept.bottom = FALSE )
 ```
