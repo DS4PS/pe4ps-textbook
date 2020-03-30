@@ -18,13 +18,13 @@ knitr::opts_chunk$set( echo = TRUE, message=F, warning=F, fig.width = 10 )
 ```
 
 ```{r, echo=FALSE, results="hide"}
-library(stargazer)
+library( stargazer )
+library( pander )
+library( dplyr )
 ```
 
 
 # Instructions 
-
-This lab is loosely based on Branas et al. (2011) article, entitled ["A Difference-in-Differences Analysis of Health, Safety, and Greening Vacant Urban Space"](https://academic.oup.com/aje/article/174/11/1296/111352).
 
 
 There are **4 sets of questions**. You can earn up to 100 points + bonus questions. Points are indicated next to each question. 
@@ -38,12 +38,19 @@ Remember to:
 
 ## The policy problem
 
+This lab is loosely based on Branas et al. (2011) article, entitled ["A Difference-in-Differences Analysis of Health, Safety, and Greening Vacant Urban Space"](https://academic.oup.com/aje/article/174/11/1296/111352).
+
+The ‘broken windows’ theory suggests that “vacant lots offer refuge to criminal and other illegal activity and visibly symbolize that a neighborhood has deteriorated, that no one is in control, and that unsafe or criminal behavior is welcome to proceed with little if any supervision” (p. 1297). 
+
+To prevent these problems, city A has decided to implement a public program that will green some of the city’s vacant lots in 4 different neighborhoods. ‘Greening’ includes removing trash and debris and planting grass and trees to create a park.
+
+Simulated data on vandalism acts include the total number of calls about vandalism acts that the police has
+received during the year before and after the greening from households near the vacant lots.
+
+
 > **Research question**: 
 > Does greening vacant lots decreases vandalism in City A? 
 
-The 'broken windows' theory suggests that "vacant lots offer refuge to criminal and other illegal activity and visibly symbolize that a neighborhood has deteriorated, that no one is in control, and that unsafe or criminal behavior is welcome to proceed with little if any supervision" (p. 1297). 
-
-To prevent these problems, city A has decided to implement a public program that will green some of the city's vacant lots in 4 different neighborhoods. 'Greening' includes removing trash and debris and planting grass and trees to create a park.   
 
 Three years after its implementation, the city wants to know whether the program has been successful and propose to compare lots that have been 'greened' and lots that are still vacants within the same neighborhoods but could have been chosen for greening. 
 
@@ -55,10 +62,9 @@ Three years after its implementation, the city wants to know whether the program
 Data on vandalism acts were reported by the local police and include the total number of calls about vandalism acts that the police has received during the year before and after the greening from households near the vacant lots. 
 
 ```{r, echo=TRUE}
-
 URL <- "https://raw.githubusercontent.com/DS4PS/pe4ps-textbook/master/labs/DATA/diff-in-diff-lab.csv"
 data <- read.csv( URL, stringsAsFactors=F )
- 
+head( data ) %>% pander()
 ```
 
 
@@ -97,27 +103,249 @@ Post_Treatment           |Observation three years before the treatment (=0) and 
 * **Q3b:** Calculate the counterfactual, i.e., how many calls for vandalism acts we would expect, had the intervention not occured. (5 points)
 * **Q3c:** What is the main assumption behind the counterfactual? (5 points)
 
-Now let's imagine that you have daily data about the number of calls for vandalism that the police has received after the intervention for the following 3 years. The mayor asks another analyst to evaluate the impact of the intervention. The analyst uses an OLS grouped data regression, as illustrated in the the following model:
-
-$$
-\text{Vandalism} = b_0 + b_1 \cdot Group + b_2 \cdot Time + b_3 \cdot Group \cdot Time + e
-$$
-Where Group indicates the treatment (=1) and the control group (=0) and time is the time passed since the intervention (in days).
-
 
 ## Question 4
 
-* **Q4a:** How do you interpret coefficient b2 and b3? (5 + 5 points)
-* **Q4b:** HOw are b2 and b3 in this model different from b2 and b3 in the diff-in-diff model you estimated before? (5 + 5 points)
+Let's consider the same study design but now let's compare two different approaches to analyzing the data. 
+
+We will use a slightly different dataset, one that contains the monthly number of vandalism crimes that the police has received in the four study neighborhoods over a four-year period. 
+
+```{r}
+URL <- "https://raw.githubusercontent.com/DS4PS/pe4ps-textbook/master/labs/DATA/time-series-diff-n-diff-comparison.csv"
+dat <- read.csv( URL, stringsAsFactors=F )
+rbind( head(dat), tail(dat) ) %>% pander()
+```
+
+
+We have 48 months of data, and the vacant lot clean-up occurred between the 24th and 25th months. The mayor asks an analyst to evaluate the impact of the intervention. 
+
+Here is what our data looks like with red points representing the treatment group and blue representing the control: 
+
+```{r}
+dat$group <- factor( dat$group )
+plot( dat$time, dat$crime, pch=19, col=dat$group, bty="n",
+      xlab="Time (months)", ylab="Number of Crimes per Quadrant" )
+abline( v=24.5, lty=3, col="gray", lwd=3 )
+```
+
+
+We can simplify the graph by calculating the average crime rate across all quadrants in the study within each time period: 
+
+```{r}
+ts1 <- 
+  dat %>% 
+  filter( group == "control" ) %>%
+  group_by( time ) %>% 
+  summarize( ave=mean( crimes ) )
+
+ts2 <- 
+  dat %>% 
+  filter( group == "treat" ) %>%
+  group_by( time ) %>% 
+  summarize( ave=mean( crimes ) )
+
+y.24 <- ts2$ave[24]
+y.25 <- ts2$ave[25]
+diff <- y.24 - y.25 
+
+plot( ts1$time, ts1$ave, type="b", pch=19, col="steelblue", bty="n",
+      xlab="Time (months)", ylab="Number of Crimes", 
+      xlim=c(0,50), ylim=c(60,225) )
+points( ts2$time, ts2$ave, type="b", pch=19, col="firebrick" ) 
+abline( v=c(12,36,48), lty=2, col="gray" )
+abline( v=24.5, lty=3, col="gray", lwd=3 )
+abline( h=c(y.24,y.25), lty=3, col="firebrick" )
+
+arrows( x0=38, y0=y.24, y1=y.25, col="firebrick", code=3 )
+text( x=40, y=mean(c(y.24,y.25)), 
+      paste0( "Diff ~ ", round(diff,0) ), 
+      col="firebrick", pos=4, cex=1.4 )
+```
+
+Note that there appears to be an immediate impact of the program, but over time we also observe what appears to be a regression to the mean level of vandalism in the treatment quadrants. 
+
+To estimate program impact the analyst runs the follow two models: 
+
+**Diff-in-Diff**
+
+$$
+\text{crimes} = a_0 + a_1 \cdot treat + a_2 \cdot post + a_3 \cdot treat.post  + e
+$$
+
+
+```{r, results="asis"}
+m1 <- lm( crimes ~ treat + post.treat + treat.x.post, data=dat )
+stargazer( m1, type="html", digits=2,
+           omit.stat=c("f","rsq","adj.rsq","ser"),
+           intercept.bottom = FALSE,
+           covariate.labels = c("Intercept (a0)", 
+                                "Treatment Group (a1)",
+                                "Post-Treatment Period (a2)", 
+                                "Treat x Post (a3)" ) )
+```
+
+
+```{r}
+C1 <- mean( dat$crimes[ dat$year == 1994 & dat$group == "control" ] )
+C2 <- mean( dat$crimes[ dat$year == 1995 & dat$group == "control" ] )
+C3 <- mean( dat$crimes[ dat$year == 1996 & dat$group == "control" ] )
+C4 <- mean( dat$crimes[ dat$year == 1997 & dat$group == "control" ] )
+
+T1 <- mean( dat$crimes[ dat$year == 1994 & dat$group == "treat" ] )
+T2 <- mean( dat$crimes[ dat$year == 1995 & dat$group == "treat" ] )
+T3 <- mean( dat$crimes[ dat$year == 1996 & dat$group == "treat" ] )
+T4 <- mean( dat$crimes[ dat$year == 1997 & dat$group == "treat" ] )
+
+dd.C1 <- mean( dat$crimes[ dat$post == 0 & dat$group == "control" ] )
+dd.C2 <- mean( dat$crimes[ dat$post == 1 & dat$group == "control" ] )
+
+dd.T1 <- mean( dat$crimes[ dat$post == 0 & dat$group == "treat" ] )
+dd.T2 <- mean( dat$crimes[ dat$post == 1 & dat$group == "treat" ] )
+
+plot( ts1$time, ts1$ave, type="b", pch=19, col="steelblue", bty="n",
+      xlab="Time (months)", ylab="Number of Crimes", 
+      main="Difference-in-Difference Group Means",
+      xlim=c(0,50), ylim=c(60,225) )
+points( ts2$time, ts2$ave, type="b", pch=19, col="firebrick" ) 
+abline( v=c(12,36,48), lty=2, col="gray" )
+abline( v=24.5, lty=3, col="gray", lwd=3 )
+abline( h=c(y.24,y.25), lty=3, col="firebrick" )
+
+points( c(6.5,18.5,30.5,42.5), c(C1,C2,C3,C4), 
+        pch=19, col=adjustcolor("steelblue",alpha=0.5), cex=2 )
+points( c(6.5,18.5,30.5,42.5), c(T1,T2,T3,T4), 
+        pch=19, col=adjustcolor("firebrick",alpha=0.5), cex=2 )
+
+points( c(12.5,36.5), c(dd.C1,dd.C2+3), col="steelblue", pch=19, cex=4 )
+points( c(12.5,36.5), c(dd.T1,dd.T2-3), col="firebrick", pch=19, cex=4 )
+```
+
+
+**Interrupted Time Series**
+
+$$
+\text{crimes} = b_0 + b_1 \cdot time + b_2 \cdot post + b_3 \cdot time.since  + e
+$$
+
+Note we only need the treatment group for this model since it is a reflexive design: 
+
+
+```{r}
+d2 <- filter( dat, group == "treat" )
+ 
+m2 <- lm( crimes ~ time + post.treat + time.since, data=d2 )
+
+plot( d2$time, d2$crimes, pch=19, 
+      col=adjustcolor("firebrick",alph=0.5), cex=1.5, bty="n",
+      xlab="Time (months)", 
+      ylab="Count of Crimes Per Quadrant", 
+      xlim=c(0,50) )
+abline( v=c(12,36,48), lty=2, col="gray" )
+abline( v=24.5, lty=3, col="gray", lwd=3 )
+points( d2$time, m2$fitted.values, pch=19, type="l", lwd=3 )
+```
+
+```{r, results="asis"}
+stargazer( m2, type="html", digits=2,
+           omit.stat=c("f","rsq","adj.rsq","ser"),
+           intercept.bottom = FALSE,
+           covariate.labels = c("Intercept (b0)", 
+                                "Time in Month (b1)",
+                                "Post-Treatment Period (b2)", 
+                                "Months Since Treatment (b3)" ))
+```
+
+
+**Questions:**
+
+
+
+* **Q4a:** What is the size of the program impact according to the diff-in-diff model? (5 points)
+* **Q4b:** What is the size of the immediate program impact according to the interrupted time series model? (5 points)
+* **Q4c:** How are the post-treatment coefficients conceptually different in these two models (a2 and b2)? (4 points)
+* **Q4d:** Which coefficient in each model captures the secular trend in the data (changes we can expect independent of the treatment)? (4 points)
+* **Q4e:** Do the two models make the same predictions regarding the size of secular trends (approximately)? Show your math. (2 points)
+
+
+----
+
+
+Not pertinent to the questions above but useful to note, you can run an interrupted time series with a comparison group as follows: 
+
+```{r}
+m3 <- lm( crimes ~ time + treat + post.treat*treat + 
+            time.since + time.since*treat, data=dat )
+
+plot( dat$time, m3$fitted.values, 
+      col=dat$group, pch=19, bty="n",
+      xlab="Time", ylab="Crimes" )
+
+```
+
+How would you interpret the results of this model? Which coefficient reprents the immediate effects? And which represents sustained effects? 
+
+```{r, results="asis"}
+stargazer( m3, type="html", digits=2,
+           omit.stat=c("f","rsq","adj.rsq","ser"),
+           intercept.bottom = FALSE )
+```
 
 
 ## BONUS QUESTIONS
 
-* **BQ1**: Re-write the above formula imaging the starting number of calls to be different between the treatment and the control group, the overall trend over time to be positive, but no annual increase differences between the two groups exist. (5 points)
+* **BQ1:** Explain why the difference-in-difference model reports a smaller program impact (a3) than the post-treatment coefficient (b2) in the time-series model. (3 points)
+* **BQ2**: Is a3 to b2 a fair comparison? Construct a treatment group prediction from the interrupted time series regression that would be a better comparison for a3. Show your math. (4 points)
+* **BQ3:** Assuming you have the data to run either model, which of these is a more convincing counter-factual, in your opinion? (3 points)
 
-* **BQ2:** Between the diff-in-diff model and the grouped data regression, which of these is a more convincing counter-factual, in your opinion? (5 points)
 
+## CHALLENGE QUESTION
 
+How would you test the parallel lines assumption for the difference-in-difference model with this data? Write the code to create the appropriate data subset and model. Report your results. 
+
+```{r, echo=F}
+C1 <- mean( dat$crimes[ dat$year == 1994 & dat$group == "control" ] )
+C2 <- mean( dat$crimes[ dat$year == 1995 & dat$group == "control" ] )
+C3 <- mean( dat$crimes[ dat$year == 1996 & dat$group == "control" ] )
+C4 <- mean( dat$crimes[ dat$year == 1997 & dat$group == "control" ] )
+
+T1 <- mean( dat$crimes[ dat$year == 1994 & dat$group == "treat" ] )
+T2 <- mean( dat$crimes[ dat$year == 1995 & dat$group == "treat" ] )
+T3 <- mean( dat$crimes[ dat$year == 1996 & dat$group == "treat" ] )
+T4 <- mean( dat$crimes[ dat$year == 1997 & dat$group == "treat" ] )
+
+dd.C1 <- mean( dat$crimes[ dat$post == 0 & dat$group == "control" ] )
+dd.C2 <- mean( dat$crimes[ dat$post == 1 & dat$group == "control" ] )
+
+dd.T1 <- mean( dat$crimes[ dat$post == 0 & dat$group == "treat" ] )
+dd.T2 <- mean( dat$crimes[ dat$post == 1 & dat$group == "treat" ] )
+
+plot( ts1$time, ts1$ave, type="b", pch=19, col="steelblue", bty="n",
+      xlab="Time (months)", ylab="Number of Crimes", 
+      main="Difference-in-Difference Group Means",
+      xlim=c(0,50), ylim=c(60,225) )
+points( ts2$time, ts2$ave, type="b", pch=19, col="firebrick" ) 
+abline( v=c(12,36,48), lty=2, col="gray" )
+abline( v=24.5, lty=3, col="gray", lwd=3 )
+abline( h=c(y.24,y.25), lty=3, col="firebrick" )
+
+points( c(6.5,18.5,30.5,42.5), c(C1,C2,C3,C4), 
+        pch=19, col=adjustcolor("steelblue",alpha=0.5), cex=2 )
+points( c(6.5,18.5,30.5,42.5), c(T1,T2,T3,T4), 
+        pch=19, col=adjustcolor("firebrick",alpha=0.5), cex=2 )
+
+points( c(12.5,36.5), c(dd.C1,dd.C2+3), col="steelblue", pch=19, cex=4 )
+points( c(12.5,36.5), c(dd.T1,dd.T2-3), col="firebrick", pch=19, cex=4 )
+```
+
+The parallel lines assumption must be met for the difference-in-difference approach to produce unbiased estimates of program impact. 
+
+Does the interrupted time series have a similar assumption? Why or why not? Hint, what type of research design estimator does the ITS operationalize? 
+
+```{r}
+plot( dat$time, m3$fitted.values, 
+      col=dat$group, pch=19, bty="n",
+      xlab="Time", ylab="Crimes" )
+```
 
 
 ---
