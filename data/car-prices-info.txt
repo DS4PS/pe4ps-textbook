@@ -1,0 +1,37 @@
+NAME: Car Data
+TYPE: Multiple Regression
+SIZE: 810 observations, 12 variables
+ 
+DESCRIPTIVE ABSTRACT:
+Data collected from Kelly Blue Book for several hundred 2005 used GM cars allows students to develop 
+a multivariate regression model to determine their car value based on a variety of characteristics 
+such as mileage, make, model, engine size, interior style, and cruise control. Students learn to 
+look at residual plots and check for heteroskedasticity, autocorrelation, and multicollinearity.
+
+SOURCES:
+
+For this data set, a representative sample of over eight hundred, 2005 GM cars were selected, 
+then an algorithm was developed following the 2005 Central Edition of the Kelly Blue Book to 
+estimate retail price. </p>
+
+VARIABLE DESCRIPTIONS:
+Price: suggested retail price of the used 2005 GM car in excellent condition. The condition of a 
+        car can greatly affect price. All cars in this data set were less than one year old when 
+        priced and considered to be in excellent condition. 
+Mileage: number of miles the car has been driven
+Make: manufacturer of the car such as Saturn, Pontiac, and Chevrolet
+Model: specific models for each car manufacturer such as Ion, Vibe, Cavalier
+Trim (of car): specific type of car model such as SE Sedan 4D, Quad Coupe 2D
+Type: body type such as sedan, coupe, etc.
+Cylinder: number of cylinders in the engine	
+Liter: a more specific measure of engine size
+Doors: number of doors
+Cruise: indicator variable representing whether the car has cruise control (1 = cruise)
+Sound: indicator variable representing whether the car has upgraded speakers (1 = upgraded)
+Leather: indicator variable representing whether the car has leather seats (1 = leather)
+
+
+SUBMITTED BY:
+Shonda Kuiper
+Grinnell College
+1116 8th Ave, Grinnell, IA 50112

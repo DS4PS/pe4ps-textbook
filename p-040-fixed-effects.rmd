@@ -10,54 +10,46 @@ knitr::opts_chunk$set(echo = TRUE, message=F, warning=F, fig.width = 10)
 
 Here are the packages we will use in this lecture. If you don't remember how to install them, you can have a look at the code. 
 
-* **stargazer** for nice tables
-* **car** and **gplots** for graphs
 * **plm** for fixed effect model
+* **car** and **gplots** for graphs
+* **stargazer** for nice tables
 
-```{r, eval=F}
-install.packages( stargazer )
-library( "stargazer" )
 
-install.packages( car )
-library( "car" )
 
-install.packages( gplots )
-library( "gplots" )
-
-install.packages( plm )
-library( "plm" )
-```
-
-**What you will learn**
-
-* What is the scope of fixed effects?
-* Which data structure do you need to run a fixed effect model? 
-* What is the difference between an OLS, fixed, and random effect model?
-* How do you interpret the effect of X on Y in a fixed effect model? And in a random effect model? 
-* Apply a fixed effect model to data in R
-* Compare a fixed effect model vs an OLS vs a random model
-
-```{r, echo=FALSE, eval=F, results="hide"}
-install.packages("stargazer", repos="https://cran.cnr.berkeley.edu")
-install.packages("scales", repos="https://cran.cnr.berkeley.edu")
-install.packages("car", repos="https://cran.cnr.berkeley.edu")
-install.packages("plm", repos="https://cran.cnr.berkeley.edu")
-install.packages("gplots", repos="https://cran.cnr.berkeley.edu")
-install.packages("fastDummies", repos="https://cran.cnr.berkeley.edu")
+```{r, echo=TRUE, eval=F, results="hide" }
+install.packages( "plm" )
+install.packages( "stargazer" )
+install.packages( "scales" )
+install.packages( "car" )
+install.packages( "gplots" )
+install.packages( "fastDummies" )
 ```
 
 ```{r, echo=FALSE, results="hide"}
-library("scales")
-library("stargazer")
-library("car")
-library("plm")
-library("gplots")
-library("fastDummies")
+library( "plm" )
+library( "scales" )
+library( "stargazer" )
+library( "car" )
+library( "gplots" )
+library( "fastDummies" )
+library( "pander" )
+library( "dplyr" )
 ```
+
+
+
+**What you will learn**
+
+* What is the difference between an OLS, fixed, and random effect model?
+* How do you interpret the effect of X on Y in a fixed effect model? 
+* Which data structure do you need to run a fixed effect model? 
+* How to run a fixed effect model in R
+
+
 
 # The key concept
 
-We will start with a very simple example to illustrate the idea of within and between variation, which is key to fixed effect models.
+We will start with a very simple example to illustrate the idea of within and between variation, which is the key to understanding the fixed effect model.
 
 Let's imagine to have data about three different countries. We want to understand the relationship between international aid funding received by the country (policy variable) and economic growth (outcome variable).
 
@@ -103,6 +95,291 @@ This statistical phenomenon is known as the **Simpson's Paradox**, where trends 
 
 As we will see in the remain of the lecture, **fixed effect** wil enable us to consider differences across groups so that we can estimated the within effect of the policy intervention.
 
+**Mundlak (1965) presented one of the first examples of solvig "management bias" in estimations using fixed effects.**
+
+
+```{r, echo=F}
+
+# this one works well:
+e <- c(-0.217265337508781, 0.0996074731855418, 0.0800275276849036, 
+-0.178488399013339, -0.496420526595239, -1.7168471976976, -0.405092050237224, 
+-0.115710342436631, -0.371092702457788, 0.822415948208485, 0.85135450577188, 
+0.171227422217835, 0.123875567283242, 1.40368293360846, 1.2581671356454, 
+0.62810338038335, -0.887705537863198, 0.757750779879804, 1.08763122728127, 
+0.575576369638848, 0.28709316244214, -0.375428732568683, 0.663417542179713, 
+1.04134503360736, -0.16471947215554, 2.4753832533224, -1.11870402193226, 
+0.32517135445685, -1.07233215548999, -0.0896477846333077)
+
+id <- rep( 1:3, each=10 )
+org.id <- factor(id)
+
+
+
+# MODEL 1 - OLS
+
+x1  <- 9 + 1:10 + 0*id
+y1  <- 25 + x1 + 0*id + e
+
+
+x <- x1
+y <- y1
+m1 <- lm( y ~ x )
+
+
+# MODEL 2 - Random Effect
+
+x2  <- 9 + 1:10 + 0*id
+y2  <- 5 + x2 + 10*id + e
+
+
+
+x <- x2
+y <- y2
+m2.ols <- lm( y ~ x )
+m2.re <- lm( y ~ x + org.id )
+
+
+# MODEL 3
+
+x3  <- 1:10 + 5*id
+y3  <- 5 + x3 + 10*id + e
+
+x <- x3
+y <- y3
+m3.ols <- lm( y ~ x )
+m3.fe <- lm( y ~ x + org.id )
+
+
+# SYNTHETIC DATA 
+
+# MODEL 1 - OLS
+
+x1  <- 9 + 1:10 + 0*id
+y1  <- 25 + x1 + 0*id + e
+
+x <- x1
+y <- y1
+m1.ols <- lm( y ~ x )
+
+
+# MODEL 3
+
+x3  <- 1:10 + 5*id
+y3  <- 5 + x3 + 10*id + e
+
+x3.mean <- ave( x3, org.id )
+x3.centered <- x3 - x3.mean
+
+y3.mean <- ave( y3, org.id )
+y3.centered <- y3 - y3.mean
+
+x <- x3
+y <- y3
+m3.ols <- lm( y ~ x )
+m3.fe <- lm( y ~ x + org.id )
+
+x <- x3.centered
+y <- y3.centered
+m3.centered <- lm( y ~ x )
+```
+
+
+
+```{r, fig.heigh=6, fig.width=12, echo=F}
+par( mfrow=c(1,3) )
+
+plot( x1, y1, pch=19, col=org.id, cex=2, 
+      ylim=c(20,60), xlim=c(0,30),
+      bty="n", axes=F,
+      xlab="Fertilizer", ylab="Tons of Corn Per Acre", 
+      line=1.5, cex.lab=1.5 ) 
+axis( side = 1, labels = FALSE )
+axis( side = 2, labels = FALSE )
+title( main="Scenario 1: \nAll Farms Equal", line=1, cex.main=2 )
+
+
+plot( x2, y2, pch=19, col=org.id, cex=2, 
+      ylim=c(20,60), xlim=c(1,30),
+      bty="n", axes=F,
+      xlab="Fertilizer", ylab="Tons of Corn Per Acre", 
+      line=1.5, cex.lab=1.5 ) 
+axis( side = 1, labels = FALSE )
+axis( side = 2, labels = FALSE )
+title( main="Scenario 2: \nLand Quality Varies", line=1, cex.main=2 )
+
+
+plot( x3, y3, pch=19, col=org.id, cex=2, 
+      ylim=c(20,60), xlim=c(1,30),
+      bty="n", axes=F,
+      xlab="Fertilizer", ylab="Tons of Corn Per Acre", 
+      line=1.5, cex.lab=1.5 ) 
+axis( side = 1, labels = FALSE )
+axis( side = 2, labels = FALSE )
+title( main="Scenario 3: \nLand Management Varies", line=1, cex.main=2 )
+```
+
+
+## Types of Bias
+
+```{r, echo=F}
+# SIMPSON'S PARADOX
+
+
+# MODEL 1 - OLS
+
+x1  <- 9 + 1:10 + 0*id
+y1  <- 25 + x1 + 0*id + e
+
+
+x <- x1
+y <- y1
+m1 <- lm( y ~ x )
+
+
+# MODEL 2 - Random Effect
+
+x2  <- 9 + 1:10 + 0*id
+y2  <- 5 + x2 + 10*id + e
+
+
+
+x <- x2
+y <- y2
+m2.ols <- lm( y ~ x )
+m2.re <- lm( y ~ x + org.id )
+
+
+# FE CASE 1
+
+x11  <- 1:10 + 5*id
+y11  <- 5 + x11 + 10*id + e
+
+x <- x11
+y <- y11
+m11.ols <- lm( y ~ x )
+m11.fe <- lm( y ~ x + org.id )
+
+
+# FE CASE 2
+
+x12  <- 1:10 + 5*id
+y12  <- 10 + 15*id + e
+
+x <- x12
+y <- y12
+m12.ols <- lm( y ~ x )
+m12.fe  <- lm( y ~ x + org.id )
+
+
+# FE CASE 3
+
+x13  <- 1:10 + 5*id
+y13  <- 60 + x13 - 18*id + e
+
+x <- x13
+y <- y13
+m13.ols <- lm( y ~ x )
+m13.fe  <- lm( y ~ x + org.id )
+
+
+
+## GRAPHICS
+
+par( mfrow=c(1,3) )
+
+
+plot( x11, y11, pch=19, col=org.id, cex=2, 
+      ylim=c(20,60), xlim=c(0,30),
+      bty="n", axes=F,
+      xlab="Hours of Private Tutoring", ylab="Math Scores", 
+      line=1.5, cex.lab=1.5 ) 
+axis( side = 1, labels = FALSE )
+axis( side = 2, labels = FALSE )
+title( main="Matthew Effect", line=1, cex.main=2 )
+
+
+plot( x12, y12, pch=19, col=org.id, cex=2, 
+      ylim=c(20,60), xlim=c(1,30),
+      bty="n", axes=F,
+      xlab="Hours of Private Tutoring", ylab="Math Scores", 
+      line=1.5, cex.lab=1.5 ) 
+axis( side = 1, labels = FALSE )
+axis( side = 2, labels = FALSE )
+title( main="Artificial Program Impact", line=1, cex.main=2 )
+
+
+plot( x13, y13, pch=19, col=org.id, cex=2, 
+      ylim=c(20,60), xlim=c(1,30),
+      bty="n", axes=F,
+      xlab="Hours of Private Tutoring", ylab="Math Scores",  
+      line=1.5, cex.lab=1.5 ) 
+axis( side = 1, labels = FALSE )
+axis( side = 2, labels = FALSE )
+title( main="Simpson's Paradox", line=1, cex.main=2 )
+```
+
+
+```{r, echo=F, fig.width=10, fig.height=18}
+###
+
+par( mfrow=c(3,1), mar=c(5.1, 4.1, 4.1, 15) )
+
+plot( x11, y11, pch=19, col=gray(0.5,0.5), cex=3, 
+      ylim=c(20,70), xlim=c(1,25),
+      bty="n", axes=F,
+      xlab="Program Impact Over-Stated", ylab="", 
+      line=1.5, cex.lab=1.5, col.lab="gray50", cex.lab=1.5 ) 
+axis( side = 1, labels = FALSE )
+axis( side = 2, labels = FALSE )
+title( main="Matthew Effect", line=1, cex.main=2 )
+abline( m11.ols, lwd=2 )
+for(i in 1:3){ abline( lm(y11[id==i]~x11[id==i]), lty=3, lwd=3, col="darkgray" ) } 
+
+mtext( " Pooled Model", side=4, outer=F, at=m11.ols$fitted.values[30]+5, cex=1.5, las=2 )
+b <- m11.fe$coefficients
+mtext( "  FE Slope", side=4, outer=F, at=b[1]+25*b[2]+2, cex=1, las=2 )
+mtext( "  FE Slope", side=4, outer=F, at=b[1]+25*b[2]+b[3]+2, cex=1, las=2 )
+mtext( "  FE Slope", side=4, outer=F, at=b[1]+25*b[2]+b[4]+2, cex=1, las=2 )
+
+
+
+plot( x12, y12, pch=19, col=gray(0.5,0.5), cex=3, 
+      ylim=c(20,70), xlim=c(1,25),
+      bty="n", axes=F,
+      xlab="Program Impact Over-Stated", ylab="", 
+      line=1.5, cex.lab=1.5, col.lab="gray50", cex.lab=1.5 ) 
+axis( side = 1, labels = FALSE )
+axis( side = 2, labels = FALSE )
+title( main="Artificial Program Impact", line=1, cex.main=2 )
+abline( m12.ols, lwd=2 )
+for(i in 1:3){ abline( lm(y12[id==i]~x12[id==i]), lty=3, lwd=3, col="darkgray" ) } 
+
+mtext( " Pooled Model", side=4, outer=F, at=m12.ols$fitted.values[30]+5, cex=1.5, las=2 )
+b <- m12.fe$coefficients
+mtext( "  FE Slope", side=4, outer=F, at=b[1]+25*b[2]+2, cex=1, las=2 )
+mtext( "  FE Slope", side=4, outer=F, at=b[1]+25*b[2]+b[3]+2, cex=1, las=2 )
+mtext( "  FE Slope", side=4, outer=F, at=b[1]+25*b[2]+b[4]+2, cex=1, las=2 )
+
+
+plot( x13, y13, pch=19, col=gray(0.5,0.5), cex=3, 
+      ylim=c(20,70), xlim=c(1,25),
+      bty="n", axes=F,
+      xlab="Impact has Wrong Sign", ylab="", 
+      line=1.5, cex.lab=1.5, col.lab="gray50", cex.lab=1.5 ) 
+axis( side = 1, labels = FALSE )
+axis( side = 2, labels = FALSE )
+title( main="Simpson's Paradox", line=1, cex.main=2 )
+abline( m13.ols, lwd=2 )
+for(i in 1:3){ abline( lm(y13[id==i]~x13[id==i]), lty=3, lwd=3, col="darkgray" ) } 
+
+mtext( " Pooled Model", side=4, outer=F, at=m13.ols$fitted.values[30]-3, cex=1.5, las=2 )
+b <- m13.fe$coefficients
+mtext( "  FE Slope", side=4, outer=F, at=b[1]+25*b[2]+2, cex=1, las=2 )
+mtext( "  FE Slope", side=4, outer=F, at=b[1]+25*b[2]+b[3]+2, cex=1, las=2 )
+mtext( "  FE Slope", side=4, outer=F, at=b[1]+25*b[2]+b[4]+2, cex=1, las=2 )
+```
+
+
 ## OLS, demeaning, and fixed effects.
 
 ```{r, echo = F}
@@ -126,7 +403,11 @@ Let's take a look at a simulated dataset that replicates the example illustrated
 
 palette( c( "steelblue", "darkred", "darkgreen"  ) )
 
-plot(x, y, ylim = c(-8,10), xlim = c(0,8), lwd = 5, col = as.factor(data$g), ylab = "Economic growth (%)", xlab = "International aid ($M)")
+plot( x, y, bty="n", pch=19, cex=3,
+      ylim = c(-8,10), xlim = c(0,8), 
+      col = as.factor(data$g), 
+      ylab = "Economic growth (%)", 
+      xlab = "International aid ($M)")
 
 text(data$x[1], data$y[1]+1, "A t1")
 text(data$x[2], data$y[2]+1, "A t2")
@@ -151,20 +432,22 @@ The OLS results show that the coefficient of International Aid is significantly 
 
 palette( c( "steelblue", "darkred", "darkgreen"  ) )
 
-plot(x[data$t ==1], y[data$t==1], ylim = c(-8,10), xlim = c(0,8), col = as.factor(data$g), lwd = 5, ylab = "Economic growth (%)", xlab = "International aid ($M)")
+plot( x[data$t ==1], y[data$t==1], pch=19, cex=3, bty="n",
+      ylim = c(-8,10), xlim = c(1,4), 
+      col = as.factor(data$g), lwd = 5, 
+      ylab = "Economic growth (%)", 
+      xlab = "International aid ($M)")
+
 abline(y[data$t == 1] ~ x[data$t == 1], col = "red")
-
 text(data$x[1], data$y[1]+1, "A t1")
-
 text(data$x[4], data$y[4]+1, "B t1")
-
 text(data$x[7], data$y[7]+1, "C t1")
 
 ```
 
 ```{r, echo=T, results='asis', fig.cap="OLS, Cross-sectional data, Year = 1"}
 
-OLS = lm ( y[data$t == 1] ~ x[data$t == 1] )
+OLS <- lm ( y[data$t == 1] ~ x[data$t == 1] )
 
 stargazer( OLS, 
            type = "html", 
@@ -188,7 +471,11 @@ Results are substantially different between the cross-sectional and the pooled O
 
 palette( c( "steelblue", "darkred", "darkgreen"  ) )
 
-plot(x, y, ylim = c(-8,10), xlim = c(0,8), lwd = 5, col = as.factor(data$g), ylab = "Economic growth (%)", xlab = "International aid ($M)")
+plot(x, y, pch=19, cex=3, bty="n",
+     col = factor(data$g), 
+     ylim = c(-8,10), xlim = c(0,8), 
+     ylab = "Economic growth (%)", 
+     xlab = "International aid ($M)")
 
 text(data$x[1], data$y[1]+1, "A t1")
 text(data$x[2], data$y[2]+1, "A t2")
@@ -198,9 +485,9 @@ text(data$x[4], data$y[4]+1, "B t1")
 text(data$x[5], data$y[5]+1, "B t2")
 text(data$x[6], data$y[6]+1, "B t3")
 
-text(data$x[7], data$y[7]+1, "C t1")
-text(data$x[8], data$y[8]+1, "C t2")
-text(data$x[9], data$y[9]+1, "C t3")
+text(data$x[7], data$y[7]+2, "C t1")
+text(data$x[8], data$y[8]+2, "C t2")
+text(data$x[9], data$y[9]+2, "C t3")
 
 ```
 
@@ -219,6 +506,210 @@ stargazer( OLS, Pooled_OLS,
 
 ### De-meaned OLS model
 
+```{r, echo=F}
+
+# this one works well:
+e <- c(-0.217265337508781, 0.0996074731855418, 0.0800275276849036, 
+-0.178488399013339, -0.496420526595239, -1.7168471976976, -0.405092050237224, 
+-0.115710342436631, -0.371092702457788, 0.822415948208485, 0.85135450577188, 
+0.171227422217835, 0.123875567283242, 1.40368293360846, 1.2581671356454, 
+0.62810338038335, -0.887705537863198, 0.757750779879804, 1.08763122728127, 
+0.575576369638848, 0.28709316244214, -0.375428732568683, 0.663417542179713, 
+1.04134503360736, -0.16471947215554, 2.4753832533224, -1.11870402193226, 
+0.32517135445685, -1.07233215548999, -0.0896477846333077)
+
+id <- rep( 1:3, each=10 )
+org.id <- factor(id)
+
+
+
+# MODEL 1 - OLS
+
+x1  <- 9 + 1:10 + 0*id
+y1  <- 25 + x1 + 0*id + e
+
+
+x <- x1
+y <- y1
+m1 <- lm( y ~ x )
+
+
+# MODEL 2 - Random Effect
+
+x2  <- 9 + 1:10 + 0*id
+y2  <- 5 + x2 + 10*id + e
+
+
+
+x <- x2
+y <- y2
+m2.ols <- lm( y ~ x )
+m2.re <- lm( y ~ x + org.id )
+
+
+# MODEL 3
+
+x3  <- 1:10 + 5*id
+y3  <- 5 + x3 + 10*id + e
+
+x <- x3
+y <- y3
+m3.ols <- lm( y ~ x )
+m3.fe <- lm( y ~ x + org.id )
+
+
+# SYNTHETIC DATA 
+
+# MODEL 1 - OLS
+
+x1  <- 9 + 1:10 + 0*id
+y1  <- 25 + x1 + 0*id + e
+
+x <- x1
+y <- y1
+m1.ols <- lm( y ~ x )
+
+
+# MODEL 3
+
+x3  <- 1:10 + 5*id
+y3  <- 5 + x3 + 10*id + e
+
+x3.mean <- ave( x3, org.id )
+x3.centered <- x3 - x3.mean
+
+y3.mean <- ave( y3, org.id )
+y3.centered <- y3 - y3.mean
+
+x <- x3
+y <- y3
+m3.ols <- lm( y ~ x )
+m3.fe <- lm( y ~ x + org.id )
+
+x <- x3.centered
+y <- y3.centered
+m3.centered <- lm( y ~ x )
+```
+
+
+
+
+```{r, fig.height=6, fig.width=12, echo=F}
+par( mfrow=c(1,2), mar=c(5.1, 4.1, 4.1, 12) )
+
+plot( x1, y1, pch=19, col=gray(0.5,0.5), cex=3, 
+      ylim=c(20,70), xlim=c(0,25),
+      bty="n", axes=F,
+      xlab="UNBIASED + EFFICIENT", ylab="", 
+      line=1.5, cex.lab=1.5, col.lab="gray20", cex.lab=1.5 )  
+axis( side = 1, labels = FALSE )
+axis( side = 2, labels = FALSE )
+title( main="Data with No Groups", line=1, cex.main=2 )
+abline( m1, lwd=2 )
+b <- m1$coefficients
+mtext( "  Pooled OLS Model", side=4, outer=F, at=b[1]+25*b[2]+3, cex=1.5, las=2 )
+
+
+
+plot( x3, y3, pch=19, col=gray(0.5,0.5), cex=3, 
+      ylim=c(20,70), xlim=c(1,25),
+      bty="n", axes=F,
+      xlab="BIASED + INEFFICIENT", ylab="", 
+      line=1.5, cex.lab=1.5, col.lab="gray20", cex.lab=1.5 ) 
+axis( side = 1, labels = FALSE )
+axis( side = 2, labels = FALSE )
+title( main="Data With Groups", line=1, cex.main=2 )
+abline( m3.ols, lwd=2 )
+for(i in 1:3){ abline( lm(y3[id==i]~x3[id==i]), lty=3, lwd=3, col="darkgray" ) } 
+
+mtext( " Pooled OLS Model", side=4, outer=F, at=m3.ols$fitted.values[30]+5, cex=1.5, las=2 )
+b <- m3.fe$coefficients
+mtext( "  FE Slope", side=4, outer=F, at=b[1]+25*b[2]+2, cex=1, las=2 )
+mtext( "  FE Slope", side=4, outer=F, at=b[1]+25*b[2]+b[3]+2, cex=1, las=2 )
+mtext( "  FE Slope", side=4, outer=F, at=b[1]+25*b[2]+b[4]+2, cex=1, las=2 )
+```
+
+*De-meaning the data by groups transforms it into something that looks like regular regression data.*
+
+```{r, fig.height=6, fig.width=12, echo=F}
+par( mfrow=c(1,2) )
+
+plot( x1, y1, pch=19, col=gray(0.5,0.5), cex=3, 
+      ylim=c(34,46), xlim=c(mean(x1)-5,mean(x1)+5),
+      bty="n", axes=F,
+      xlab="", ylab="", 
+      cex.lab=1.5 ) 
+axis( side = 1, cex.axis=2, at=c(10.5,12.5,14.5,16.5,18.5), labels=c(10,12,14,16,18) )
+axis( side = 2, cex.axis=2 )
+title( main="No Groups in Data)", line=1, cex.main=2 )
+abline( h=40, lty=3, col="gray", lwd=3 )
+abline( v=mean(x), lty=3, col="gray", lwd=3 )
+text( 17, 39, expression( paste( "( ", bar( x ), " , ", bar( y ), " )" ) ), 
+      cex=2, col="black" )
+
+
+plot( x3, y3, 
+      pch=19, col=gray(0.5,0.5), cex=3,
+      ylim=c(20,60), xlim=c(1,30),
+      bty="n", axes=F,
+      xlab="", ylab="", 
+      cex.lab=1.5 ) 
+axis( side = 1, cex.axis=2 )
+axis( side = 2, cex.axis=2 )
+title( main="Data With Groups", line=1, cex.main=2 )
+for( i in 1:3 )
+{ 
+   segments( x0=min(x3[id==i])-1, x1=max(x3[id==i])+1, 
+             y0=mean(y3[id==i]), 
+             lty=3, col="gray", lwd=3 )
+
+   segments( x0=mean(x3[id==i]),
+             y0=min(y3[id==i])-1, y1=max(y3[id==i])+1,
+             lty=3, col="gray", lwd=3 )
+
+   text( mean(x3[id==i])-3, mean(y3[id==i])+3, 
+         expression( paste( "( ", bar( x )[j], " , ", bar( y )[j], " )" ) ), 
+         cex=1.5, col="black" )
+}
+
+
+
+
+```
+
+
+```{r, fig.height=6, fig.width=12, echo=F}
+par( mfrow=c(1,2) )
+
+plot( x1, y1, pch=19, col=gray(0.5,0.5), cex=3, 
+      ylim=c(34,46), xlim=c(mean(x1)-5,mean(x1)+5),
+      bty="n", axes=F,
+      xlab="", ylab="", 
+      cex.lab=1.5 ) 
+axis( side = 1, cex.axis=2, at=c(10.5,12.5,14.5,16.5,18.5), labels=c(10,12,14,16,18) )
+axis( side = 2, cex.axis=2 )
+title( main="No Groups in Data", line=1, cex.main=2 )
+abline( h=40, lty=3, col="gray", lwd=3 )
+abline( v=mean(x), lty=3, col="gray", lwd=3 )
+text( 17, 39, expression( paste( "( ", bar( x ), " , ", bar( y ), " )" ) ), 
+      cex=2, col="black" )
+
+
+plot( x3.centered, y3.centered, 
+      pch=19, col=gray(0.5,0.5), cex=3, 
+      ylim=c(-6,6), 
+      bty="n", axes=F,
+      xlab="", ylab="", 
+      cex.lab=1.5 ) 
+axis( side = 1, cex.axis=2 )
+axis( side = 2, cex.axis=2 )
+title( main="Group Data After \nMean Centering", line=1, cex.main=2 )
+abline( h=0, lty=3, col="gray", lwd=3 )
+abline( v=0, lty=3, col="gray", lwd=3 )
+text( -2.3, 1.5, expression( paste( "( ", x[ij] - bar( x )[j], " , ", y[ij] - bar( y )[j], " )" ) ), 
+      cex=2, col="black" )
+```
+
 As we discussed before, OLS can be problematic with panel data because it takes into account **across-country** variation. The effect of international aid on growth is negative because the overall trend across countries is negative. Countries which receive more funding (like Country C) report a lower economic growth. To observe the true effect of international aid, we need to remove the across-country variation. We can do it by demeaning the data. 
 
 De-meaning requires you to substract the mean from each variable. In this case, we are interested in demeaning by group, so that the values of x and y are centered around each group mean. You can observe the process in table \@ref(fig:f5). 
@@ -231,26 +722,69 @@ The mean value of Economic Growth in group A is 4. We substract 4 from each valu
 knitr::include_graphics( "FIGURE/FixEffs/Picture6.png" )
 ```
 
+```{r, echo = F}
+y <- c(4.4, 6.8, 9.2, 0.54, 1.9, 3.26, -6.92, -5.495, -4.07)
+
+x <- c(2, 4, 6, 2.3, 4, 5.7, 3, 4.5, 6)
+
+g <- c("a", "a", "a", "b", "b", "b", "c", "c", "c")
+
+t <- c(1,2,3,1,2,3,1,2,3)
+
+data <- data.frame( x,y,t,g )
+```
+
+
+
 ```{r, echo=T, results='asis', fig.cap="Pooled OLS regression"}
+# library( dplyr )
 
-data$x_dem = ifelse(
-   data$g == "a", data$x - mean(data$x[data$g == "a"]),
-      ifelse(data$g == "b", data$x - mean(data$x[data$g == "b"]),
-          ifelse(data$g == "c", data$x - mean(data$x[data$g == "c"]),NA)))
-
-data$y_dem = ifelse(
-   data$g == "a", data$y - mean(data$y[data$g == "a"]),
-      ifelse(data$g == "b", data$y - mean(data$y[data$g == "b"]),
-          ifelse(data$g == "c", data$y - mean(data$y[data$g == "c"]),NA)))
+data <- 
+  data %>%
+  group_by( g ) %>%
+  mutate( mean.x=mean(x), x.demeaned = x - mean.x,
+             mean.y=mean(y), y.demeaned = y - mean.y ) %>%
+  ungroup()
 ```
 
 As a result, we obtain a new dataset where our observations are disposed along a line. In graph \@ref(fig:f10), there are no longer significant differences **across** the 3 countries - they all lay on the same line. We observe only **within** countries differences. 
 
+
+```{r, echo=F}
+data <- 
+  structure(list( x = c(2, 4, 6, 2.3, 4, 5.7, 3, 4.5, 6), 
+                  y = c(4.4, 6.8, 9.2, 0.54, 1.9, 3.26, -6.92, -5.495, -4.07), 
+                  t = c(1, 2, 3, 1, 2, 3, 1, 2, 3), 
+                  g = structure(c(1L, 1L, 1L, 2L, 2L, 2L, 3L, 3L, 3L), 
+                  .Label = c("a", "b", "c"), 
+                  class = "factor"), 
+                  mean.x = c(4, 4, 4, 4, 4, 4, 4.5, 4.5, 4.5), 
+                  x.demeaned = c(-2, -0.1, 2, -1.7, 0.1, 1.7, -1.5, 0, 1.5), 
+                  mean.y = c(6.8, 6.8, 6.8, 1.9, 1.9, 1.9, -5.495, -5.495, -5.495), 
+                  y.demeaned = c(-2.4, 0.1, 2.4, -1.36, -0.1, 1.36, -1.425, 0.2, 1.425)), 
+            class = c("tbl_df", "tbl", "data.frame"), row.names = c(NA, -9L))
+```
+
 ```{r f10, fig.cap = "Simulated dataset: De-meaned observations"}
 
 palette( c( "steelblue", "darkred", "darkgreen"  ) )
+palette( adjustcolor( palette(), alpha.f = 0.4 ) )
 
-plot(data$x_dem, data$y_dem, ylim = c(-5,5), xlim = c(-3,3), lwd = 5, col = as.factor(data$g), ylab = "Economic growth (%)", xlab = "International aid ($M)")
+par( mfrow=c(1,2) )
+
+plot( data$x, data$y, bty="n",
+     # ylim = c(-5,5), xlim = c(-3,3), bty="n", 
+     pch = 19, cex=4, col = factor(data$g), 
+     ylab = "Economic growth (%)", 
+     xlab = "International aid ($M)",
+     main="POOLED MODEL")
+
+plot( data$x.demeaned, data$y.demeaned, 
+     ylim = c(-5,5), xlim = c(-3,3), bty="n", 
+     pch = 19, cex=4, col = factor(data$g), 
+     ylab = "Economic growth (%)", 
+     xlab = "International aid ($M)",
+     main="DEMEANED DATA")
 
 points(2, -4, col = "steelblue", lwd = 5 )
 points(2, -4.5, col = "darkred", lwd = 5 )
@@ -263,17 +797,23 @@ text(2.4, -5, "C", col = "darkgreen")
 
 At this point, we can estimate the relationship between x and y using an OLS model. Our beta coefficient is positive and statistically significant. For each milion dollar received in funding aid, a country's economic growth increases - on average - of 1.01 points percentage. 
 
->Note that we do not know whether a country grows more than another. We are estimating an **average within country effect**. 
+> Note that we do not know whether a country grows more than another. We are estimating an **average within country effect**. 
 
 ```{r, echo=T, results='asis', fig.cap="Pooled OLS regression"}
 
-Demean_OLS = lm ( y_dem ~ x_dem, data = data )
+Demean_OLS = lm ( y.demeaned ~ x.demeaned, data = data )
 
 stargazer( OLS, Pooled_OLS, Demean_OLS, 
            type = "html", 
-           dep.var.labels = c("Economic growth", "Economic growth", "Economic growth (de-meaned)"),
-           column.labels = c("Cross-Sectional OLS", "Pooled OLS", "De-meaned OLS"),
-           covariate.labels = c("Constant", "International aid - Year 1", "International aid", "International aid - De-meaned OLS"),
+           dep.var.labels = c("Economic growth", 
+                              "Economic growth", 
+                              "Economic growth (de-meaned)"),
+           column.labels = c("Cross-Sectional OLS", 
+                             "Pooled OLS", "De-meaned OLS"),
+           covariate.labels = c("Constant", 
+                                "International aid - Year 1", 
+                                "International aid", 
+                                "International aid - De-meaned OLS"),
            omit.stat = "all", 
            digits = 2, intercept.bottom = FALSE )
 ```
@@ -294,9 +834,18 @@ fixed_reg = lm ( y ~ x + as.factor(g), data = data)
 
 stargazer( OLS, Pooled_OLS, Demean_OLS, fixed_reg,
            type = "html", 
-           dep.var.labels = c("Economic growth", "Economic growth", "Economic growth (de-meaned)"),
-           column.labels = c("Cross-Sectional OLS", "Pooled OLS", "De-mean OLS", "Fixed effect"),
-           covariate.labels = c("Constant", "International aid - Year 1", "International aid", "International aid - De-meaned OLS", "Country B", "Country C"),
+           dep.var.labels = c("Economic growth", 
+                              "Economic growth", 
+                              "Economic growth (de-meaned)"),
+           column.labels = c("Cross-Sectional OLS", 
+                             "Pooled OLS", 
+                             "De-mean OLS", 
+                             "Fixed effect"),
+           covariate.labels = c("Constant", 
+                                "International aid - Year 1", 
+                                "International aid", 
+                                "International aid - De-meaned OLS", 
+                                "Country B", "Country C"),
            omit.stat = "all", 
            digits = 2, intercept.bottom = FALSE )
 ```
@@ -348,7 +897,7 @@ To summarize key conclusions from our previous example:
 The dataset below is an example of a panel dataset. It contains 35 observations. Data are grouped into 7 groups and for each group we have 5 years of observation. 
 
 ```{r}
-head(data[13:16], 10)
+head(data[13:16], 10) %>% pander()
 ```
 
 2. We are interested in investigating the effect of a policy variable X on a given outcome. But because groups are different across each others (*between variation*), an OLS model (either a cross-sectional or a pooled model) does not approximate our data very well. 
@@ -483,7 +1032,7 @@ Countries strongly [invest in Research & Development](http://uis.unesco.org/apps
 Data are structured in a **panel dataset** where we have 10 companies and observations over a five-year period. You can see here the structure of the data for Company 1, Company 10, and Company 2.
 
 ```{r}
- head(data[,c(1,2,18)],15)
+ head(data[,c(1,2,18)],15) %>% pander()
 ```
 
 Each company has different levels of investment in research and development. We plot each company average R&D investement in graph \@ref(fig:companies). Each bar represents a company. The middle dot is the average R&D investment. The bars go from the minimum level of investment to the maximum.
@@ -519,7 +1068,7 @@ barcol = "gray52")
 
 We can look at both company and year variation at the same time in one graph:
 
-```{r companyYears, fig.cap=" Heterogeneity across companies and years"}
+```{r companyYears, fig.cap=" Heterogeneity across companies and years", fig.height=10}
 
 palette( c( "steelblue", "darkred", "forestgreen", "goldenrod1", "gray67", "turquoise4", "black"))
 
@@ -555,24 +1104,29 @@ We can plot our observations and the OLS results on graph \@ref(fig:plotOLS). Th
 We can see that the line only approximates the actual observations.
 
 ```{r plotOLS, fig.cap = "OLS results"}
-
-plot(RDPub, RD, pch=19, xlab="Public R&D Investment", ylab="Company R&D Investment")
-abline(lm( RD ~ RDPub ),lwd=3, col="darkred")
+plot( RDPub, RD, pch=19, 
+      xlab="Public R&D Investment", ylab="Company R&D Investment")
+abline( lm( RD ~ RDPub ),lwd=3, col="darkred" )
 ```
 
-A way to improve the results is to include a set of dummy variable for each company, so as we can control differences across companies. 
+We can improve the results by including a set of dummy variables, one for each company, so as we can control for preliminary differences in R&D spending across companies. 
 
 Results of our variable of interest (Public R&D) change; now, for each dollar spent by the public, companies spend 0.99. 
 
 ```{r, echo = T, results = 'asis'}
-regDummy = lm ( RD ~ RDPub + as.factor(Company), data = data)
+regDummy <- lm ( RD ~ RDPub + as.factor(Company), data = data )
 
 stargazer( regDummy, 
            type = "html", 
            dep.var.labels = ("Company R&D"),
            column.labels = c(" "),
            omit.stat = "all", 
-           covariate.labels = c("Constant (or Company 1)", "Public R&D", "Company 10", "Company 2",  "Company 3",  "Company 4",  "Company 5",  "Company 6", "Company 7",  "Company 8",  "Company 9"),
+           covariate.labels = c("Constant (or Company 1)", 
+                                "Public R&D", "Company 10", 
+                                "Company 2",  "Company 3",  
+                                "Company 4",  "Company 5",  
+                                "Company 6", "Company 7",  
+                                "Company 8",  "Company 9"),
            digits = 2, intercept.bottom = FALSE )
 
 ```
@@ -581,15 +1135,21 @@ We can see how the regression line varies for each company. The dark red, thicke
 
 Note that each line has a different intercept (which is predicted by our dummies) but the same slope - as $\beta_1$ estimates the average within effect for all groups. 
 
-```{r plotdummy, fig.cap= "Plot of OLS with dummy variables"}
+```{r plotdummy, fig.cap= "Plot of OLS with dummy variables", fig.height=10}
 
-yhat = regDummy$fitted
+yhat <- regDummy$fitted
 
-colline = palette( c( "steelblue", "darkred", "forestgreen", "goldenrod1", "gray67", "turquoise4", "black" ) )
+colline <- palette( c( "steelblue", "darkred", "forestgreen", 
+                      "goldenrod1", "gray67", "turquoise4", "black" ) )
 
-scatterplot(yhat ~ RDPub | as.factor(Company), boxplots = FALSE, xlab = "Public R&D Investment", ylab = "Predicted Company R&D Investment", smooth = FALSE, col=colline, lwd = 2, legend=c(title = "Companies"))
+scatterplot( yhat ~ RDPub | as.factor(Company), 
+             boxplots = FALSE, 
+             xlab = "Public R&D Investment", 
+             ylab = "Predicted Company R&D Investment", 
+             smooth = FALSE, col=colline, 
+             lwd = 2, legend=c(title = "Companies"))
 
-abline(lm( RD ~ RDPub ), lwd = 3, col = "red")
+abline( lm( RD ~ RDPub ), lwd = 3, col = "red" )
 ```
 
 ## plm package
@@ -597,13 +1157,22 @@ abline(lm( RD ~ RDPub ), lwd = 3, col = "red")
 We can use the plm package to estimate the fixed effects model. In the output table, we compare results across the OLS, the OLS with dummies, and the fixed effect model. 
 
 ```{r, echo = T, results = 'asis'}
-fixed <- plm(RD ~ RDPub, data=data, index=c("Company"), model="within") ## The model is specified as a OLS model, but we need to indicate the "index" - i.e. the level of grouping.
+## The model is specified as a OLS model, 
+## but we need to indicate the "index" - 
+## i.e. the group variable in the model 
+fixed <- plm( RD ~ RDPub, data=data, 
+              index=c("Company"), model="within" ) 
 
 stargazer( reg, regDummy, fixed, 
            type = "html", 
            dep.var.labels = ("Company R&D"),
-           column.labels = c("Ols", "Ols with Dummy", "Fixed"),
-           covariate.labels = c("Constant (or Company 1)", "Public R&D", "Company 10", "Company 2",  "Company 3",  "Company 4",  "Company 5",  "Company 6", "Company 7",  "Company 8",  "Company 9"),
+           column.labels = c("OLS", "OLS with Dummy", "FE"),
+           covariate.labels = c("Constant (or Company 1)", 
+                                "Public R&D", "Company 10", 
+                                "Company 2",  "Company 3",  
+                                "Company 4",  "Company 5",  
+                                "Company 6", "Company 7",  
+                                "Company 8",  "Company 9"),
            omit.stat = "all", 
            digits = 2, intercept.bottom = FALSE )
 ```
@@ -621,6 +1190,8 @@ The plm package also allows us to test whether the fixed effect model is a bette
 ```{r}
 pFtest(fixed, reg) 
 ```
+
+
 
 ## Key notes on fixed effects
 
@@ -660,13 +1231,13 @@ We start by uploading the data *Crime* from the plm package,
 ```{r, echo=T}
 data(Crime)
 
-dataCrime = Crime
+dataCrime <- Crime
 ```
 
 You can see te structure of the dataset and the main independent variables in the following table. Note that for each county (1 and 3 in this case), we have data from 1981 to 1987. 
 
 ```{r}
-head(dataCrime[,1:7], 10)
+head( dataCrime[,1:7], 10 ) %>% pander()
 ```
 
 These are the main **independent variables** that we will be investigating:
@@ -717,64 +1288,54 @@ pctmin |Percentage minority
 We will estimate two models. The first model is an OLS model. The second model will include fixed effects to control for variation across years and counties. 
 
 ```{r, echo=T, results='asis'}
-OLS.Crime = lm(crmrte ~
-prbarr +
-prbconv +
-prbpris +
-avgsen +
-polpc +
-density +
-region +
-smsa +
-pctmin +
-wcon +
-wtuc +
-wtrd +
-wfir +
-wser +
-wmfg +
-wfed +
-wsta +
-wloc +
-pctymle, 
-data = dataCrime)
 
-Fixed.Crime = plm(crmrte ~
-prbarr +
-prbconv +
-prbpris +
-avgsen +
-polpc +
-density +
-region +
-smsa +
-pctmin +
-wcon +
-wtuc +
-wtrd +
-wfir +
-wser +
-wmfg +
-wfed +
-wsta +
-wloc +
-pctymle, index=c("county"), data = dataCrime)
+# crime as a function of punishment severity 
 
-stargazer( OLS.Crime, Fixed.Crime, 
+model.ols <- lm( crmrte ~ prbarr + prbconv + prbpris + avgsen + 
+               # geographic controls 
+               polpc + density + region + smsa + 
+               # demographic controls 
+               pctmin + pctymle + 
+               # economic controls 
+               wcon + wtuc + wtrd + wfir + wser + wmfg +
+               wfed + wsta + wloc, 
+               data = dataCrime)
+
+model.fe <- plm( crmrte ~ prbarr + prbconv + prbpris + avgsen + 
+               # geographic controls 
+               polpc + density + region + smsa + 
+               # demographic controls 
+               pctmin + pctymle + 
+               # economic controls 
+               wcon + wtuc + wtrd + wfir + wser + wmfg +
+               wfed + wsta + wloc,
+               index=c("county"), 
+               data = dataCrime)
+
+
+stargazer( model.ols, model.fe, 
            type = "html", 
            dep.var.labels = ("Crime rates"),
-           column.labels = c("OLS", "Fixed effects"), intercept.bottom = FALSE,
+           column.labels = c("OLS", "Fixed effects"), 
+           intercept.bottom = FALSE,
            omit.stat = "all", 
-           digits = 2)
+           digits = 2 )
 
 ```
+
+The basic take-away is that our interpretation of the main policy variables will be extremely biased unless we are accounting for baseline levels of crime in communities. 
+
+We see that as the probability of getting arrested (**prbarr**) and getting convicted (**prbconv**) increase crime rates are falling, but the pooled OLS model is grossly over-stating their impact by a factor of two or three. One possible explanation is that communities with a lower baseline level of crime have more resources to pursue arrests and convictions. After controlling for baseline levels of both we see that marginal increases in arrests or convinctions don't actually serve as a big deterrent (not as much as the first model suggests). 
+
+The convinction rate is not significant in either model. But oddly the length of prison sentences is actually positively related to crime. Here we need to use some caution because we know that time-variant omitted variables can still cause bias. It would be odd that people not planning to commit crimes would decide to when they learn prison sentences are longer. It is more likely that communities that were increasing sentences were also experiencing increases in crime rates for other reasons. There is a lot to unpack there, but even without a good theory we can see that there is little evidence to support the idea that getting tough on crime will yield large dividends for public safety, at least not at the levels initially expected using under-specified cross-sectional models. 
+
 
 Note differences across the two models:
 
 1. The fixed effect model has no intercept. We can retrieve the intercept for each county using the command $fixef$. 
 
 ```{r}
-fixef(Fixed.Crime) 
+fixef( model.fe ) 
 ```
 
 2. The variables that are time-invariant such as region type, location in a metropolitan area, or minority percentage are removed from the fixed-effect model. 
@@ -782,7 +1343,7 @@ fixef(Fixed.Crime)
 3. We can compare OLS and fixed effect results using the $pFtest$ command. Remember if the p-value < 0.05, the fixed effect model is a better choice than the OLS model.
 
 ```{r}
-pFtest(Fixed.Crime, OLS.Crime) 
+pFtest( model.fe, model.ols ) 
 ```
 
 # Random effects 
