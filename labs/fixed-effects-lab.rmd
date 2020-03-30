@@ -17,7 +17,9 @@ knitr::opts_chunk$set(echo = TRUE, message=F, warning=F, fig.width = 10)
 ```
 
 ```{r, echo=FALSE, results="hide"}
-library(stargazer)
+library( stargazer )
+library( pander )
+library( dplyr )
 ```
 
 For this lab you need to upload the FixEff_Lab data available in the class R package. 
@@ -42,14 +44,27 @@ For this lab, we want to consider the effect of beer taxes on mortality rates du
 
 # Data
 
-We are going to use a set of simulated data that look at 7 southern US states. For each state we have observations across 7 years. The data are structured as a panel dataset. Variables are the following:  
+We are going to use a set of simulated data that look at 7 southern US states. For each state we have observations across 7 years. 
+
+
+```{r, echo=TRUE}
+URL <- "https://raw.githubusercontent.com/DS4PS/pe4ps-textbook/master/labs/DATA/beer-tax-fixed-effects.csv"
+data <- read.csv( URL, stringsAsFactors=F )
+head( data ) %>% pander()
+```
+
+
+
+The data are structured as a panel dataset. Variables are the following:  
+
+
 
  **Variable name**       | **Description    **                                   
 ------------------------ | -----------------------------------------------------
-state                    |Each state is indicated with a number, from 1 to 7 
-taxes                    |Beer taxes in percentage %, ranges from 0 to 1  
-year                     |Year in which observations were collected      
-accidents                |Number of car accidents       
+state                    | Each state is indicated with a number, from 1 to 7 
+taxes                    | Beer taxes   
+year                     | Year in which observations were collected      
+accidents                | Number of car accidents       
 
 # Analysis 
 
