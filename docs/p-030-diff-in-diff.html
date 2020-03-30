@@ -1007,8 +1007,8 @@ B1 = 0</p>
 <p>Similarly, do we observe a significant secular trend in the data?</p>
 <p>B0 = control group in time=1<br />
 B0 + B2 = control group in time=2</p>
-<p>Trend = B2 + B0 - B0 = B2</p>
-<p>So the test B2=0 is a test of whether we see any secular trends in the data.</p>
+<p>Trend = C2 - C1 = (B2 + B0) - B0 = B2</p>
+<p>So the test B2=0 is a test of whether we see any secular trends in the data: Trend=0.</p>
 <p>Does the program have an impact? Or stated differently, after the treatment does the outcome of the treatment group depart from our counterfactual expectations?</p>
 <p>We construct the counterfactual by looking at the average level of the treatment group before the intervention and adjusting for the secular trend to predict where we expect the group to be in the second time period if the program has no impact.</p>
 <p>T1 + trend = (B0 + B1) + B2 = counterfactual<br />
@@ -1016,7 +1016,7 @@ B0 + B1 + B2 + B3 = actual observed treatment group outcome</p>
 <p>The contrast for comparing the treated group to its counterfactual is:</p>
 <p>B0 + B1 + B2 + B3 = B0 + B1 + B2<br />
 B3 = 0 (after simplification)</p>
-<p>Which is the significance test associated with B3 that is reported in the model.</p>
+<p>Which is the significance test associated with B3=0 that is reported in the model.</p>
 <p>So the coefficients on B1, B2, and B3 all represent meaningful contrasts that map onto useful hypotheses.</p>
 </div>
 <div id="the-counterfactual-1" class="section level2">
