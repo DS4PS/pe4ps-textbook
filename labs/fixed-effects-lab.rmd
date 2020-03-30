@@ -62,7 +62,7 @@ The data are structured as a panel dataset. Variables are the following:
  **Variable name**       | **Description    **                                   
 ------------------------ | -----------------------------------------------------
 state                    | Each state is indicated with a number, from 1 to 7 
-taxes                    | Beer taxes   
+taxes                    | Beer taxes as percentage of cost, from 0 to 1
 year                     | Year in which observations were collected      
 accidents                | Number of car accidents       
 
