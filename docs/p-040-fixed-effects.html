@@ -2049,7 +2049,8 @@ Public R&amp;D
 </td>
 </tr>
 </table>
-<p>The effect of public R&amp;D investment on private ones is equal to 1.036, indicating that for each dollar invested by the government, private companies will invest 1.036 dollars.</p>
+<p>The effect of public R&amp;D investment on private ones is equal to 0.92
+, indicating that for each dollar invested by the government, private companies will invest 0.92 dollars.</p>
 <p>We can plot our observations and the OLS results on graph <a href="#fig:plotOLS">2.5</a>. The black dots represent our observations. The red line represents OLS results.</p>
 <p>We can see that the line only approximates the actual observations.</p>
 <pre class="r"><code>plot( RDPub, RD, pch=19, 
@@ -2062,7 +2063,6 @@ Figure 2.5: OLS results
 </p>
 </div>
 <p>We can improve the results by including a set of dummy variables, one for each company, so as we can control for preliminary differences in R&amp;D spending across companies.</p>
-<p>Results of our variable of interest (Public R&amp;D) change; now, for each dollar spent by the public, companies spend 0.99.</p>
 <pre class="r"><code>regDummy &lt;- lm ( RD ~ RDPub + as.factor(Company), data = data )
 
 stargazer( regDummy, 
@@ -2360,6 +2360,7 @@ Company 9
 </td>
 </tr>
 </table>
+<p>Results of our variable of interest (Public R&amp;D) change; now, for each dollar spent by the public, companies spend 1.15.</p>
 <p>We can see how the regression line varies for each company. The dark red, thicker line represent the regression results when dummies are not included.</p>
 <p>Note that each line has a different intercept (which is predicted by our dummies) but the same slope - as <span class="math inline">\(\beta_1\)</span> estimates the average within effect for all groups.</p>
 <pre class="r"><code>yhat &lt;- regDummy$fitted

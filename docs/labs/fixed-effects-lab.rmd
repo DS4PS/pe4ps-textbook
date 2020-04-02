@@ -1,0 +1,103 @@
+---
+title: "Fixed Effects Model LAB"
+output:
+  html_document:
+    theme: readable
+    df_print: paged
+    highlight: tango
+    toc: yes
+    toc_float: no
+    css: 'css/lab-instructions.css'
+    includes:
+      after_body: 'footer.html'
+--- 
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message=F, warning=F, fig.width = 10)
+```
+
+```{r, echo=FALSE, results="hide"}
+library( stargazer )
+library( pander )
+library( dplyr )
+```
+
+For this lab you need to upload the FixEff_Lab data available in the class R package. 
+
+There are **4 sets of questions** to be answered. You can get up to 100 points + bonus questions. Points are indicated next to each question. 
+
+Remember to:
+
+* Format your table using stargazer 
+* Submit the r markdown file with all your codes. 
+* Bold your answers. 
+
+# The policy problem
+
+> **Research question**: 
+> Do beer taxes affect car accidents at night time?
+
+For this lab, we want to consider the effect of beer taxes on mortality rates due to car accidents during night time. There has been several studies examining how [state policies aiming to control alcohol consumption affect car accidents](https://www.sciencedirect.com/science/article/pii/S0167629696004900). Beer taxes are a way for states to control consumption of alcohol; higher beer taxes increase prices, which in turn decrease consumption. Lower consumption of alcohol is expected to decrease drunk driving and therefore accidents, especially at nigth time.
+
+> **Hypothesis**
+> Beer taxes will be negatively correlated with car accidents at night time. 
+
+# Data
+
+We are going to use a set of simulated data that look at 7 southern US states. For each state we have observations across 7 years. 
+
+
+```{r, echo=TRUE}
+URL <- "https://raw.githubusercontent.com/DS4PS/pe4ps-textbook/master/labs/DATA/beer-tax-fixed-effects.csv"
+data <- read.csv( URL, stringsAsFactors=F )
+head( data ) %>% pander()
+```
+
+
+
+The data are structured as a panel dataset. Variables are the following:  
+
+
+
+ **Variable name**       | **Description    **                                   
+------------------------ | -----------------------------------------------------
+state                    | Each state is indicated with a number, from 1 to 7 
+taxes                    | Beer taxes as percentage of cost, from 0 to 1
+year                     | Year in which observations were collected      
+accidents                | Number of car accidents       
+
+# Analysis 
+
+**Q1: Your colleague starts analyzing this data using a pooled OLS model.**
+
+* **Q1a:** Write the formula of a pooled regression model (5 points).
+* **Q1b:** Run a pooled OLS model and present your results in a table. (5 + 5 points)
+* **Q1c:** Do beer taxes have a significant effect on reducing car accidents? (5 points)
+* **Q1d:** Interpret the coefficient of "taxes". What is its effect on car accidents? Is the effect across or within states? (5 + 5 points)
+
+**Q2: However, you know that grouped data might lead to biased results because of the Simpson's paradox (trends in the data are different when data are looked at the group or aggregate level). You propose a fixed effect model.** 
+
+* **Q2a:** Using an OLS approach, write the formula of the fixed effect model. (5 points)
+* **Q2b:** Looking at the formulas you wrote in response to Q1a and Q2a, what is the main difference between a pooled OLS and a fixed effect model? (5 points)
+* **Q2c:** Now run two fixed-effect models, one including the intercept and one excluding the intercept (you can use the plm function for this latter). Present the results in a nice table. (5 + 5 + 5 points)
+* **Q2d:** When using a fixed effect model, do beer taxes have a significant effect on reducing car accidents? (5 points) 
+* **Q2e:** Describe the effect of "taxes" on car accidents. Make sure to specify whether the estimated effect is across or within states (5 points).
+
+**Q3: We now have a look at state-level differences.**
+
+* **Q3a:** What is the value of the intercept in the first model? What does the intercept represent in the first model? (5 points)
+* **Q3b:** What is the value of the coefficient of "State4" in the first model? What does it say about the number of car accidents in state 4? (5 points)
+* **Q3c:** What is the value of the coefficient of "State4" in the second model? What does it say about the number of car accidents in state 4? (5 points)
+* **Q3d:** Why is the coefficient of "State3" non-significant in model 1 while it is significant in model 2? (10 points)
+
+**Q4: Considering what you know about fixed effect models and the current study, which of these variables would you suggest that your colleague add in the model? Specify why.** (10 points) 
+
+* State geographical location (north, south, east... )
+* Annual unemployment rates
+* State form of government
+
+**BONUS QUESTION: We can run a fixed effect model by de-meaning our data and then using an OLS predictor.**
+
+* **BQ1:** De-mean the data (help yourself with the codes in the lecture)
+* **BQ2:** Run a de-meaned OLS model and present results in a nice table
+* **BQ3:** Do results change from the fixed effect model? Explain why. 

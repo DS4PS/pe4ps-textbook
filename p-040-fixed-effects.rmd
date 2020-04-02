@@ -1097,7 +1097,8 @@ stargazer( reg,
            digits = 2, intercept.bottom = FALSE )
 ```
 
-The effect of public R&D investment on private ones is equal to 1.036, indicating that for each dollar invested by the government, private companies will invest 1.036 dollars. 
+The effect of public R&D investment on private ones is equal to `r reg$coefficients[2]%>%round(2)`
+, indicating that for each dollar invested by the government, private companies will invest `r reg$coefficients[2]%>%round(2)` dollars. 
 
 We can plot our observations and the OLS results on graph \@ref(fig:plotOLS). The black dots represent our observations. The red line represents OLS results.
 
@@ -1111,7 +1112,7 @@ abline( lm( RD ~ RDPub ),lwd=3, col="darkred" )
 
 We can improve the results by including a set of dummy variables, one for each company, so as we can control for preliminary differences in R&D spending across companies. 
 
-Results of our variable of interest (Public R&D) change; now, for each dollar spent by the public, companies spend 0.99. 
+
 
 ```{r, echo = T, results = 'asis'}
 regDummy <- lm ( RD ~ RDPub + as.factor(Company), data = data )
@@ -1130,6 +1131,8 @@ stargazer( regDummy,
            digits = 2, intercept.bottom = FALSE )
 
 ```
+
+Results of our variable of interest (Public R&D) change; now, for each dollar spent by the public, companies spend `r regDummy$coefficients[2]%>%round(2)`. 
 
 We can see how the regression line varies for each company. The dark red, thicker line represent the regression results when dummies are not included.
 

@@ -5,6 +5,8 @@ title: "Instrumental variables"
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, message=F, warning=F, fig.width = 10)
 ```
+
+
 **Packages**
 
 Here are the packages we will use in this lecture. If you don't remember how to install them, you can have a look at the code. 
@@ -16,7 +18,7 @@ Here are the packages we will use in this lecture. If you don't remember how to 
 # install.packages( AER )
 # install.packages( stargazer )
 
-library( "AER" ) # To use the ivreg function. Make sure to install it beforehand (install.packages)
+library( "AER" )          # ivreg function
 library( "stargazer" )
 
 ```
@@ -35,10 +37,10 @@ install.packages( "wooldridge", repos="https://cran.cnr.berkeley.edu" )
 ```
 
 ```{r, echo=FALSE, results="hide"}
-library("scales")
-library(AER) # To use the ivreg function. Make sure to install it beforehand (install.packages)
-library(stargazer)
-library( "wooldridge" )
+library( scales )        # rescaling variables
+library( AER )           # ivreg function
+library( stargazer )     # nice regression tables 
+library( wooldridge )    # regression data
 ```
 
 # The key concept
