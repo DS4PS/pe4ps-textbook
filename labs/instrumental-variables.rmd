@@ -17,9 +17,10 @@ output:
 knitr::opts_chunk$set(echo = TRUE, message=F, warning=F, fig.width = 10)
 ```
 
-```{r, echo=FALSE, results="hide"}
+```{r}
 library( stargazer )
 library( pander )
+library( dplyr )
 ```
 
 This labs is loosely based on the paper written by Angela R. Fertig and David A. Reingold (2007) entitled ["Public housing, health, and health behaviors: Is there connection?".](https://onlinelibrary.wiley.com/doi/epdf/10.1002/pam.20288)
@@ -35,6 +36,13 @@ Remember to:
 * Bold your answers.
 
 ```{r, echo = F, results="hide"}
+URL <- "DATA/IV_lab.csv"
+data <- read.csv( URL, stringsAsFactors=F )
+head( data ) %>% pander()
+```
+
+
+```{r, eval = F, results="hide"}
 URL <- "https://raw.githubusercontent.com/DS4PS/pe4ps-textbook/master/labs/DATA/IV_lab.csv"
 data <- read.csv( URL, stringsAsFactors=F )
 head( data ) %>% pander()
