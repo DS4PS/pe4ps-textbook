@@ -407,35 +407,93 @@ Figure 1.5: Relationship between growth and international aid: <strong>Within</s
 <p>This statistical phenomenon is known as the <strong>Simpson’s Paradox</strong>, where trends are different depeding on whether data are observed by groups or at the aggregate level (you can read more about the Simpson’s paradox <a href="https://towardsdatascience.com/simpsons-paradox-how-to-prove-two-opposite-arguments-using-one-dataset-1c9c917f5ff9">here</a> and <a href="https://towardsdatascience.com/simpsons-paradox-and-interpreting-data-6a0443516765">here</a>).</p>
 <p>As we will see in the remain of the lecture, <strong>fixed effect</strong> wil enable us to consider differences across groups so that we can estimated the within effect of the policy intervention.</p>
 <p><strong>Mundlak (1965) presented one of the first examples of solvig “management bias” in estimations using fixed effects.</strong></p>
-<p><img src="p-040-fixed-effects_files/figure-html/unnamed-chunk-4-1.png" width="1152" /></p>
+<pre class="r"><code># demo datasets farms:
+
+dat.ols &lt;-
+structure(list(corn = c(34.7827346624912, 36.0996074731855, 37.0800275276849, 
+37.8215116009867, 38.5035794734048, 38.2831528023024, 40.5949079497628, 
+41.8842896575634, 42.6289072975422, 44.8224159482085, 35.8513545057719, 
+36.1712274222178, 37.1238755672832, 39.4036829336085, 40.2581671356454, 
+40.6281033803834, 40.1122944621368, 42.7577507798798, 44.0876312272813, 
+44.5755763696388, 35.2870931624421, 35.6245712674313, 37.6634175421797, 
+39.0413450336074, 38.8352805278445, 42.4753832533224, 39.8812959780677, 
+42.3251713544568, 41.92766784451, 43.9103522153667), fertilizer = c(10, 
+11, 12, 13, 14, 15, 16, 17, 18, 19, 10, 11, 12, 13, 14, 15, 16, 
+17, 18, 19, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19), org.id = structure(c(1L, 
+1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 2L, 2L, 2L, 2L, 2L, 2L, 2L, 
+2L, 2L, 2L, 3L, 3L, 3L, 3L, 3L, 3L, 3L, 3L, 3L, 3L), .Label = c(&quot;farm-1&quot;, 
+&quot;farm-2&quot;, &quot;farm-3&quot;), class = &quot;factor&quot;)), class = &quot;data.frame&quot;, row.names = c(NA, 
+-30L))
+
+dat.re &lt;-
+structure(list(corn = c(24.7827346624912, 26.0996074731855, 27.0800275276849, 
+27.8215116009867, 28.5035794734048, 28.2831528023024, 30.5949079497628, 
+31.8842896575634, 32.6289072975422, 34.8224159482085, 35.8513545057719, 
+36.1712274222178, 37.1238755672832, 39.4036829336085, 40.2581671356454, 
+40.6281033803834, 40.1122944621368, 42.7577507798798, 44.0876312272813, 
+44.5755763696388, 45.2870931624421, 45.6245712674313, 47.6634175421797, 
+49.0413450336074, 48.8352805278445, 52.4753832533224, 49.8812959780677, 
+52.3251713544568, 51.92766784451, 53.9103522153667), fertilizer = c(10, 
+11, 12, 13, 14, 15, 16, 17, 18, 19, 10, 11, 12, 13, 14, 15, 16, 
+17, 18, 19, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19), org.id = structure(c(1L, 
+1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 2L, 2L, 2L, 2L, 2L, 2L, 2L, 
+2L, 2L, 2L, 3L, 3L, 3L, 3L, 3L, 3L, 3L, 3L, 3L, 3L), .Label = c(&quot;farm-1&quot;, 
+&quot;farm-2&quot;, &quot;farm-3&quot;), class = &quot;factor&quot;)), class = &quot;data.frame&quot;, row.names = c(NA, 
+-30L))
+  
+dat.fe &lt;- 
+structure(list(corn = c(20.7827346624912, 22.0996074731855, 23.0800275276849, 
+23.8215116009867, 24.5035794734048, 24.2831528023024, 26.5949079497628, 
+27.8842896575634, 28.6289072975422, 30.8224159482085, 36.8513545057719, 
+37.1712274222178, 38.1238755672832, 40.4036829336085, 41.2581671356454, 
+41.6281033803834, 41.1122944621368, 43.7577507798798, 45.0876312272813, 
+45.5755763696388, 51.2870931624421, 51.6245712674313, 53.6634175421797, 
+55.0413450336074, 54.8352805278445, 58.4753832533224, 55.8812959780677, 
+58.3251713544568, 57.92766784451, 59.9103522153667), fertilizer = c(6, 
+7, 8, 9, 10, 11, 12, 13, 14, 15, 11, 12, 13, 14, 15, 16, 17, 
+18, 19, 20, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25), org.id = structure(c(1L, 
+1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 2L, 2L, 2L, 2L, 2L, 2L, 2L, 
+2L, 2L, 2L, 3L, 3L, 3L, 3L, 3L, 3L, 3L, 3L, 3L, 3L), .Label = c(&quot;farm-1&quot;, 
+&quot;farm-2&quot;, &quot;farm-3&quot;), class = &quot;factor&quot;)), class = &quot;data.frame&quot;, row.names = c(NA, 
+-30L))</code></pre>
+<p><img src="p-040-fixed-effects_files/figure-html/unnamed-chunk-5-1.png" width="1152" /></p>
 <div id="types-of-bias" class="section level2">
 <h2><span class="header-section-number">1.1</span> Types of Bias</h2>
-<p><img src="p-040-fixed-effects_files/figure-html/unnamed-chunk-5-1.png" width="960" /></p>
 <p><img src="p-040-fixed-effects_files/figure-html/unnamed-chunk-6-1.png" width="960" /></p>
+<p><img src="p-040-fixed-effects_files/figure-html/unnamed-chunk-7-1.png" width="960" /></p>
 </div>
 <div id="ols-demeaning-and-fixed-effects." class="section level2">
 <h2><span class="header-section-number">1.2</span> OLS, demeaning, and fixed effects.</h2>
 <p>We will continue our example and look at some numbers to better understand differences between OLS and fixed effects.</p>
 <p>Let’s take a look at a simulated dataset that replicates the example illustrated in figure <a href="#fig:f3">1.3</a>. We plot the observations on a graph. We have three countries (A, B, C) and we observe the relationship between international aid and economic growth at three points in time.</p>
+<pre class="r"><code># development aid example
+data &lt;- 
+structure(list(x = c(2, 4, 6, 2.3, 4, 5.7, 3, 4.5, 6), y = c(4.4, 
+6.8, 9.2, 0.54, 1.9, 3.26, -6.92, -5.495, -4.07), g = structure(c(1L, 
+1L, 1L, 2L, 2L, 2L, 3L, 3L, 3L), .Label = c(&quot;a&quot;, &quot;b&quot;, &quot;c&quot;), class = &quot;factor&quot;), 
+    t = c(1, 2, 3, 1, 2, 3, 1, 2, 3)), class = &quot;data.frame&quot;, row.names = c(NA, 
+-9L))</code></pre>
 <pre class="r"><code>palette( c( &quot;steelblue&quot;, &quot;darkred&quot;, &quot;darkgreen&quot;  ) )
 
 plot( x, y, bty=&quot;n&quot;, pch=19, cex=3,
-      ylim = c(-8,10), xlim = c(0,8), 
+      ylim = c(-10,10), xlim = c(0,8), 
       col = as.factor(data$g), 
       ylab = &quot;Economic growth (%)&quot;, 
       xlab = &quot;International aid ($M)&quot;)
 
-text(data$x[1], data$y[1]+1, &quot;A t1&quot;)
-text(data$x[2], data$y[2]+1, &quot;A t2&quot;)
-text(data$x[3], data$y[3]+1, &quot;A t3&quot;)
+id.label &lt;- paste0( toupper( data$g ), &quot;[t==&quot;, data$t, &quot;]&quot; )
 
-text(data$x[4], data$y[4]+1, &quot;B t1&quot;)
-text(data$x[5], data$y[5]+1, &quot;B t2&quot;)
-text(data$x[6], data$y[6]+1, &quot;B t3&quot;)
+abline( lm(y~x, subset=(g==&quot;a&quot;) ), lwd=3, lty=3,
+        col=adjustcolor(&quot;gray40&quot;, alpha=0.2) )
 
-text(data$x[7], data$y[7]+1, &quot;C t1&quot;)
-text(data$x[8], data$y[8]+1, &quot;C t2&quot;)
-text(data$x[9], data$y[9]+1, &quot;C t3&quot;)</code></pre>
+abline( lm(y~x, subset=(g==&quot;b&quot;) ), lwd=3, lty=3,
+        col=adjustcolor(&quot;gray40&quot;, alpha=0.2) )
+
+abline( lm(y~x, subset=(g==&quot;c&quot;) ), lwd=3, lty=3,
+        col=adjustcolor(&quot;gray40&quot;, alpha=0.2) )
+
+text(data$x, data$y, parse( text=id.label ), 
+     col=&quot;gray60&quot;, pos=2, cex=2, offset=1 )</code></pre>
 <div class="figure"><span id="fig:f6"></span>
 <img src="p-040-fixed-effects_files/figure-html/f6-1.png" alt="Simulated dataset: Economic growth and international aid" width="960" />
 <p class="caption">
@@ -763,10 +821,10 @@ International aid
 </div>
 <div id="de-meaned-ols-model" class="section level3">
 <h3><span class="header-section-number">1.2.3</span> De-meaned OLS model</h3>
-<p><img src="p-040-fixed-effects_files/figure-html/unnamed-chunk-11-1.png" width="1152" /></p>
-<p><em>De-meaning the data by groups transforms it into something that looks like regular regression data.</em></p>
-<p><img src="p-040-fixed-effects_files/figure-html/unnamed-chunk-12-1.png" width="1152" /></p>
 <p><img src="p-040-fixed-effects_files/figure-html/unnamed-chunk-13-1.png" width="1152" /></p>
+<p><em>De-meaning the data by groups transforms it into something that looks like regular regression data.</em></p>
+<p><img src="p-040-fixed-effects_files/figure-html/unnamed-chunk-14-1.png" width="1152" /></p>
+<p><img src="p-040-fixed-effects_files/figure-html/unnamed-chunk-15-1.png" width="1152" /></p>
 <p>As we discussed before, OLS can be problematic with panel data because it takes into account <strong>across-country</strong> variation. The effect of international aid on growth is negative because the overall trend across countries is negative. Countries which receive more funding (like Country C) report a lower economic growth. To observe the true effect of international aid, we need to remove the across-country variation. We can do it by demeaning the data.</p>
 <p>De-meaning requires you to substract the mean from each variable. In this case, we are interested in demeaning by group, so that the values of x and y are centered around each group mean. You can observe the process in table <a href="#fig:f5">1.5</a>.</p>
 <blockquote>
@@ -1523,7 +1581,7 @@ plot( data$X, data$Outcome,
       xlab=&quot;X - Policy variable&quot;, ylab=&quot;Outcome&quot; )
 
 abline( lm( Outcome ~ X, data=data ), col=&quot;red&quot;, lwd=2 )</code></pre>
-<p><img src="p-040-fixed-effects_files/figure-html/unnamed-chunk-21-1.png" width="960" /></p>
+<p><img src="p-040-fixed-effects_files/figure-html/unnamed-chunk-23-1.png" width="960" /></p>
 <ol start="4" style="list-style-type: decimal">
 <li>A fixed effects includes a set of dummy variables each of which represents a group. The equation of a fixed effect model is the following:</li>
 </ol>
@@ -1805,19 +1863,60 @@ Figure 2.1: Source: <a href="https://commons.wikimedia.org/wiki/File:Argonne_lab
 </p>
 </div>
 <p>Countries strongly <a href="http://uis.unesco.org/apps/visualisations/research-and-development-spending/">invest in Research &amp; Development</a> (R&amp;D). The United States spend <a href="https://www.nsf.gov/statistics/2018/nsb20181/report/sections/research-and-development-u-s-trends-and-international-comparisons/cross-national-comparisons-of-r-d-performance">2.7% of their GDP</a> into research and development. One of the goals of these investments is to provide <a href="https://www.nsf.gov/news/news_summ.jsp?cntn_id=296760&amp;org=NSF&amp;from=news">funding to companies and incentivize private investments</a>. In this example, we want to assess the impact of public expenditure on research and development (R&amp;D) on companies’ investments.</p>
+<pre class="r"><code># Research and Dev Data Example
+data &lt;- 
+  structure(list(Company = structure(c(1L, 1L, 1L, 1L, 1L, 2L, 
+2L, 2L, 2L, 2L, 3L, 3L, 3L, 3L, 3L, 4L, 4L, 4L, 4L, 4L, 5L, 5L, 
+5L, 5L, 5L, 6L, 6L, 6L, 6L, 6L, 7L, 7L, 7L, 7L, 7L, 8L, 8L, 8L, 
+8L, 8L, 9L, 9L, 9L, 9L, 9L, 10L, 10L, 10L, 10L, 10L), .Label = c(&quot;Company1&quot;, 
+&quot;Company10&quot;, &quot;Company2&quot;, &quot;Company3&quot;, &quot;Company4&quot;, &quot;Company5&quot;, 
+&quot;Company6&quot;, &quot;Company7&quot;, &quot;Company8&quot;, &quot;Company9&quot;), class = &quot;factor&quot;), 
+    Year = structure(c(1L, 2L, 3L, 4L, 5L, 1L, 2L, 3L, 4L, 5L, 
+    1L, 2L, 3L, 4L, 5L, 1L, 2L, 3L, 4L, 5L, 1L, 2L, 3L, 4L, 5L, 
+    1L, 2L, 3L, 4L, 5L, 1L, 2L, 3L, 4L, 5L, 1L, 2L, 3L, 4L, 5L, 
+    1L, 2L, 3L, 4L, 5L, 1L, 2L, 3L, 4L, 5L), .Label = c(&quot;2010&quot;, 
+    &quot;2011&quot;, &quot;2012&quot;, &quot;2013&quot;, &quot;2014&quot;), class = &quot;factor&quot;), RDPub = c(36084.6765050791, 
+    39167.0736835245, 25470.5788846145, 38535.3290719112, 49854.0961164269, 
+    34432.7195247533, 47245.1859513487, 33777.5660532294, 32980.9108059019, 
+    18674.6311495257, 51582.5751143172, 49657.5920063913, 21151.7482521862, 
+    44989.3944563987, 27469.6531842028, 49232.2994550922, 33291.5195048303, 
+    41546.8796686058, 22638.4592049686, 31625.9607988133, 31303.50781271, 
+    45974.624780176, 34504.7441273564, 20774.7954185228, 27950.0144375957, 
+    40690.7676159195, 46561.2962668267, 26188.3993809124, 43009.8737838624, 
+    22704.6853492831, 58388.1638517069, 48936.4747616786, 52636.7608395869, 
+    47799.3428502192, 26684.9981230871, 16972.5078799265, 21749.0137860797, 
+    57615.815520373, 42115.9212584994, 24784.2851609194, 24700.4171860131, 
+    43935.0254079564, 45875.8362000498, 34058.1942678181, 34929.4644701799, 
+    43575.4984304363, 12647.1563283971, 23945.2484980536, 26468.5011319786, 
+    47789.1957893751), RD = c(81350.714800065, 94166.5836970621, 
+    78826.8375271711, 113518.1052785, 131910.186554822, 113235.255062069, 
+    144046.776937286, 128988.32612132, 142774.887677862, 110726.882333979, 
+    140466.844220037, 152997.657483535, 121013.721249736, 146230.227928565, 
+    124621.042472361, 141553.47064653, 118274.962010614, 140517.569536745, 
+    129300.130864955, 142068.771051653, 78596.777474216, 106571.998091857, 
+    91542.9150565959, 91568.9285167832, 124649.074154644, 114606.917489605, 
+    118348.580376089, 112382.812865581, 134644.20839165, 113341.657058609, 
+    115421.233970692, 105148.345003555, 94432.2359901331, 124823.732848258, 
+    91339.5836525477, 97820.2935444977, 103924.578594518, 154164.264112627, 
+    161462.972856511, 128987.507909402, 71910.0053382578, 116670.754012959, 
+    105724.09794328, 118671.548890751, 114642.783618629, 117707.976981318, 
+    80315.8777704682, 89917.1704724757, 115655.631519908, 155541.106401779
+    )), class = &quot;data.frame&quot;, row.names = c(NA, -50L))</code></pre>
 <p>Data are structured in a <strong>panel dataset</strong> where we have 10 companies and observations over a five-year period. You can see here the structure of the data for Company 1, Company 10, and Company 2.</p>
-<pre class="r"><code> head(data[,c(1,2,18)],15) %&gt;% pander()</code></pre>
-<table style="width:38%;">
+<pre class="r"><code> head(data,15) %&gt;% pander()</code></pre>
+<table style="width:50%;">
 <colgroup>
 <col width="16%" />
 <col width="9%" />
 <col width="11%" />
+<col width="12%" />
 </colgroup>
 <thead>
 <tr class="header">
 <th align="center">Company</th>
 <th align="center">Year</th>
 <th align="center">RDPub</th>
+<th align="center">RD</th>
 </tr>
 </thead>
 <tbody>
@@ -1825,76 +1924,91 @@ Figure 2.1: Source: <a href="https://commons.wikimedia.org/wiki/File:Argonne_lab
 <td align="center">Company1</td>
 <td align="center">2010</td>
 <td align="center">36085</td>
+<td align="center">81351</td>
 </tr>
 <tr class="even">
 <td align="center">Company1</td>
 <td align="center">2011</td>
 <td align="center">39167</td>
+<td align="center">94167</td>
 </tr>
 <tr class="odd">
 <td align="center">Company1</td>
 <td align="center">2012</td>
 <td align="center">25471</td>
+<td align="center">78827</td>
 </tr>
 <tr class="even">
 <td align="center">Company1</td>
 <td align="center">2013</td>
 <td align="center">38535</td>
+<td align="center">113518</td>
 </tr>
 <tr class="odd">
 <td align="center">Company1</td>
 <td align="center">2014</td>
 <td align="center">49854</td>
+<td align="center">131910</td>
 </tr>
 <tr class="even">
 <td align="center">Company10</td>
 <td align="center">2010</td>
 <td align="center">34433</td>
+<td align="center">113235</td>
 </tr>
 <tr class="odd">
 <td align="center">Company10</td>
 <td align="center">2011</td>
 <td align="center">47245</td>
+<td align="center">144047</td>
 </tr>
 <tr class="even">
 <td align="center">Company10</td>
 <td align="center">2012</td>
 <td align="center">33778</td>
+<td align="center">128988</td>
 </tr>
 <tr class="odd">
 <td align="center">Company10</td>
 <td align="center">2013</td>
 <td align="center">32981</td>
+<td align="center">142775</td>
 </tr>
 <tr class="even">
 <td align="center">Company10</td>
 <td align="center">2014</td>
 <td align="center">18675</td>
+<td align="center">110727</td>
 </tr>
 <tr class="odd">
 <td align="center">Company2</td>
 <td align="center">2010</td>
 <td align="center">51583</td>
+<td align="center">140467</td>
 </tr>
 <tr class="even">
 <td align="center">Company2</td>
 <td align="center">2011</td>
 <td align="center">49658</td>
+<td align="center">152998</td>
 </tr>
 <tr class="odd">
 <td align="center">Company2</td>
 <td align="center">2012</td>
 <td align="center">21152</td>
+<td align="center">121014</td>
 </tr>
 <tr class="even">
 <td align="center">Company2</td>
 <td align="center">2013</td>
 <td align="center">44989</td>
+<td align="center">146230</td>
 </tr>
 <tr class="odd">
 <td align="center">Company2</td>
 <td align="center">2014</td>
 <td align="center">27470</td>
+<td align="center">124621</td>
 </tr>
 </tbody>
 </table>
@@ -2928,8 +3042,8 @@ Based on deterrence theory, we argue that greater certainty or severity of pain 
 <div id="data" class="section level2">
 <h2><span class="header-section-number">3.1</span> Data</h2>
 <p>We start by uploading the data <em>Crime</em> from the plm package,</p>
-<pre class="r"><code>data(Crime)
-
+<pre class="r"><code># library( plm )
+data( Crime )
 dataCrime &lt;- Crime</code></pre>
 <p>You can see te structure of the dataset and the main independent variables in the following table. Note that for each county (1 and 3 in this case), we have data from 1981 to 1987.</p>
 <pre class="r"><code>head( dataCrime[,1:7], 10 ) %&gt;% pander()</code></pre>
@@ -4065,7 +4179,7 @@ wloc
 <p>As mentioned in section <a href="#key-notes-on-fixed-effects">2.3</a>, fixed effects assume that there is no correlation across entities’ error term and constants - i.e., that each entity is independent from others.</p>
 <p>This assumption can be tested by using a <strong>random effects</strong> model, where we assume that differences <strong>across entities</strong> influence our dependent variable, and there is correlation across entities’ error terms and constants.</p>
 <p>We use our previous example about R&amp;D investment to illustrate a random effect model. The model can be estimated using the <span class="math inline">\(plm\)</span> function and specifying <span class="math inline">\(model = &quot;random&quot;\)</span>.</p>
-<pre class="r"><code>random &lt;- plm(RD ~ RDPub, data=data, index=c(&quot;Company&quot;, &quot;Year&quot;), model=&quot;random&quot;)
+<pre class="r"><code>random &lt;- plm( RD ~ RDPub, data=data, index=c(&quot;Company&quot;, &quot;Year&quot;), model=&quot;random&quot; )
 
 stargazer( random, 
            type = &quot;html&quot;, 
@@ -4170,7 +4284,7 @@ Public R&amp;D
 </table>
 <p>Interpretation of the coefficients is tricky since they include both the <strong>within-entity</strong> and <strong>between-entity</strong> effects. It represents the average effect of X over Y, when X changes across time and between countries by one unit.</p>
 <p>There are tests that you can run to chose between fixed and random effects. For instance, the Hausmann test compare a fixed and a random effect model. If the p-value is &lt; 0.05 then fixed effects is a better choice.</p>
-<pre class="r"><code> phtest(fixed, random)</code></pre>
+<pre class="r"><code> phtest( fixed, random )</code></pre>
 <pre><code>## 
 ##  Hausman Test
 ## 

@@ -120,6 +120,8 @@ org.id <- factor(id)
 x1  <- 9 + 1:10 + 0*id
 y1  <- 25 + x1 + 0*id + e
 
+# dat.ols <- data.frame( corn=y1, fertilizer=x1, org.id=paste0( "farm-", id ) )
+# dput( dat.ols )
 
 x <- x1
 y <- y1
@@ -131,7 +133,8 @@ m1 <- lm( y ~ x )
 x2  <- 9 + 1:10 + 0*id
 y2  <- 5 + x2 + 10*id + e
 
-
+# dat.re <- data.frame( corn=y2, fertilizer=x2, org.id=paste0( "farm-", id ) )
+# dput( dat.re )
 
 x <- x2
 y <- y2
@@ -143,6 +146,9 @@ m2.re <- lm( y ~ x + org.id )
 
 x3  <- 1:10 + 5*id
 y3  <- 5 + x3 + 10*id + e
+
+# dat.fe <- data.frame( corn=y3, fertilizer=x3, org.id=paste0( "farm-", id ) )
+# dput( dat.fe )
 
 x <- x3
 y <- y3
@@ -185,7 +191,73 @@ m3.centered <- lm( y ~ x )
 
 
 
+```{r, eval=T}
+# demo datasets farms:
+
+dat.ols <-
+structure(list(corn = c(34.7827346624912, 36.0996074731855, 37.0800275276849, 
+37.8215116009867, 38.5035794734048, 38.2831528023024, 40.5949079497628, 
+41.8842896575634, 42.6289072975422, 44.8224159482085, 35.8513545057719, 
+36.1712274222178, 37.1238755672832, 39.4036829336085, 40.2581671356454, 
+40.6281033803834, 40.1122944621368, 42.7577507798798, 44.0876312272813, 
+44.5755763696388, 35.2870931624421, 35.6245712674313, 37.6634175421797, 
+39.0413450336074, 38.8352805278445, 42.4753832533224, 39.8812959780677, 
+42.3251713544568, 41.92766784451, 43.9103522153667), fertilizer = c(10, 
+11, 12, 13, 14, 15, 16, 17, 18, 19, 10, 11, 12, 13, 14, 15, 16, 
+17, 18, 19, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19), org.id = structure(c(1L, 
+1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 2L, 2L, 2L, 2L, 2L, 2L, 2L, 
+2L, 2L, 2L, 3L, 3L, 3L, 3L, 3L, 3L, 3L, 3L, 3L, 3L), .Label = c("farm-1", 
+"farm-2", "farm-3"), class = "factor")), class = "data.frame", row.names = c(NA, 
+-30L))
+
+dat.re <-
+structure(list(corn = c(24.7827346624912, 26.0996074731855, 27.0800275276849, 
+27.8215116009867, 28.5035794734048, 28.2831528023024, 30.5949079497628, 
+31.8842896575634, 32.6289072975422, 34.8224159482085, 35.8513545057719, 
+36.1712274222178, 37.1238755672832, 39.4036829336085, 40.2581671356454, 
+40.6281033803834, 40.1122944621368, 42.7577507798798, 44.0876312272813, 
+44.5755763696388, 45.2870931624421, 45.6245712674313, 47.6634175421797, 
+49.0413450336074, 48.8352805278445, 52.4753832533224, 49.8812959780677, 
+52.3251713544568, 51.92766784451, 53.9103522153667), fertilizer = c(10, 
+11, 12, 13, 14, 15, 16, 17, 18, 19, 10, 11, 12, 13, 14, 15, 16, 
+17, 18, 19, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19), org.id = structure(c(1L, 
+1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 2L, 2L, 2L, 2L, 2L, 2L, 2L, 
+2L, 2L, 2L, 3L, 3L, 3L, 3L, 3L, 3L, 3L, 3L, 3L, 3L), .Label = c("farm-1", 
+"farm-2", "farm-3"), class = "factor")), class = "data.frame", row.names = c(NA, 
+-30L))
+  
+dat.fe <- 
+structure(list(corn = c(20.7827346624912, 22.0996074731855, 23.0800275276849, 
+23.8215116009867, 24.5035794734048, 24.2831528023024, 26.5949079497628, 
+27.8842896575634, 28.6289072975422, 30.8224159482085, 36.8513545057719, 
+37.1712274222178, 38.1238755672832, 40.4036829336085, 41.2581671356454, 
+41.6281033803834, 41.1122944621368, 43.7577507798798, 45.0876312272813, 
+45.5755763696388, 51.2870931624421, 51.6245712674313, 53.6634175421797, 
+55.0413450336074, 54.8352805278445, 58.4753832533224, 55.8812959780677, 
+58.3251713544568, 57.92766784451, 59.9103522153667), fertilizer = c(6, 
+7, 8, 9, 10, 11, 12, 13, 14, 15, 11, 12, 13, 14, 15, 16, 17, 
+18, 19, 20, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25), org.id = structure(c(1L, 
+1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 2L, 2L, 2L, 2L, 2L, 2L, 2L, 
+2L, 2L, 2L, 3L, 3L, 3L, 3L, 3L, 3L, 3L, 3L, 3L, 3L), .Label = c("farm-1", 
+"farm-2", "farm-3"), class = "factor")), class = "data.frame", row.names = c(NA, 
+-30L))
+  
+```
+
+
 ```{r, fig.heigh=6, fig.width=12, echo=F}
+org.id <- dat.ols$org.id 
+
+x1 <- dat.ols$fertilizer
+y1 <- dat.ols$corn
+
+x2 <- dat.re$fertilizer
+y2 <- dat.re$corn
+
+x3 <- dat.fe$fertilizer
+y3 <- dat.fe$corn
+
+
 par( mfrow=c(1,3) )
 
 plot( x1, y1, pch=19, col=org.id, cex=2, 
@@ -391,35 +463,51 @@ g = c("a", "a", "a", "b", "b", "b", "c", "c", "c")
 
 t = c(1,2,3,1,2,3,1,2,3)
 
-data = as.data.frame(cbind(x,y,t))
-data = as.data.frame(cbind(data, g))
+data = data.frame(x,y,g,t)
+
+# dat.dev <- data
+# dput( dat.dev )
 ```
 
 We will continue our example and look at some numbers to better understand differences between OLS and fixed effects.
 
 Let's take a look at a simulated dataset that replicates the example illustrated in figure \@ref(fig:f3). We plot the observations on a graph. We have three countries (A, B, C) and we observe the relationship between international aid and economic growth at three points in time. 
 
+```{r}
+# development aid example
+data <- 
+structure(list(x = c(2, 4, 6, 2.3, 4, 5.7, 3, 4.5, 6), y = c(4.4, 
+6.8, 9.2, 0.54, 1.9, 3.26, -6.92, -5.495, -4.07), g = structure(c(1L, 
+1L, 1L, 2L, 2L, 2L, 3L, 3L, 3L), .Label = c("a", "b", "c"), class = "factor"), 
+    t = c(1, 2, 3, 1, 2, 3, 1, 2, 3)), class = "data.frame", row.names = c(NA, 
+-9L))
+```
+
+
 ```{r f6, fig.cap = "Simulated dataset: Economic growth and international aid"}
 
 palette( c( "steelblue", "darkred", "darkgreen"  ) )
 
 plot( x, y, bty="n", pch=19, cex=3,
-      ylim = c(-8,10), xlim = c(0,8), 
+      ylim = c(-10,10), xlim = c(0,8), 
       col = as.factor(data$g), 
       ylab = "Economic growth (%)", 
       xlab = "International aid ($M)")
 
-text(data$x[1], data$y[1]+1, "A t1")
-text(data$x[2], data$y[2]+1, "A t2")
-text(data$x[3], data$y[3]+1, "A t3")
+id.label <- paste0( toupper( data$g ), "[t==", data$t, "]" )
 
-text(data$x[4], data$y[4]+1, "B t1")
-text(data$x[5], data$y[5]+1, "B t2")
-text(data$x[6], data$y[6]+1, "B t3")
+abline( lm(y~x, subset=(g=="a") ), lwd=3, lty=3,
+        col=adjustcolor("gray40", alpha=0.2) )
 
-text(data$x[7], data$y[7]+1, "C t1")
-text(data$x[8], data$y[8]+1, "C t2")
-text(data$x[9], data$y[9]+1, "C t3")
+abline( lm(y~x, subset=(g=="b") ), lwd=3, lty=3,
+        col=adjustcolor("gray40", alpha=0.2) )
+
+abline( lm(y~x, subset=(g=="c") ), lwd=3, lty=3,
+        col=adjustcolor("gray40", alpha=0.2) )
+
+text(data$x, data$y, parse( text=id.label ), 
+     col="gray60", pos=2, cex=2, offset=1 )
+
 ```
 
 ### OLS model
@@ -870,24 +958,26 @@ Y3 = rep(c(0,0,1,0,0),7)
 Y4 = rep(c(0,0,0,1,0),7)
 Y5 = rep(c(0,0,0,0,1),7)
 
-data = as.data.frame(cbind(G1, G2, G3, G4, G5, G6, G7, Y1, Y2, Y3, Y4, Y5))
+# data = as.data.frame(cbind(G1, G2, G3, G4, G5, G6, G7, Y1, Y2, Y3, Y4, Y5))
 
 X = rnorm(35, 35000, 12000)
 
 err = rnorm(35, 31000, 7000)
 
-data = as.data.frame(cbind(data, X))
+# data = as.data.frame(cbind(data, X))
 
 Outcome = (30000 + 1.4*X - 13000*G1 + 17000*G2 + 21000*G3 - 3690*G4 + 13600*G5 - 25870*G6 + 24500*G7  + err)
 
 # - 25000*Y1 - 15000*Y2 - 25200*Y3 + 13600*Y4 + 5800*Y5
 
-data = as.data.frame(cbind(data, Outcome))
+# data = data.frame( G1, G2, G3, G4, G5, G6, G7, Y1, Y2, Y3, Y4, Y5, X, Outcome )
 
 G = as.vector(cbind(rep(1, 5), rep(2, 5), rep(3, 5), rep(4, 5), rep(5, 5), rep(6,5), rep(7,5)))
 Y  = rep(c(2010:2014), 7)
 
-data = cbind(data, G, Y)
+# data = data.frame( data, G, Y )
+
+data = data.frame( G1, G2, G3, G4, G5, G6, G7, Y1, Y2, Y3, Y4, Y5, X, Outcome, G, Y )
 ```
 
 To summarize key conclusions from our previous example: 
@@ -1017,22 +1107,69 @@ RDPub = rnorm(50, 35000, 12000)
 
 err = rnorm(50, 31000, 7000)
 
-data = as.data.frame(cbind(data, RDPub))
+# data = as.data.frame(cbind(data, RDPub))
 
 RD = (30000 + 1.4*RDPub - 13000*data$Company_Company1 + 17000*data$Company_Company2 + 21000*data$Company_Company3 - 3690*data$Company_Company4 + 13600*data$Company_Company5 
 - 25870*data$Company_Company6 
 + 24500*data$Company_Company7 - 8963*data$Company_Company8 + 11596*data$Company_Company9 + 17800*data$Company_Company10 - 12000*data$Year_2010 - 5000*data$Year_2011 - 2896*data$Year_2012 + 12175*data$Year_2013  + 17000*data$Year_2014 + err)
 
-data = as.data.frame(cbind(data, RD))
+# data = as.data.frame(cbind(data, RD))
 
+
+data <- data.frame( Company, Year, RDPub, RD )
+
+# write.csv( data, "research-and-dev-fe-example.csv", row.names=F )
 ```
 
 Countries strongly [invest in Research & Development](http://uis.unesco.org/apps/visualisations/research-and-development-spending/) (R&D). The United States spend [2.7% of their GDP](https://www.nsf.gov/statistics/2018/nsb20181/report/sections/research-and-development-u-s-trends-and-international-comparisons/cross-national-comparisons-of-r-d-performance) into research and development. One of the goals of these investments is to provide [funding to companies and incentivize private investments](https://www.nsf.gov/news/news_summ.jsp?cntn_id=296760&org=NSF&from=news). In this example, we want to assess the impact of public expenditure on research and development (R&D) on companies' investments. 
 
+```{r, eval=F}
+# Research and Dev Data Example
+data <- 
+  structure(list(Company = structure(c(1L, 1L, 1L, 1L, 1L, 2L, 
+2L, 2L, 2L, 2L, 3L, 3L, 3L, 3L, 3L, 4L, 4L, 4L, 4L, 4L, 5L, 5L, 
+5L, 5L, 5L, 6L, 6L, 6L, 6L, 6L, 7L, 7L, 7L, 7L, 7L, 8L, 8L, 8L, 
+8L, 8L, 9L, 9L, 9L, 9L, 9L, 10L, 10L, 10L, 10L, 10L), .Label = c("Company1", 
+"Company10", "Company2", "Company3", "Company4", "Company5", 
+"Company6", "Company7", "Company8", "Company9"), class = "factor"), 
+    Year = structure(c(1L, 2L, 3L, 4L, 5L, 1L, 2L, 3L, 4L, 5L, 
+    1L, 2L, 3L, 4L, 5L, 1L, 2L, 3L, 4L, 5L, 1L, 2L, 3L, 4L, 5L, 
+    1L, 2L, 3L, 4L, 5L, 1L, 2L, 3L, 4L, 5L, 1L, 2L, 3L, 4L, 5L, 
+    1L, 2L, 3L, 4L, 5L, 1L, 2L, 3L, 4L, 5L), .Label = c("2010", 
+    "2011", "2012", "2013", "2014"), class = "factor"), RDPub = c(36084.6765050791, 
+    39167.0736835245, 25470.5788846145, 38535.3290719112, 49854.0961164269, 
+    34432.7195247533, 47245.1859513487, 33777.5660532294, 32980.9108059019, 
+    18674.6311495257, 51582.5751143172, 49657.5920063913, 21151.7482521862, 
+    44989.3944563987, 27469.6531842028, 49232.2994550922, 33291.5195048303, 
+    41546.8796686058, 22638.4592049686, 31625.9607988133, 31303.50781271, 
+    45974.624780176, 34504.7441273564, 20774.7954185228, 27950.0144375957, 
+    40690.7676159195, 46561.2962668267, 26188.3993809124, 43009.8737838624, 
+    22704.6853492831, 58388.1638517069, 48936.4747616786, 52636.7608395869, 
+    47799.3428502192, 26684.9981230871, 16972.5078799265, 21749.0137860797, 
+    57615.815520373, 42115.9212584994, 24784.2851609194, 24700.4171860131, 
+    43935.0254079564, 45875.8362000498, 34058.1942678181, 34929.4644701799, 
+    43575.4984304363, 12647.1563283971, 23945.2484980536, 26468.5011319786, 
+    47789.1957893751), RD = c(81350.714800065, 94166.5836970621, 
+    78826.8375271711, 113518.1052785, 131910.186554822, 113235.255062069, 
+    144046.776937286, 128988.32612132, 142774.887677862, 110726.882333979, 
+    140466.844220037, 152997.657483535, 121013.721249736, 146230.227928565, 
+    124621.042472361, 141553.47064653, 118274.962010614, 140517.569536745, 
+    129300.130864955, 142068.771051653, 78596.777474216, 106571.998091857, 
+    91542.9150565959, 91568.9285167832, 124649.074154644, 114606.917489605, 
+    118348.580376089, 112382.812865581, 134644.20839165, 113341.657058609, 
+    115421.233970692, 105148.345003555, 94432.2359901331, 124823.732848258, 
+    91339.5836525477, 97820.2935444977, 103924.578594518, 154164.264112627, 
+    161462.972856511, 128987.507909402, 71910.0053382578, 116670.754012959, 
+    105724.09794328, 118671.548890751, 114642.783618629, 117707.976981318, 
+    80315.8777704682, 89917.1704724757, 115655.631519908, 155541.106401779
+    )), class = "data.frame", row.names = c(NA, -50L))
+```
+
+
 Data are structured in a **panel dataset** where we have 10 companies and observations over a five-year period. You can see here the structure of the data for Company 1, Company 10, and Company 2.
 
 ```{r}
- head(data[,c(1,2,18)],15) %>% pander()
+ head(data,15) %>% pander()
 ```
 
 Each company has different levels of investment in research and development. We plot each company average R&D investement in graph \@ref(fig:companies). Each bar represents a company. The middle dot is the average R&D investment. The bars go from the minimum level of investment to the maximum.
@@ -1232,8 +1369,8 @@ We will use a panel dataset of 90 observational units (counties) from 1981 to 19
 We start by uploading the data *Crime* from the plm package, 
 
 ```{r, echo=T}
-data(Crime)
-
+# library( plm )
+data( Crime )
 dataCrime <- Crime
 ```
 
@@ -1360,7 +1497,7 @@ We use our previous example about R&D investment to illustrate a random effect m
 
 ```{r, echo = T, results = 'asis'}
 
-random <- plm(RD ~ RDPub, data=data, index=c("Company", "Year"), model="random")
+random <- plm( RD ~ RDPub, data=data, index=c("Company", "Year"), model="random" )
 
 stargazer( random, 
            type = "html", 
@@ -1376,7 +1513,7 @@ Interpretation of the coefficients is tricky since they include both the **withi
 There are tests that you can run to chose between fixed and random effects. For instance, the Hausmann test compare a fixed and a random effect model. If the p-value is < 0.05 then fixed effects is a better choice.
 
 ```{r}
- phtest(fixed, random)
+ phtest( fixed, random )
 ```
 
 ## Notes on random vs fixed effects
