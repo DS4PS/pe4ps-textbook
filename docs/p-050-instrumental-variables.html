@@ -284,6 +284,12 @@ $(document).ready(function () {
 <li>
   <a href="p-030-diff-in-diff.html">Diff-in-Diff</a>
 </li>
+<li>
+  <a href="p-040-fixed-effects.html">FixedEffects</a>
+</li>
+<li>
+  <a href="p-050-instrumental-variables.html">InstrumentalVariables</a>
+</li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
         <li>
@@ -421,7 +427,7 @@ Figure 1.5: Partitioning the variance of X1
 <p><img src="FIGURE/InstVar/Graduation.jpg" width="60%" /></p>
 <p>In the following working example, we will look at the correlation between hourly wage and education. The discussion regarding <a href="https://www.nytimes.com/2014/09/11/business/economy/a-simple-equation-more-education-more-income.html">“more education, more income”</a> gets continuous attention in the media and in the policy world (see for instance the <a href="https://www.nytimes.com/2014/05/27/upshot/is-college-worth-it-clearly-new-data-say.html">New York Times</a>). We ask: <strong>how much does your salary (Y) increase for any additional year of education?</strong> In other words, we are interested in estimating <span class="math inline">\(\beta_1\)</span>.</p>
 <p><span class="math display" id="eq:example">\[\begin{equation} 
-Y=\beta_0 + \beta_1Education
+Earnings=\beta_0 + \beta_1Education
   \tag{2.1}
 \end{equation}\]</span></p>
 <div id="data" class="section level2">
@@ -548,11 +554,11 @@ Figure 2.1: Ability bias
 <p>Ability, however, is difficult to measure and cannot be included in the model. It is an omitted variable, which is correlated with both our outcome variable and our policy variable. Excluding “ability” from the analysis creates a bias in the estimation of <span class="math inline">\(\beta_1\)</span>.</p>
 <p>We can observe this bias with our simulated data. Let’s assume we can create a variable measuring ability and include it in our model (<strong>full model</strong>) based on equation <a href="#eq:fullmodel">(1.1)</a> such that:</p>
 <center>
-<span class="math inline">\(Y=\beta_0 + \beta_1\text{Education} + \beta_2\text{Ability} + \beta_3\text{Experience}\)</span>
+<span class="math inline">\(Earnings=\beta_0 + \beta_1\text{Education} + \beta_2\text{Ability} + \beta_3\text{Experience}\)</span>
 </center>
 <p>Let’s then run a more realistic model (<strong>naive model</strong>) based on equation <a href="#eq:naivemodel">(1.2)</a> where the ability variable is excluded:</p>
 <center>
-<span class="math inline">\(Y=\text{b}_0 + \text{b}_1\text{Education} + \text{b}_3\text{Experience}\)</span>
+<span class="math inline">\(Earnings=\text{b}_0 + \text{b}_1\text{Education} + \text{b}_3\text{Experience}\)</span>
 </center>
 <p><br>
 <br>
@@ -764,17 +770,20 @@ Constant
 <p>We can empirically test these hypotheses by looking at correlations across the variables in our dataset. In the first graph, we can see that father’s education is positively correlated with education. In the second graph, there is a slight correlation between a father’s education and hourly wage. We would expect this, because education and hourly wage are correlated. However, we theoretically argue that there is no direct correlation: a father’s education increases the hourly wage <em>only because it increases one’s education</em>, which in turn leads to a higher salary. Finally, in the third graph, we can see that there is no correlation between father’s education and ability.</p>
 <pre class="r"><code>par( mfrow=c(1,3) )
 
-plot(fathereduc, educ, xlab = &quot;Father&#39;s education&quot;, ylab = &quot;Education&quot; )   # Plot
+plot(fathereduc, educ, xlab = &quot;Father&#39;s education&quot;, ylab = &quot;Education&quot;,
+     bty=&quot;n&quot;, col=gray(0.5,0.5), cex=1.3 )   # Plot
 
-abline( lm( educ ~ fathereduc ), col = &quot;red&quot;)                              # regression line 
+abline( lm( educ ~ fathereduc ), col = &quot;red&quot;, lwd=3 )          # regression line 
 
-plot( fathereduc, wage, xlab = &quot;Father&#39;s education&quot;, ylab = &quot;Hourly wage&quot; )
+plot( fathereduc, wage, xlab = &quot;Father&#39;s education&quot;, ylab = &quot;Hourly wage&quot;,
+      bty=&quot;n&quot;, col=gray(0.5,0.5), cex=1.3)
 
-abline(lm( wage ~ fathereduc ), col = &quot;green&quot;) 
+abline(lm( wage ~ fathereduc ), col = &quot;darkgreen&quot;, lwd=3) 
 
-plot( fathereduc, ability, xlab = &quot;Father&#39;s education&quot;, ylab = &quot;Ability&quot;)
+plot( fathereduc, ability, xlab = &quot;Father&#39;s education&quot;, ylab = &quot;Ability&quot;,
+      bty=&quot;n&quot;, col=gray(0.5,0.5), cex=1.3)
 
-abline(lm( ability ~ fathereduc ), col = &quot;blue&quot;)</code></pre>
+abline(lm( ability ~ fathereduc ), col = &quot;blue&quot;, lwd=3)</code></pre>
 <p><img src="p-050-instrumental-variables_files/figure-html/unnamed-chunk-7-1.png" width="960" /></p>
 <p>We now run the model using our instrumental variable. The model is defined in two stages: first, we estimate our policy variable based on our instrumental variable (equation <a href="#eq:step1">(1.3)</a>):</p>
 <p><strong>First stage:</strong></p>
@@ -1244,9 +1253,10 @@ F Statistic
 <h2><span class="header-section-number">2.3</span> Additional explanation: plotting the results</h2>
 <p>Using our simulated data, we can have a look at what is happening when we estimate the model with an instrument variable.</p>
 <p>We know that omitted variable bias results from the correlation of our policy variable (Education) and the omitted variable (Ability).</p>
-<pre class="r"><code>plot(ability, educ, xlab = &quot;Ability&quot;, ylab = &quot;Education&quot;)
+<pre class="r"><code>plot(ability, educ, xlab = &quot;Ability&quot;, ylab = &quot;Education&quot;,
+     bty=&quot;n&quot;, col=gray(0.5,0.5), cex=1.3 )
 
-abline(lm( educ ~ ability ), col = &quot;green&quot;)</code></pre>
+abline(lm( educ ~ ability ), col = &quot;darkgreen&quot;, lwd=3 )</code></pre>
 <div class="figure"><span id="fig:plot1"></span>
 <img src="p-050-instrumental-variables_files/figure-html/plot1-1.png" alt="Relationship between Y and the omitted variable" width="960" />
 <p class="caption">
@@ -1271,12 +1281,18 @@ e_x1        &lt;- residuals( first.stage )   #Save residuals of education (e_x1)
 par( mfrow=c(1,2) )
 
 #Plot the predicted values against ability
-plot( ability, x1_hat, xlab = &quot;Ability (omitted variable)&quot;, ylab = &quot;Predicted values of Education (x1_hat)&quot;)
+plot( ability, x1_hat, 
+      xlab = &quot;Ability (omitted variable)&quot;, 
+      ylab = &quot;Predicted values of Education (x1_hat)&quot;,
+      bty=&quot;n&quot;, col=gray(0.5,0.5), cex=1.3 )
 
 abline( lm( x1_hat ~ ability), col = &quot;blue&quot;)
 
 #Plot the residual against ability
-plot( ability, e_x1, xlab = &quot;Ability (omitted variable)&quot;, ylab = &quot;Education - Residual (e_X1)&quot; )
+plot( ability, e_x1, 
+      xlab = &quot;Ability (omitted variable)&quot;, 
+      ylab = &quot;Education - Residual (e_X1)&quot;,
+      bty=&quot;n&quot;, col=gray(0.5,0.5), cex=1.3)
 
 abline( lm( e_x1 ~ ability), col = &quot;green&quot;)</code></pre>
 <div class="figure"><span id="fig:plot2"></span>
@@ -1288,13 +1304,17 @@ Figure 2.4: Partitioning the variance of Education
 <p>One interesting thing about the instrumental variable model is that Education will be more correlated with Wage than X1-hat, but X1-hat does a better job of recovering the true slope B1 from the full model.</p>
 <pre class="r"><code>par( mfrow=c(1,2) )
 
-plot( educ, wage, xlab = &quot;Education&quot;, ylab = &quot;Wage&quot; )
+plot( educ, wage, 
+      xlab = &quot;Education&quot;, ylab = &quot;Wage&quot;,
+      bty=&quot;n&quot;, col=gray(0.5,0.5), cex=1.3 )
 
-abline( lm( wage ~ educ), col = &quot;red&quot;)
+abline( lm( wage ~ educ), col = &quot;red&quot;, lwd=3 )
 
-plot( x1_hat, wage, xlab = &quot;Predicted values of Education (x1_hat)&quot;, ylab = &quot;Wage&quot; )
+plot( x1_hat, wage, 
+      xlab = &quot;Predicted values of Education (x1_hat)&quot;, ylab = &quot;Wage&quot;,
+      bty=&quot;n&quot;, col=gray(0.5,0.5), cex=1.3 )
 
-abline( lm( wage ~ x1_hat), col = &quot;blue&quot;)</code></pre>
+abline( lm( wage ~ x1_hat), col = &quot;blue&quot;, lwd=3 )</code></pre>
 <div class="figure"><span id="fig:plot3"></span>
 <img src="p-050-instrumental-variables_files/figure-html/plot3-1.png" alt="Relationship between the 'parts' of education and Y" width="960" />
 <p class="caption">
@@ -1460,7 +1480,9 @@ F Statistic
 <ol start="2" style="list-style-type: decimal">
 <li>Because the instrumental variable is correlated with the policy variable and the policy variable is correlated with the outcome variable, the instrumental variable is also correlated with the outcome. See for instance the correlation between father’s education and wage.</li>
 </ol>
-<pre class="r"><code>plot( fathereduc, wage, xlab = &quot;Father&#39;s education&quot;, ylab = &quot;Hourly wage&quot;)
+<pre class="r"><code>plot( fathereduc, wage, 
+      xlab = &quot;Father&#39;s education&quot;, ylab = &quot;Hourly wage&quot;,
+      bty=&quot;n&quot;, col=gray(0.5,0.5), cex=1.3  )
 abline(lm( wage ~ fathereduc ), col = &quot;green&quot;) </code></pre>
 <div class="figure"><span id="fig:plot4"></span>
 <img src="p-050-instrumental-variables_files/figure-html/plot4-1.png" alt="Correlation between Y and the omitted variable" width="960" />
@@ -1673,9 +1695,13 @@ lwage
 <pre class="r"><code>#Note: the symbols ^ &amp; $ around educ prevents the function from grabbing other variables containing educ, such as fatheduc or mothedut</code></pre>
 <pre class="r"><code>par( mfrow=c(1,2) )
 
-plot( density(card$lwage), xlab = &quot;Wage&quot;, main = &quot;Dependent variable&quot;, ylab = &quot;Frequency&quot;)
+plot( density(card$lwage), 
+      xlab = &quot;Wage&quot;, main = &quot;Dependent variable&quot;, ylab = &quot;Frequency&quot;,
+      bty=&quot;n&quot;, col=gray(0.5,0.5), cex=1.3 )
 
-plot( density(card$educ), xlab = &quot;Education&quot;, main = &quot;Policy variable&quot;, ylab = &quot;Frequency&quot;)</code></pre>
+plot( density(card$educ), 
+      xlab = &quot;Education&quot;, main = &quot;Policy variable&quot;, ylab = &quot;Frequency&quot;,
+      bty=&quot;n&quot;, col=gray(0.5,0.5), cex=1.3 )</code></pre>
 <div class="figure"><span id="fig:plot51"></span>
 <img src="p-050-instrumental-variables_files/figure-html/plot5-1.png" alt="Distribution of Y, X, and Z" width="960" />
 <p class="caption">

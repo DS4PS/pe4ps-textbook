@@ -150,7 +150,7 @@ knitr::include_graphics( "FIGURE/InstVar/Graduation.jpg" )
 In the following working example, we will look at the correlation between hourly wage and education. The discussion regarding ["more education, more income"](https://www.nytimes.com/2014/09/11/business/economy/a-simple-equation-more-education-more-income.html) gets continuous attention in the media and in the policy world (see for instance the [New York Times](https://www.nytimes.com/2014/05/27/upshot/is-college-worth-it-clearly-new-data-say.html)). We ask: **how much does your salary (Y) increase for any additional year of education?** In other words, we are interested in estimating $\beta_1$.
 
 \begin{equation} 
-Y=\beta_0 + \beta_1Education
+Earnings=\beta_0 + \beta_1Education
   (\#eq:example)
 \end{equation}
 
@@ -187,11 +187,11 @@ Ability, however, is difficult to measure and cannot be included in the model. I
 
 We can observe this bias with our simulated data. Let's assume we can create a variable measuring ability and include it in our model (**full model**) based on equation \@ref(eq:fullmodel) such that:
 
-<center>$Y=\beta_0 + \beta_1\text{Education} + \beta_2\text{Ability} + \beta_3\text{Experience}$</center>
+<center>$Earnings=\beta_0 + \beta_1\text{Education} + \beta_2\text{Ability} + \beta_3\text{Experience}$</center>
 
 Let's then run a more realistic model (**naive model**) based on equation \@ref(eq:naivemodel) where the ability variable is excluded:
 
-<center>$Y=\text{b}_0 + \text{b}_1\text{Education} + \text{b}_3\text{Experience}$</center>
+<center>$Earnings=\text{b}_0 + \text{b}_1\text{Education} + \text{b}_3\text{Experience}$</center>
 <br>
 <br>
 We can now compare the different estimates: 
@@ -228,17 +228,20 @@ We can empirically test these hypotheses by looking at correlations across the v
 ```{r}
 par( mfrow=c(1,3) )
 
-plot(fathereduc, educ, xlab = "Father's education", ylab = "Education" )   # Plot
+plot(fathereduc, educ, xlab = "Father's education", ylab = "Education",
+     bty="n", col=gray(0.5,0.5), cex=1.3 )   # Plot
 
-abline( lm( educ ~ fathereduc ), col = "red")                              # regression line 
+abline( lm( educ ~ fathereduc ), col = "red", lwd=3 )          # regression line 
 
-plot( fathereduc, wage, xlab = "Father's education", ylab = "Hourly wage" )
+plot( fathereduc, wage, xlab = "Father's education", ylab = "Hourly wage",
+      bty="n", col=gray(0.5,0.5), cex=1.3)
 
-abline(lm( wage ~ fathereduc ), col = "green") 
+abline(lm( wage ~ fathereduc ), col = "darkgreen", lwd=3) 
 
-plot( fathereduc, ability, xlab = "Father's education", ylab = "Ability")
+plot( fathereduc, ability, xlab = "Father's education", ylab = "Ability",
+      bty="n", col=gray(0.5,0.5), cex=1.3)
 
-abline(lm( ability ~ fathereduc ), col = "blue")
+abline(lm( ability ~ fathereduc ), col = "blue", lwd=3)
 ```
 
 We now run the model using our instrumental variable. The model is defined in two stages: first, we estimate our policy variable based on our instrumental variable (equation \@ref(eq:step1)):
@@ -293,9 +296,10 @@ We know that omitted variable bias results from the correlation of our policy va
 
 ```{r plot1, fig.cap="Relationship between Y and the omitted variable"}
 
-plot(ability, educ, xlab = "Ability", ylab = "Education")
+plot(ability, educ, xlab = "Ability", ylab = "Education",
+     bty="n", col=gray(0.5,0.5), cex=1.3 )
 
-abline(lm( educ ~ ability ), col = "green")
+abline(lm( educ ~ ability ), col = "darkgreen", lwd=3 )
 ```
 
 The instrumental variable, however, is correlated only with the policy variable, not the omitted variable. 
@@ -320,12 +324,18 @@ e_x1        <- residuals( first.stage )   #Save residuals of education (e_x1)
 par( mfrow=c(1,2) )
 
 #Plot the predicted values against ability
-plot( ability, x1_hat, xlab = "Ability (omitted variable)", ylab = "Predicted values of Education (x1_hat)")
+plot( ability, x1_hat, 
+      xlab = "Ability (omitted variable)", 
+      ylab = "Predicted values of Education (x1_hat)",
+      bty="n", col=gray(0.5,0.5), cex=1.3 )
 
 abline( lm( x1_hat ~ ability), col = "blue")
 
 #Plot the residual against ability
-plot( ability, e_x1, xlab = "Ability (omitted variable)", ylab = "Education - Residual (e_X1)" )
+plot( ability, e_x1, 
+      xlab = "Ability (omitted variable)", 
+      ylab = "Education - Residual (e_X1)",
+      bty="n", col=gray(0.5,0.5), cex=1.3)
 
 abline( lm( e_x1 ~ ability), col = "green")
 ```
@@ -336,13 +346,17 @@ One interesting thing about the instrumental variable model is that Education wi
 
 par( mfrow=c(1,2) )
 
-plot( educ, wage, xlab = "Education", ylab = "Wage" )
+plot( educ, wage, 
+      xlab = "Education", ylab = "Wage",
+      bty="n", col=gray(0.5,0.5), cex=1.3 )
 
-abline( lm( wage ~ educ), col = "red")
+abline( lm( wage ~ educ), col = "red", lwd=3 )
 
-plot( x1_hat, wage, xlab = "Predicted values of Education (x1_hat)", ylab = "Wage" )
+plot( x1_hat, wage, 
+      xlab = "Predicted values of Education (x1_hat)", ylab = "Wage",
+      bty="n", col=gray(0.5,0.5), cex=1.3 )
 
-abline( lm( wage ~ x1_hat), col = "blue")
+abline( lm( wage ~ x1_hat), col = "blue", lwd=3 )
 ```
 
 ## Summary: How to select a valid instrumental variable 
@@ -368,7 +382,9 @@ If your instrumental variable is weak, it means that it is little correlated wit
 
 ```{r plot4, fig.cap="Correlation between Y and the omitted variable"}
 
-plot( fathereduc, wage, xlab = "Father's education", ylab = "Hourly wage")
+plot( fathereduc, wage, 
+      xlab = "Father's education", ylab = "Hourly wage",
+      bty="n", col=gray(0.5,0.5), cex=1.3  )
 abline(lm( wage ~ fathereduc ), col = "green") 
 
 ```
@@ -393,7 +409,7 @@ The lack of direct correlation between the instrumental and the oucome variable 
 * Experience is a control variable
 * Father's education is the instrumental variable
 
-```{r matrixstructure, fig.cap="Correlation matrix structure", echo=F}
+```{r matrixstructure, fig.cap="Correlation matrix structure", echo=F, fig.height=10}
 
 panel.cor <- function(x, y, digits=2, prefix="", cex.cor)
 {
@@ -425,8 +441,6 @@ panel.smooth <- function (x, y, col = par("col"), bg = NA, pch = par("pch"),
 }
 
 pairs( dat, upper.panel=panel.cor, lower.panel=panel.smooth )
-
-
 ```
 
 4. Finding a valid instrumental variable is challenging, requires creativity and some review of previous studies to get ideas and preliminary assess the correlation between the model variables.
@@ -496,9 +510,13 @@ stargazer( card,
 ```{r plot5, fig.cap="Distribution of Y, X, and Z"}
 par( mfrow=c(1,2) )
 
-plot( density(card$lwage), xlab = "Wage", main = "Dependent variable", ylab = "Frequency")
+plot( density(card$lwage), 
+      xlab = "Wage", main = "Dependent variable", ylab = "Frequency",
+      bty="n", col=gray(0.5,0.5), cex=1.3 )
 
-plot( density(card$educ), xlab = "Education", main = "Policy variable", ylab = "Frequency")
+plot( density(card$educ), 
+      xlab = "Education", main = "Policy variable", ylab = "Frequency",
+      bty="n", col=gray(0.5,0.5), cex=1.3 )
 
 barplot( table(card$nearc4), xlab = "Living near a four-year college", ylab = "Frequency", main = "Instrumental variable")
 ```

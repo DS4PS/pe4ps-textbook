@@ -8,6 +8,10 @@ navbar:
       href: p-020-time-series.html
     - text: "Diff-in-Diff"
       href: p-030-diff-in-diff.html
+    - text: "FixedEffects"
+      href: p-040-fixed-effects.html
+    - text: "InstrumentalVariables"
+      href: p-050-instrumental-variables.html
   right:
     - icon: fa-github fa-2x
       href: https://github.com/DS4PS/pe4ps-textbook
