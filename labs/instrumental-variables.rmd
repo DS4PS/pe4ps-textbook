@@ -17,11 +17,13 @@ output:
 knitr::opts_chunk$set(echo = TRUE, message=F, warning=F, fig.width = 10)
 ```
 
-```{r}
+```{r, echo=F}
 library( stargazer )
 library( pander )
 library( dplyr )
 ```
+
+# Overview
 
 This labs is loosely based on the paper written by Angela R. Fertig and David A. Reingold (2007) entitled ["Public housing, health, and health behaviors: Is there connection?".](https://onlinelibrary.wiley.com/doi/epdf/10.1002/pam.20288)
 
@@ -48,7 +50,7 @@ data <- read.csv( URL, stringsAsFactors=F )
 head( data ) %>% pander()
 ```
 
-# The policy problem
+## The policy problem
 
 > **Research question**: 
 > Does access to public housing improve health outcomes for low-income households? 
@@ -71,11 +73,32 @@ Estimating the impact of public housing assistance on health status can be probl
 
 We can see this in figure \@ref(fig:figure1). "Healthy lifestyle" is an individual's commitment to diet, exercise and utilization of healthcare services. It is an omitted variable, which is correlated with both the outcome and the policy variable. Individuals who are more concerned about maintaining an healthy lifestyle might be more likely to look for public house assistance. But concerns about one's healthy lifestyle might also lead to a better health statust. Healthy lifestyle is an omitted variable. Therefore we would need to use an instrumental variable to correctly estimate the relationship between public housing and health status. 
 
-*Note: healthy lifestyle is an omitted variable in this exercise because it was not measured when data were collected. Omitted variables occur because some concepts are too complex to measure (remember the ability variable in the lecture) or because researchers did not collect data on some aspects (like in this case). 
+*Note: healthy lifestyle is an omitted variable in this exercise because it was not measured when data were collected. Omitted variables occur because some concepts are too complex to measure (remember the ability variable in the lecture) or because researchers did not collect data on some aspects (like in this case).*
 
-# Lab
 
-## Data
+
+<br>
+<hr>
+<br>
+
+```{r healthoutcomes, fig.cap="Health status scale", out.width='100%', echo=F }
+knitr::include_graphics( "img/healthoutcomes.png" )
+```
+
+\newpage
+
+<br>
+<hr>
+<br>
+
+
+```{r figure1, fig.cap="Covariance structure of an instrumental variable model", out.width='80%', echo=F }
+knitr::include_graphics( "img/IV_Fig1.png" )
+```
+
+
+
+## The Data
 
 Data were collected across multiple cities in the US. The study population includes only households eligible for public houses - i.e., househols whose income is below 80 percent of their city's median family income. 
 
@@ -96,22 +119,31 @@ Education             | Education, 1 = High School, 2 = Diploma, 3 = Bachelor, 4
 MaritalStatus         | 1 = Single, 2 = Married, 3 = Widow, 4 = Divorced 
 
 
-**Q1: As first thinq, we look at some descriptive statistics.**  
+
+
+
+# Lab
+
+## Q1 
+
+**First, lets look at some descriptive statistics.**
 
 * **Q1a:** Produce a summary statistics table using stargazer. (5 points)
 * **Q1b:** What are the mean and standard deviation of the dependent variable? (2.5 points)
 * **Q1c:** What are the mean and standard deviation of the policy variable? (2.5 points)
 
-## Analysis
+## Q2 
 
 We now explore the data a bit more. 
 
-**Q2: First, we run a naive model that predict the effect of public housing assistance on health status. We do not consider the omitted variable bias for now. Include race, education, age, and marital status as control variables.** 
+**Run a naive model that predict the effect of public housing assistance on health status. We do not consider the omitted variable bias for now. Include race, education, age, and marital status as control variables.** 
 
 * **Q2a:** Provide the full model table with stargazer. (5 points)
 * **Q2b:** What is the estimated effect of public housing? Is that statistically significant? How much does an additional month of public housing assistance decrease or increase health status? (5 points)
 
-**Q3: Now we examine our data and identify four possible instrumental variables:**
+## Q3 
+
+**Now we examine our data and identify four possible instrumental variables:**
 
 * Supply of public housing measured as the number of housing available every 100 households
 * Health status of parents
@@ -120,48 +152,50 @@ We now explore the data a bit more.
 
 * **Q3a:** What three key characteristics should these variables have to be valid instruments? Briefly list and describe them. (15 points)
 
-**Q4: Look at the correlation matrix provided below. To help you, the matrix contains the omitted variable (note that in reality you won't have this information!).** 
+## Q4 
+
+**Look at the correlation matrix provided below. To help you, the matrix contains the omitted variable (note that in reality you won't have this information!).** 
 
 * **Q4a:** Which criteria among the ones described in question Q3a can you test by looking at the correlation matrix? (5 points)
 * **Q4b:** For each of the three variables, describe which criteria of a valid instrument they meet and which criteria they do not meet based on the matrix. (15 points)  
 * **Q4c:** As a result, which variable(s) is(are) a valid instrument? (5 points)
 
-** Q5: Once you selected the valid instrumental variable(s), you need to decide which one is the best choice (in a real study, we might want to include both of them; but, for simplicity, let's limit our selection to one instrumental variable).**
+## Q5
+
+**Once you selected the valid instrumental variable(s), you need to decide which one is the best choice (in a real study, we might want to include both of them; but, for simplicity, let's limit our selection to one instrumental variable).**
 
 * **Q5a:** Run a first-stage model using each of the instrumental variables that you selected as valid in question Q4c. Provide result tables using stargazer. (10 points)
 * **Q5b:** Given the results of the first stage, which variable would you pick as instrumental variable? (5 points)
 * **Q5c:** Why? (5 points)
 
-**Q6: Now run the second stage of the IV model using the instrumental variable that you selected in Q5.** 
+## Q6
+
+**Now run the second stage of the IV model using the instrumental variable that you selected in Q5.** 
 
 * **Q6a:** Provide result tables using stargazer. (5 points)
 * **Q6b:** Is the effect of public housing on health status positive or negative after you utilize an instrumental variable? Is it statistically significant? (5 points)
 * **Q6c:** How much does the health status of a individual increase or decrease for each additional months spent in a public house? (5 points)
 * **Q6d:** Compare results with the naive model. Were we under- or over-estimating the effect of public housing on health status? (5 points)
 
-**BONUS QUESTION 1: Imagine that you are explaining your results to a journalist. You want to provide a concrete example of the effect of public housing assistance. (5 points) **
+## BONUS QUESTION 1
+
+**Imagine that you are explaining your results to a journalist. You want to provide a concrete example of the effect of public housing assistance. (5 points) **
 
 * **BQ2a:** From the summary statistics table, retrieve the amount of time spent in a public house for an average individual and an individual in the top 25 percent (use the third quantile). 
 * **BQ2b:** If for each 1-point increase of the health status index, the government saves 1200 $ in medical bill, what is the average amount of savings when we move from an average individual to an individual in the top-25 percent? Consider the individual to be white, with a diploma, 35 years old and single.  
 
-**BONUS QUESTION 2: Will the omitted variable be correlated with the residual of stage 1? Will it be correlated with the predicted values of X1? (5 points) **
+## BONUS QUESTION 2
 
-* **BQ2a: Draw a plot representing the correlation between the omitted variable (the variable is called HealthBehavior in your dataset) and the predicted value of the first stage.
-* **BQ2b: Draw a plot representing the correlation between the omitted variable (the variable is called HealthBehavior in your dataset) and the residuals of the first stage.
+**Will the omitted variable be correlated with the residual of stage 1? Will it be correlated with the predicted values of X1? (5 points) **
 
-\newpage
-
-```{r healthoutcomes, fig.cap="Health status scale", out.width='100%', echo=F }
-knitr::include_graphics( "img/healthoutcomes.png" )
-```
+* **BQ2a:** Draw a plot representing the correlation between the omitted variable (the variable is called HealthBehavior in your dataset) and the predicted value of the first stage.
+* **BQ2b:** Draw a plot representing the correlation between the omitted variable (the variable is called HealthBehavior in your dataset) and the residuals of the first stage.
 
 \newpage
 
-```{r figure1, fig.cap="Covariance structure of an instrumental variable model", out.width='80%', echo=F }
-knitr::include_graphics( "img/IV_Fig1.png" )
-```
-
-\newpage
+<br>
+<hr>
+<br>
 
 ```{r matrixstructure, fig.cap="Correlation matrix structure", echo=F, fig.height=10}
 
@@ -200,6 +234,13 @@ pairs( dat, upper.panel=panel.cor, lower.panel=panel.smooth )
 
 
 ```
+
+
+
+
+
+
+
 
 ```{css, echo=F}
 p {
