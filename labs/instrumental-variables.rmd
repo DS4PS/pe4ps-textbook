@@ -23,7 +23,7 @@ library( pander )
 library( dplyr )
 ```
 
-# Overview
+# Lab Overview
 
 This labs is loosely based on the paper written by Angela R. Fertig and David A. Reingold (2007) entitled ["Public housing, health, and health behaviors: Is there connection?".](https://onlinelibrary.wiley.com/doi/epdf/10.1002/pam.20288)
 
@@ -122,7 +122,7 @@ MaritalStatus         | 1 = Single, 2 = Married, 3 = Widow, 4 = Divorced
 
 
 
-# Lab
+# Lab Questions
 
 ## Q1 
 
@@ -134,12 +134,13 @@ MaritalStatus         | 1 = Single, 2 = Married, 3 = Widow, 4 = Divorced
 
 ## Q2 
 
-We now explore the data a bit more. 
+Let's examine the estimated impact of the policy variable in a model that does not account for omitted variable bias.
 
-**Run a naive model that predict the effect of public housing assistance on health status. We do not consider the omitted variable bias for now. Include race, education, age, and marital status as control variables.** 
+Run a naive model that predict the effect of public housing assistance on health status. Include race, education, age, and marital status as control variables. We are not accounting for our omitted variable, healthy lifestyle, in this initial model. 
 
-* **Q2a:** Provide the full model table with stargazer. (5 points)
-* **Q2b:** What is the estimated effect of public housing? Is that statistically significant? How much does an additional month of public housing assistance decrease or increase health status? (5 points)
+* **Q2a:** Report the results in a regression table with stargazer. (5 points)
+* **Q2b:** What is the estimated effect of public housing in this model? Is that statistically significant? How much does an additional month of public housing assistance decrease or increase health status? (5 points)
+
 
 ## Q3 
 

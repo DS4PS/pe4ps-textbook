@@ -1707,12 +1707,12 @@ summary {
 
 <div id="TOC">
 <ul>
-<li><a href="#overview">Overview</a><ul>
+<li><a href="#lab-overview">Lab Overview</a><ul>
 <li><a href="#the-policy-problem">The policy problem</a></li>
 <li><a href="#an-instrumental-variable-approach">An instrumental variable approach</a></li>
 <li><a href="#the-data">The Data</a></li>
 </ul></li>
-<li><a href="#lab">Lab</a><ul>
+<li><a href="#lab-questions">Lab Questions</a><ul>
 <li><a href="#q1">Q1</a></li>
 <li><a href="#q2">Q2</a></li>
 <li><a href="#q3">Q3</a></li>
@@ -1725,8 +1725,8 @@ summary {
 </ul>
 </div>
 
-<div id="overview" class="section level1">
-<h1>Overview</h1>
+<div id="lab-overview" class="section level1">
+<h1>Lab Overview</h1>
 <p>This labs is loosely based on the paper written by Angela R. Fertig and David A. Reingold (2007) entitled <a href="https://onlinelibrary.wiley.com/doi/epdf/10.1002/pam.20288">“Public housing, health, and health behaviors: Is there connection?”.</a></p>
 <p>For this lab you need to upload the RegDisc_lab data available in the class R package.</p>
 <p>There are <strong>6 sets of questions</strong> to be answered. You can get up to 100 points + bonus questions. Points are indicated next to each question.</p>
@@ -1838,8 +1838,8 @@ Covariance structure of an instrumental variable model
 </table>
 </div>
 </div>
-<div id="lab" class="section level1">
-<h1>Lab</h1>
+<div id="lab-questions" class="section level1">
+<h1>Lab Questions</h1>
 <div id="q1" class="section level2">
 <h2>Q1</h2>
 <p><strong>First, lets look at some descriptive statistics.</strong></p>
@@ -1851,11 +1851,11 @@ Covariance structure of an instrumental variable model
 </div>
 <div id="q2" class="section level2">
 <h2>Q2</h2>
-<p>We now explore the data a bit more.</p>
-<p><strong>Run a naive model that predict the effect of public housing assistance on health status. We do not consider the omitted variable bias for now. Include race, education, age, and marital status as control variables.</strong></p>
+<p>Let’s examine the estimated impact of the policy variable in a model that does not account for omitted variable bias.</p>
+<p>Run a naive model that predict the effect of public housing assistance on health status. Include race, education, age, and marital status as control variables. We are not accounting for our omitted variable, healthy lifestyle, in this initial model.</p>
 <ul>
-<li><strong>Q2a:</strong> Provide the full model table with stargazer. (5 points)</li>
-<li><strong>Q2b:</strong> What is the estimated effect of public housing? Is that statistically significant? How much does an additional month of public housing assistance decrease or increase health status? (5 points)</li>
+<li><strong>Q2a:</strong> Report the results in a regression table with stargazer. (5 points)</li>
+<li><strong>Q2b:</strong> What is the estimated effect of public housing in this model? Is that statistically significant? How much does an additional month of public housing assistance decrease or increase health status? (5 points)</li>
 </ul>
 </div>
 <div id="q3" class="section level2">
