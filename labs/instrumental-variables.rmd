@@ -200,7 +200,10 @@ Run a naive model that predict the effect of public housing assistance on health
 
 ```{r matrixstructure, fig.cap="Correlation matrix structure", echo=F, fig.height=10}
 
-dat <- data.frame(data$HealthStatus, data$PublicHousing, data$Supply, data$WaitingTime, data$Stamp, data$ParentsHealthStatus, data$HealthBehavior)
+dat <- 
+  data %>%
+  select( HealthStatus, PublicHousing, Supply, WaitingTime, 
+          Stamp, ParentsHealthStatus, HealthBehavior)
 
 panel.cor <- function(x, y, digits=2, prefix="", cex.cor)
 {
