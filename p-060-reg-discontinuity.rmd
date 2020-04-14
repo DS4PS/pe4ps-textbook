@@ -1,5 +1,5 @@
 ---
-title: "Regression Discontinuity"
+title: "Regression Discontinuity Design"
 ---
 
 ```{r setup, include=FALSE}
@@ -39,9 +39,33 @@ library(scales)
 
 # The key concept
 
-The regression discontinuity design is used when the treatment (or intervention) is based on some continuous criteria (age, a test results, income...). Only individuals who are below or above a given cutoff point are assigned to the treatment. Examples include:
+"Selection" is one of the most challenging problems in evaluation. Selection occurs when participants decide whether or not to participate in the program, i.e. they select into the program. Typically this means that program participants are different from non-participants, and as a result we will commonly observe performance differences between the two groups but it is challenging to determine whether they are partly from program impact or whether they are entirely driven by other behaviors or characteristics of program participants. Selection and omitted variable bias are synonymous.
 
-* A program designed to enhance skills of students who poorly perfom on class tests. Students with an average score of 50/100 participate in the program (treatment group), while students with an higher average are excluded (control group);
+To give a concrete example, we might be interested in whether going to the gym lowers heart disease so we use survey data to identify a population that includes adults between ages of 30 and 40 that actively visit the gym each week and those that do not. We wish to compare some basic metrics of heart health to see if gym memberships might improve heart health. The problem is that most people with gym memberships embrace other healthy lifestyle choices such as eating organic or vegetarian diets and not smoking. As a result, comparing gym members to non-members was an apples to oranges comparison before the effects of membership were realized. 
+
+The regression discontinuity model was created to deal with one very specific type of selection - cases where people have to qualify for the program, and the criteria for qualification is a measure that is highly correlated with performance. Some threshold is created and all people that score above the threshold are accepted into the program, and all people below are not allowed to participate, or vice-versa.
+
+When a criteria is used to determine program eligibility in this way it automatically sorts the data into high performers and low performers, thus ensuring that large pre-treatment group differences are baked into the program. 
+
+For example, a standardized exam might be used to determine the roster for honors classes in a high school. It would be hard to evaluate whether honors courses improve academic performance once students metriculate in college because there are already large differences between program participants and non-participants (honors students and regular students). 
+
+
+```{r rd-intro1, fig.cap="Program participants score above the threshold", out.width='60%', echo=F }
+knitr::include_graphics( "FIGURE/RegDisc/overview1.png" )
+```
+
+Alternatively, perhaps all students that score below the threshold are required to attend remedial summer school courses. Do these expensive summer programs help close the achievement gap so students do better in college? Those in the "treatment" group will be very different from those that did not have to attend summer school, and as a result we run a risk of failing to detect achievement gains when we compare the treatment to "control" or comparison group. 
+
+
+```{r rd-intro2, fig.cap="Program participants score below the threshold", out.width='60%', echo=F }
+knitr::include_graphics( "FIGURE/RegDisc/overview2.png" )
+```
+
+If you have performance data for both groups before and after the program occurs then you can use a difference-in-difference framework to compare gains across the two groups and parse out program impact. If you are using post-program administrative data, or if it is impossible to measure performance prior to program completion (there is no pre-program college GPA for the exmaple above, for example), then regression discontinuity is appropriate.
+
+It turns out that a lot of programs and public policies have some criteria for participation that create these inferential challenges. 
+
+* A tutoring program designed to improve reading skills of students who perform poorly on a reading test. Students with an average score of 50/100 participate in the tutoring program (treatment group), while students with a score above 50 are not included in the tutorial sessions (control group);
 <br>
 <br>
 * A government program (such as Medicare) where individuals can enroll only after a certain age. Individuals who are older are enrolled (treatment group) while individuals who are yourger are not enrolled (control group);
@@ -259,7 +283,7 @@ plot( Attendance_c, Performance, cex=2,
 abline( v=0, col="red", lwd=2, lty=2 )
 
 # Plot our predicted values
-points( Attendance_c, predfit, col="black", lwd=5, pch = 20 )
+points( Attendance_c, predfit, col="black", cex=0.8, pch = 19 )
 
 ## Add a legend
 points( 10, 26, col="steelblue", pch=19, cex=2 )
@@ -279,7 +303,9 @@ The counterfactual represents the final exame grades, had the policy of mandator
 
 ```{r}
 ## We create a new dataset where the variable Treatment is only equal to 0 as no student has been part of the intervention
-data2 <- data.frame( Performance=data$Performance, Treatment=rep(0), Attendance_c=data$Attendance_c )
+data2 <- data.frame( Performance=data$Performance, 
+                     Treatment=rep(0), 
+                     Attendance_c=data$Attendance_c )
 
 ## Based on our previous model we predict the final grades, had the intervention not occured
 predfit2 <- predict( reg, data2 )
@@ -287,7 +313,7 @@ predfit2 <- predict( reg, data2 )
 data2$predfit2 <- predfit2
 
 ## We set a new color for representing the counterfactual
-counterfactual <- adjustcolor("goldenrod1", alpha.f=0.2 )
+counterfactual <- adjustcolor("darkorange2", alpha.f=0.2 )
 
 ## Plot the observed valies
 plot( Attendance_c, Performance, cex=2, 
@@ -306,12 +332,12 @@ points( Attendance_c[ Attendance_c < 0 ],
 
 # Add a legend
 ## Add a legend
-points( 10, 26, col="steelblue", pch=19, cex=2 )
-text( 10, 26, "Treatment group", col="steelblue", pos=4 )
-points( 10, 20, col="darkred", pch=19, cex=2 )
-text( 10, 20, "Control group", col="darkred", pos=4 )
-points( 10, 14, col="goldenrod1", pch=19, cex=2 )
-text( 10, 14, "Counterfactual", col="goldenrod1", pos=4 )
+points( 10, 20, col="steelblue", pch=19, cex=2 )
+text( 10, 20, "Treatment group", col="steelblue", pos=4 )
+points( 10, 26, col="darkred", pch=19, cex=2 )
+text( 10, 26, "Control group", col="darkred", pos=4 )
+points( 10, 14, col="darkorange2", pch=19, cex=2 )
+text( 10, 14, "Counterfactual", col="darkorange2", pos=4 )
 ```
 
 # Replication of a study
@@ -332,8 +358,9 @@ Data are made available by Josh Angrist and Steve Pischke here: http://mastering
 > **Hypothesis:** 
 > Young adults who consume alcohol have a higher mortality rate.
 
-```{r, echo = F}
-data = read.csv( "data/RegDisc2.csv" )
+```{r, echo = T}
+URL <- "https://raw.githubusercontent.com/DS4PS/pe4ps-textbook/master/data/RegDisc2.csv"
+data <- read.csv( URL, stringsAsFactors=F )
 ```
 
 ## Data
@@ -344,13 +371,6 @@ We can have a look at the first 10 rows of the data and summary statistics for t
 head( data ) %>% pander()
 ```
 
-```{r, echo=T, results='asis'}
-
-stargazer( data,  
-           type = "html", 
-           omit.summary.stat = c("p25", "p75"),
-           digits = 2 )
-```
 
 Variables include:
 
@@ -365,15 +385,23 @@ mva                  |Mortality rate for car accidents                          
 drugs                |Mortality rate for drug-related causes (alcohol excluded)          |
 externalother        |Mortality rate for other external causes                           |
 
+```{r, echo=T, results='asis'}
+
+stargazer( data,  
+           type = "html", 
+           omit.summary.stat = c("p25", "p75"),
+           digits = 2 )
+```
+
+
 Before running our model we need to create two variables. One variable indicating young adults over than 21 (=1) and younger than 21 (=0). A second variable indicating the centered rating score, which in this case is age. 
 
 ```{r, echo=T, results='asis'}
 # First we create a dummy Treatment variable, where individuals older than 21 are = 1 and younger than 21 = 0
-data$Treatment = data$agecell
-data$Treatment = ifelse(data$Treatment>21, 1, 0 )
+data$Treatment <- ifelse( data$agecell > 21, 1, 0 )
 
 # Second we create a centered age variable, which will be the rating variable in our model. 
-data$age_c = data$agecell - 21
+data$age_c <- data$agecell - 21
 
 stargazer( data,  
            type = "html", 
@@ -387,15 +415,16 @@ stargazer( data,
 We specify the model based on the equation \@ref(eq:RD). We estimate the effect of alcohol consumption on four outcomes: mortality rate for all causes, car accidents, alcohol-related causes, and drug-related causes.
 
 ```{r, echo=T, results='asis'}
-reg1 = lm(all ~ Treatment + age_c, data = data)
-reg2 = lm(mva ~ Treatment + age_c, data = data)
-reg3 = lm(alcohol ~ Treatment + age_c, data = data)
-reg4 = lm(drugs ~ Treatment + age_c, data = data)
+reg1 <- lm( all ~ Treatment + age_c, data = data )
+reg2 <- lm( mva ~ Treatment + age_c, data = data )
+reg3 <- lm( alcohol ~ Treatment + age_c, data = data )
+reg4 <- lm( drugs ~ Treatment + age_c, data = data )
 
 
 stargazer( reg1, reg2, reg3, reg4,
            type = "html", 
-           dep.var.labels = c("All causes", "Car accidents", "Alcohol", "Drugs"),
+           dep.var.labels = c("All causes", "Car accidents", 
+                              "Alcohol", "Drugs"),
            column.labels = "",
            covariate.labels = c("Treatment", "Age"),
            omit.stat = "all", 
@@ -425,20 +454,22 @@ As before we can plot the results on a graph, so that we can visualize the disco
 
 ```{r}
 # We first predict the final exam grades based on our regression discontinuity model. 
-predfit = predict(reg2, data) 
+predfit <- predict( reg2, data ) 
 
 # We set colors for the graph
-palette( c( adjustcolor( "steelblue", alpha.f=1), adjustcolor( "darkred", alpha.f=1)  ) )
+palette( c( adjustcolor( "steelblue", alpha.f=1 ), 
+            adjustcolor( "darkred", alpha.f=1)  ) )
 
-# To differently color the treatment and control group we need to create a new Treatment variable that where the Control group = 2. 
-data$Treatment2 = ifelse(data$Treatment==0,2,1)
+# To differently color the treatment and control group 
+# we need to create a new Treatment variable that where the Control group = 2. 
+data$Treatment2 <- ifelse(data$Treatment==0,2,1)
 
 # Plot our observed value
 plot(data$age_c, data$mva, col=data$Treatment2, pch=19, bty="n",
       xlab="Age (centered)", ylab="Car accidents",  cex=2)
 
 # Plot a line at the cutoff point
-abline(v=0, col = "red", lwd = 2, lty = 2)
+abline(v=0, col <- "red", lwd = 2, lty = 2)
 
 # Plot our predicted values
 points( data$age_c, predfit, col="black", lwd=5, pch = 20 )
@@ -446,8 +477,8 @@ points( data$age_c, predfit, col="black", lwd=5, pch = 20 )
 ## Add a legend
 points( 1.5, 36, col="steelblue", pch=19, cex=2 )
 text( 1.5, 36, "Treatment group", col="steelblue", pos=4 )
-points( 1.5, 30, col="darkred", pch=19, cex=2 )
-text( 1.5, 30, "Control group", col="darkred", pos=4 )
+points( 1.5, 33, col="darkred", pch=19, cex=2 )
+text( 1.5, 33, "Control group", col="darkred", pos=4 )
 ```
 
 # Additional notes
@@ -494,6 +525,8 @@ Little explanation, but nice graphs: [here](https://vizdatar.wordpress.com/autho
 More on [nonlinear relationships](http://econ.lse.ac.uk/staff/spischke/mhe/ex_ch6.pdf) and [fuzzy regression discontinuity](http://cega.berkeley.edu/assets/cega_events/39/Regression_Discontinuity.pdf). 
 
 [A complete guide to regression discontinuity for practitioners](http://dev.mdrc.org/sites/default/files/RDD%20Guide_Full%20rev%202016_0.pdf)  
+
+
 
 
 ```{css, echo=F}

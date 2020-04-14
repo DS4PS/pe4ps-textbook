@@ -939,6 +939,8 @@ Does alcohol consumption increase mortality rate?</p>
 <p><strong>Hypothesis:</strong>
 Young adults who consume alcohol have a higher mortality rate.</p>
 </blockquote>
+<pre class="r"><code>URL &lt;- &quot;https://raw.githubusercontent.com/DS4PS/pe4ps-textbook/master/data/RegDisc2.csv&quot;
+data &lt;- read.csv( URL, stringsAsFactors=F )</code></pre>
 <div id="data-1" class="section level2">
 <h2><span class="header-section-number">3.1</span> Data</h2>
 <p>We can have a look at the first 10 rows of the data and summary statistics for the variables included.</p>
@@ -1026,6 +1028,53 @@ Young adults who consume alcohol have a higher mortality rate.</p>
 <td align="center">32.72</td>
 <td align="center">3.212</td>
 <td align="center">7.973</td>
+</tr>
+</tbody>
+</table>
+<p>Variables include:</p>
+<table>
+<colgroup>
+<col width="23%" />
+<col width="76%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>Variable name </strong></th>
+<th><strong>Description </strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>agecell</td>
+<td>Age of individual (the study focuses on adults between 19-22 year)</td>
+</tr>
+<tr class="even">
+<td>all</td>
+<td>Overall mortality rate</td>
+</tr>
+<tr class="odd">
+<td>alcohol</td>
+<td>Mortality rate for alcohol-related causes</td>
+</tr>
+<tr class="even">
+<td>homicide</td>
+<td>Mortality rate for homicides</td>
+</tr>
+<tr class="odd">
+<td>suicide</td>
+<td>Mortality rate for suicide</td>
+</tr>
+<tr class="even">
+<td>mva</td>
+<td>Mortality rate for car accidents</td>
+</tr>
+<tr class="odd">
+<td>drugs</td>
+<td>Mortality rate for drug-related causes (alcohol excluded)</td>
+</tr>
+<tr class="even">
+<td>externalother</td>
+<td>Mortality rate for other external causes</td>
 </tr>
 </tbody>
 </table>
@@ -1227,60 +1276,12 @@ externalother
 </td>
 </tr>
 </table>
-<p>Variables include:</p>
-<table>
-<colgroup>
-<col width="23%" />
-<col width="76%" />
-</colgroup>
-<thead>
-<tr class="header">
-<th><strong>Variable name </strong></th>
-<th><strong>Description </strong></th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>agecell</td>
-<td>Age of individual (the study focuses on adults between 19-22 year)</td>
-</tr>
-<tr class="even">
-<td>all</td>
-<td>Overall mortality rate</td>
-</tr>
-<tr class="odd">
-<td>alcohol</td>
-<td>Mortality rate for alcohol-related causes</td>
-</tr>
-<tr class="even">
-<td>homicide</td>
-<td>Mortality rate for homicides</td>
-</tr>
-<tr class="odd">
-<td>suicide</td>
-<td>Mortality rate for suicide</td>
-</tr>
-<tr class="even">
-<td>mva</td>
-<td>Mortality rate for car accidents</td>
-</tr>
-<tr class="odd">
-<td>drugs</td>
-<td>Mortality rate for drug-related causes (alcohol excluded)</td>
-</tr>
-<tr class="even">
-<td>externalother</td>
-<td>Mortality rate for other external causes</td>
-</tr>
-</tbody>
-</table>
 <p>Before running our model we need to create two variables. One variable indicating young adults over than 21 (=1) and younger than 21 (=0). A second variable indicating the centered rating score, which in this case is age.</p>
 <pre class="r"><code># First we create a dummy Treatment variable, where individuals older than 21 are = 1 and younger than 21 = 0
-data$Treatment = data$agecell
-data$Treatment = ifelse(data$Treatment&gt;21, 1, 0 )
+data$Treatment &lt;- ifelse( data$agecell &gt; 21, 1, 0 )
 
 # Second we create a centered age variable, which will be the rating variable in our model. 
-data$age_c = data$agecell - 21
+data$age_c &lt;- data$agecell - 21
 
 stargazer( data,  
            type = &quot;html&quot;, 
@@ -1365,15 +1366,16 @@ age_c
 <div id="analysis-1" class="section level2">
 <h2><span class="header-section-number">3.2</span> Analysis</h2>
 <p>We specify the model based on the equation <a href="#eq:RD">(1.1)</a>. We estimate the effect of alcohol consumption on four outcomes: mortality rate for all causes, car accidents, alcohol-related causes, and drug-related causes.</p>
-<pre class="r"><code>reg1 = lm(all ~ Treatment + age_c, data = data)
-reg2 = lm(mva ~ Treatment + age_c, data = data)
-reg3 = lm(alcohol ~ Treatment + age_c, data = data)
-reg4 = lm(drugs ~ Treatment + age_c, data = data)
+<pre class="r"><code>reg1 &lt;- lm( all ~ Treatment + age_c, data = data )
+reg2 &lt;- lm( mva ~ Treatment + age_c, data = data )
+reg3 &lt;- lm( alcohol ~ Treatment + age_c, data = data )
+reg4 &lt;- lm( drugs ~ Treatment + age_c, data = data )
 
 
 stargazer( reg1, reg2, reg3, reg4,
            type = &quot;html&quot;, 
-           dep.var.labels = c(&quot;All causes&quot;, &quot;Car accidents&quot;, &quot;Alcohol&quot;, &quot;Drugs&quot;),
+           dep.var.labels = c(&quot;All causes&quot;, &quot;Car accidents&quot;, 
+                              &quot;Alcohol&quot;, &quot;Drugs&quot;),
            column.labels = &quot;&quot;,
            covariate.labels = c(&quot;Treatment&quot;, &quot;Age&quot;),
            omit.stat = &quot;all&quot;, 
@@ -1620,9 +1622,11 @@ Constant
 predfit = predict(reg2, data) 
 
 # We set colors for the graph
-palette( c( adjustcolor( &quot;steelblue&quot;, alpha.f=1), adjustcolor( &quot;darkred&quot;, alpha.f=1)  ) )
+palette( c( adjustcolor( &quot;steelblue&quot;, alpha.f=1 ), 
+            adjustcolor( &quot;darkred&quot;, alpha.f=1)  ) )
 
-# To differently color the treatment and control group we need to create a new Treatment variable that where the Control group = 2. 
+# To differently color the treatment and control group 
+# we need to create a new Treatment variable that where the Control group = 2. 
 data$Treatment2 = ifelse(data$Treatment==0,2,1)
 
 # Plot our observed value
