@@ -5,15 +5,19 @@ title: "Regression Discontinuity"
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, message=F, warning=F, fig.width = 10)
 ```
+
 **Packages**
 
-Here are the packages we will use in this lecture. If you don't remember how to install them, you can have a look at the code. 
+For this lab we will use the following packages:
 
-* **stargazer** for nice tables
+* **stargazer** for nice regression tables
+* **dplyr** for data wrangling 
+* **pander** for nice tables
 
-```{r, eval=F}
-install.packages( stargazer )
-library( "stargazer" )
+```{r, eval=T}
+library( stargazer )
+library( dplyr )
+library( pander )
 ```
 
 **Learning objectives** 
@@ -30,8 +34,7 @@ install.packages("scales", repos="https://cran.cnr.berkeley.edu")
 ```
 
 ```{r, echo=FALSE, results="hide"}
-library("stargazer")
-library("scales")
+library(scales)
 ```
 
 # The key concept
@@ -140,29 +143,24 @@ Research has used several methods to test this relationship, from [simple regres
 
 ```{r, echo=F}
 set.seed(650)
-Attendance1 = rbeta(1000, shape1 = 7, shape2 = 2,  ncp = 0)
-Attendance = rescale(Attendance1, to = c(20,100))
+Attendance1 <- rbeta(1000, shape1 = 7, shape2 = 2,  ncp = 0)
+Attendance <- rescale(Attendance1, to = c(20,100))
 
-Treatment = Attendance
-Treatment = ifelse(Treatment>median(Treatment), 0, 1)
+Treatment <- Attendance
+Treatment <- ifelse( Treatment > median(Treatment), 0, 1 )
 
-Attendance_c = Attendance - median(Attendance)
+Attendance_c <- Attendance - median(Attendance)
 
-err = rnorm(1000, 600, 100)
+err <- rnorm(1000, 600, 100)
 
-Y = 40 + 120*Treatment + 20*Attendance_c + err
+Y <- 40 + 120*Treatment + 20*Attendance_c + err
 
-Performance = rescale(Y, to = c(0,100))
+Performance <- rescale( Y, to = c(0,100) )
 
-data = as.data.frame(cbind(Performance, Treatment, Attendance, Attendance_c))
+data <- data.frame( Performance, Treatment, Attendance, Attendance_c, stringsAsFactors=F )
 
 ```
 
-We can have a look at the dataset below:
-
-```{r}
-head(data, 10)
-```
 
 The dataset contains four variables. 
 
@@ -173,14 +171,20 @@ $\text{Treatment}$      |Dummy variable if Treatment group (=1) or Control group
 $\text{Attendance}$     |Percentage of classes attended from 0% (attended no class) to 100% (attended all classes) - Rating variable   |
 $\text{Attendance_c}$   |Attendance variable centered around the cutoff. The cutoff was fixed at the median of Attendance              |
 
+
+```{r}
+head( data, 10 ) %>% pander()
+```
+
+
 The problem with comparing the treatment and the control group is that students with lower attendance (treatment group) are more likely to have lower grades than students with higher attendance. Because of this, if we compare the means of the two groups we might observe no different between them. 
 
 We can empirically see this:
 
 ```{r}
 
-mean(data$Performance[data$Treatment==1])
-mean(data$Performance[data$Treatment==0])
+mean( data$Performance[ data$Treatment==1 ] )
+mean( data$Performance[ data$Treatment==0 ] )
 
 ```
 
@@ -194,9 +198,8 @@ Our model is based on the equation \@ref(eq:RD):
 
 ```{r, echo=T, results='asis'}
 
-reg = lm(Performance ~
-Treatment+
-Attendance_c, data = data)
+reg <- lm( Performance ~ Treatment + 
+             Attendance_c, data = data )
 
 stargazer( reg, 
            type = "html", 
@@ -221,7 +224,7 @@ We can see this by running the model with an uncentered rating variable. The coe
 
 ```{r, echo=T, results='asis'}
 
-reg = lm(Performance ~ Treatment + Attendance, data = data)
+reg <- lm( Performance ~ Treatment + Attendance, data = data )
 
 stargazer( reg, 
            type = "html", 
@@ -238,20 +241,22 @@ We can visually observe the discontinuity in the following plot. The black line 
 
 ```{r}
 # We first predict the final exam grades based on our regression discontinuity model. 
-predfit = predict(reg, data) 
+predfit <- predict( reg, data ) 
 
 # We set colors for the graph
 palette( c( adjustcolor( "steelblue", alpha.f=0.3), adjustcolor( "darkred", alpha.f=0.3)  ) )
 
 # To differently color the treatment and control group we need to create a new Treatment variable that where the Control group = 2. 
-data$Treatment2 = ifelse(data$Treatment==0,2,1)
+data$Treatment2 <- ifelse( data$Treatment==0, 2, 1 )
 
 # Plot our observed value
-plot(Attendance_c, Performance, col=data$Treatment2, pch=19, bty="n",
-      xlab="Attendance Rate (centered)", ylab="Final exam grade",  cex=2)
+plot( Attendance_c, Performance, cex=2,
+      col=data$Treatment2, pch=19, bty="n",
+      xlab="Attendance Rate (centered)", 
+      ylab="Final exam grade")
 
 # Plot a line at the cutoff point
-abline(v=0, col = "red", lwd = 2, lty = 2)
+abline( v=0, col="red", lwd=2, lty=2 )
 
 # Plot our predicted values
 points( Attendance_c, predfit, col="black", lwd=5, pch = 20 )
@@ -274,26 +279,29 @@ The counterfactual represents the final exame grades, had the policy of mandator
 
 ```{r}
 ## We create a new dataset where the variable Treatment is only equal to 0 as no student has been part of the intervention
-data2 = as.data.frame(cbind(data$Performance, Treatment = rep(0), data$Attendance_c))
+data2 <- data.frame( Performance=data$Performance, Treatment=rep(0), Attendance_c=data$Attendance_c )
 
 ## Based on our previous model we predict the final grades, had the intervention not occured
-predfit2 = predict(reg, data2)
+predfit2 <- predict( reg, data2 )
 
-data2$predfit2 = predfit2
+data2$predfit2 <- predfit2
 
 ## We set a new color for representing the counterfactual
-counterfactual = adjustcolor("goldenrod1", alpha.f=0.2)
+counterfactual <- adjustcolor("goldenrod1", alpha.f=0.2 )
 
 ## Plot the observed valies
-plot(Attendance_c, Performance, col=data$Treatment2, pch=19, bty="n",
-      xlab="Attendance Rate (centered)", ylab="Final exam grade",  cex=2)
+plot( Attendance_c, Performance, cex=2, 
+      col=data$Treatment2, pch=19, bty="n",
+      xlab="Attendance Rate (centered)", 
+      ylab="Final exam grade")
 
 # Plot a line at the cutoff
-abline(v=0, col = "red", lwd = 2, lty = 2)
+abline( v=0, col = "red", lwd = 2, lty = 2 )
 
 # Plot the counterfactual
 # Note that we add a bit of noise in the data to facilitate visualization
-points( Attendance_c[Attendance_c<0], predfit2[Attendance_c<0]+rnorm(500,0,5), 
+points( Attendance_c[ Attendance_c < 0 ], 
+        predfit2[ Attendance_c < 0 ] + rnorm(500,0,5), 
         col=counterfactual, lwd=2, pch = 19, cex = 2 )
 
 # Add a legend
@@ -325,7 +333,7 @@ Data are made available by Josh Angrist and Steve Pischke here: http://mastering
 > Young adults who consume alcohol have a higher mortality rate.
 
 ```{r, echo = F}
-data = read.csv("DATA/RegDisc2.csv")
+data = read.csv( "data/RegDisc2.csv" )
 ```
 
 ## Data
@@ -333,7 +341,7 @@ data = read.csv("DATA/RegDisc2.csv")
 We can have a look at the first 10 rows of the data and summary statistics for the variables included.
 
 ```{r}
-head( data )
+head( data ) %>% pander()
 ```
 
 ```{r, echo=T, results='asis'}
