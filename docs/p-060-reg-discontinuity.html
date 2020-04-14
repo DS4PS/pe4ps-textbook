@@ -12,7 +12,7 @@
 
 
 
-<title>Regression Discontinuity</title>
+<title>Regression Discontinuity Design</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -315,7 +315,7 @@ $(document).ready(function () {
 
 
 
-<h1 class="title toc-ignore">Regression Discontinuity</h1>
+<h1 class="title toc-ignore">Regression Discontinuity Design</h1>
 
 </div>
 
@@ -361,9 +361,28 @@ library( pander )</code></pre>
 </ul>
 <div id="the-key-concept" class="section level1">
 <h1><span class="header-section-number">1</span> The key concept</h1>
-<p>The regression discontinuity design is used when the treatment (or intervention) is based on some continuous criteria (age, a test results, income…). Only individuals who are below or above a given cutoff point are assigned to the treatment. Examples include:</p>
+<p>“Selection” is one of the most challenging problems in evaluation. Selection occurs when participants decide whether or not to participate in the program, i.e. they select into the program. Typically this means that program participants are different from non-participants, and as a result we will commonly observe performance differences between the two groups but it is challenging to determine whether they are partly from program impact or whether they are entirely driven by other behaviors or characteristics of program participants. Selection and omitted variable bias are synonymous.</p>
+<p>To give a concrete example, we might be interested in whether going to the gym lowers heart disease so we use survey data to identify a population that includes adults between ages of 30 and 40 that actively visit the gym each week and those that do not. We wish to compare some basic metrics of heart health to see if gym memberships might improve heart health. The problem is that most people with gym memberships embrace other healthy lifestyle choices such as eating organic or vegetarian diets and not smoking. As a result, comparing gym members to non-members was an apples to oranges comparison before the effects of membership were realized.</p>
+<p>The regression discontinuity model was created to deal with one very specific type of selection - cases where people have to qualify for the program, and the criteria for qualification is a measure that is highly correlated with performance. Some threshold is created and all people that score above the threshold are accepted into the program, and all people below are not allowed to participate, or vice-versa.</p>
+<p>When a criteria is used to determine program eligibility in this way it automatically sorts the data into high performers and low performers, thus ensuring that large pre-treatment group differences are baked into the program.</p>
+<p>For example, a standardized exam might be used to determine the roster for honors classes in a high school. It would be hard to evaluate whether honors courses improve academic performance once students metriculate in college because there are already large differences between program participants and non-participants (honors students and regular students).</p>
+<div class="figure"><span id="fig:rd-intro1"></span>
+<img src="FIGURE/RegDisc/overview1.png" alt="Program participants score above the threshold" width="60%" />
+<p class="caption">
+Figure 1.1: Program participants score above the threshold
+</p>
+</div>
+<p>Alternatively, perhaps all students that score below the threshold are required to attend remedial summer school courses. Do these expensive summer programs help close the achievement gap so students do better in college? Those in the “treatment” group will be very different from those that did not have to attend summer school, and as a result we run a risk of failing to detect achievement gains when we compare the treatment to “control” or comparison group.</p>
+<div class="figure"><span id="fig:rd-intro2"></span>
+<img src="FIGURE/RegDisc/overview2.png" alt="Program participants score below the threshold" width="60%" />
+<p class="caption">
+Figure 1.2: Program participants score below the threshold
+</p>
+</div>
+<p>If you have performance data for both groups before and after the program occurs then you can use a difference-in-difference framework to compare gains across the two groups and parse out program impact. If you are using post-program administrative data, or if it is impossible to measure performance prior to program completion (there is no pre-program college GPA for the exmaple above, for example), then regression discontinuity is appropriate.</p>
+<p>It turns out that a lot of programs and public policies have some criteria for participation that create these inferential challenges.</p>
 <ul>
-<li>A program designed to enhance skills of students who poorly perfom on class tests. Students with an average score of 50/100 participate in the program (treatment group), while students with an higher average are excluded (control group);
+<li>A tutoring program designed to improve reading skills of students who perform poorly on a reading test. Students with an average score of 50/100 participate in the tutoring program (treatment group), while students with a score above 50 are not included in the tutorial sessions (control group);
 <br>
 <br></li>
 <li>A government program (such as Medicare) where individuals can enroll only after a certain age. Individuals who are older are enrolled (treatment group) while individuals who are yourger are not enrolled (control group);
@@ -374,18 +393,18 @@ library( pander )</code></pre>
 <br></li>
 <li>A law that faciliates admission to college for the top 10% students from low-ranked high schools; students in the top 10% will be part of the program (treatment group), while students below the top 10% will not (control group)</li>
 </ul>
-<p>The key problem is the <strong>endogeneity between the outcome and the assignment of the treatment</strong>. Scholarships are a classical example. For instance, let’s imagine a scholarship which is offered to low income students to attend college. You can see a representation of the model in figure <a href="#fig:rdfigure">1.1</a>. The x axis is the family income based on which we assign students to the treatment or control group. We call it the <em>rating variable</em>. The y axis is the likelihood to enroll into college. It is our <em>outcome variable</em>. There is a positive relationship between the two: students from higher income families are more likely to enroll to college.</p>
+<p>The key problem is the <strong>endogeneity between the outcome and the assignment of the treatment</strong>. Scholarships are a classical example. For instance, let’s imagine a scholarship which is offered to low income students to attend college. You can see a representation of the model in figure <a href="#fig:rdfigure">1.3</a>. The x axis is the family income based on which we assign students to the treatment or control group. We call it the <em>rating variable</em>. The y axis is the likelihood to enroll into college. It is our <em>outcome variable</em>. There is a positive relationship between the two: students from higher income families are more likely to enroll to college.</p>
 <div class="figure"><span id="fig:rdfigure"></span>
 <img src="FIGURE/RegDisc/Picture1.png" alt="Students' family income and college enrollment" width="60%" />
 <p class="caption">
-Figure 1.1: Students’ family income and college enrollment
+Figure 1.3: Students’ family income and college enrollment
 </p>
 </div>
 <p>We establish to give a scholarship to students below a given level of income (the <em>cutoff</em>). We have two groups: one group receive the scholarship (treatment group) while the other does not (control group).</p>
 <div class="figure"><span id="fig:rdfigure2"></span>
 <img src="FIGURE/RegDisc/Picture2.png" alt="Control and treatment group based on the cutoff" width="60%" />
 <p class="caption">
-Figure 1.2: Control and treatment group based on the cutoff
+Figure 1.4: Control and treatment group based on the cutoff
 </p>
 </div>
 <p>Comparing these two groups, however, is problematic. Students who did not receive the scholarship (the control group) are more likely to go to college even without the scholarship because of their income. Their enrollment is likely to remain higher than the enrollment of low-income students. This does not imply that the scholarship has no effect: it might be that in the absence of the treatment (i.e., without the scholarship), low-income students would have been even less likely to enroll to college.</p>
@@ -393,7 +412,7 @@ Figure 1.2: Control and treatment group based on the cutoff
 <div class="figure"><span id="fig:rdfigure3"></span>
 <img src="FIGURE/RegDisc/Picture3.png" alt="Treatment effect" width="60%" />
 <p class="caption">
-Figure 1.3: Treatment effect
+Figure 1.5: Treatment effect
 </p>
 </div>
 <blockquote>
@@ -422,7 +441,7 @@ Figure 1.3: Treatment effect
 <div class="figure"><span id="fig:dataset"></span>
 <img src="FIGURE/RegDisc/Picture4.png" alt="Regression discontinuity dataset" width="60%" />
 <p class="caption">
-Figure 1.4: Regression discontinuity dataset
+Figure 1.6: Regression discontinuity dataset
 </p>
 </div>
 <p>We can consider each coefficient of our equation <a href="#eq:RD">(1.1)</a> separately.</p>
@@ -438,7 +457,7 @@ Figure 1.4: Regression discontinuity dataset
 <div class="figure"><span id="fig:counterfactual"></span>
 <img src="FIGURE/RegDisc/Picture5.png" alt="Counterfactual" width="60%" />
 <p class="caption">
-Figure 1.5: Counterfactual
+Figure 1.7: Counterfactual
 </p>
 </div>
 <p>If we take our equation <a href="#eq:RD">(1.1)</a>, the counterfactual is obtained by assuming that the intervetion has not occured (Treatment = 0), so that Y is only predicted by its relationship with rating variable:</p>
@@ -872,7 +891,7 @@ plot( Attendance_c, Performance, cex=2,
 abline( v=0, col=&quot;red&quot;, lwd=2, lty=2 )
 
 # Plot our predicted values
-points( Attendance_c, predfit, col=&quot;black&quot;, lwd=5, pch = 20 )
+points( Attendance_c, predfit, col=&quot;black&quot;, cex=0.8, pch = 19 )
 
 ## Add a legend
 points( 10, 26, col=&quot;steelblue&quot;, pch=19, cex=2 )
@@ -891,7 +910,9 @@ text( 10, 20, &quot;Control group&quot;, col=&quot;darkred&quot;, pos=4 )</code>
 <br>
 The counterfactual represents the final exame grades, had the policy of mandatory attendance not been implemented. It’s the yellow group in the graph. Students in the treatment group would have performed worse without the policy. The yellow dots are - on average - in a lower position than the blue ones (which represent the score after the treatment).</p>
 <pre class="r"><code>## We create a new dataset where the variable Treatment is only equal to 0 as no student has been part of the intervention
-data2 &lt;- data.frame( Performance=data$Performance, Treatment=rep(0), Attendance_c=data$Attendance_c )
+data2 &lt;- data.frame( Performance=data$Performance, 
+                     Treatment=rep(0), 
+                     Attendance_c=data$Attendance_c )
 
 ## Based on our previous model we predict the final grades, had the intervention not occured
 predfit2 &lt;- predict( reg, data2 )
@@ -899,7 +920,7 @@ predfit2 &lt;- predict( reg, data2 )
 data2$predfit2 &lt;- predfit2
 
 ## We set a new color for representing the counterfactual
-counterfactual &lt;- adjustcolor(&quot;goldenrod1&quot;, alpha.f=0.2 )
+counterfactual &lt;- adjustcolor(&quot;darkorange2&quot;, alpha.f=0.2 )
 
 ## Plot the observed valies
 plot( Attendance_c, Performance, cex=2, 
@@ -908,7 +929,7 @@ plot( Attendance_c, Performance, cex=2,
       ylab=&quot;Final exam grade&quot;)
 
 # Plot a line at the cutoff
-abline( v=0, col = &quot;red&quot;, lwd = 2, lty = 2 )
+abline( v=0, col=&quot;red&quot;, lwd=2, lty=2 )
 
 # Plot the counterfactual
 # Note that we add a bit of noise in the data to facilitate visualization
@@ -918,12 +939,12 @@ points( Attendance_c[ Attendance_c &lt; 0 ],
 
 # Add a legend
 ## Add a legend
-points( 10, 26, col=&quot;steelblue&quot;, pch=19, cex=2 )
-text( 10, 26, &quot;Treatment group&quot;, col=&quot;steelblue&quot;, pos=4 )
-points( 10, 20, col=&quot;darkred&quot;, pch=19, cex=2 )
-text( 10, 20, &quot;Control group&quot;, col=&quot;darkred&quot;, pos=4 )
-points( 10, 14, col=&quot;goldenrod1&quot;, pch=19, cex=2 )
-text( 10, 14, &quot;Counterfactual&quot;, col=&quot;goldenrod1&quot;, pos=4 )</code></pre>
+points( 10, 20, col=&quot;steelblue&quot;, pch=19, cex=2 )
+text( 10, 20, &quot;Treatment group&quot;, col=&quot;steelblue&quot;, pos=4 )
+points( 10, 26, col=&quot;darkred&quot;, pch=19, cex=2 )
+text( 10, 26, &quot;Control group&quot;, col=&quot;darkred&quot;, pos=4 )
+points( 10, 14, col=&quot;darkorange2&quot;, pch=19, cex=2 )
+text( 10, 14, &quot;Counterfactual&quot;, col=&quot;darkorange2&quot;, pos=4 )</code></pre>
 <p><img src="p-060-reg-discontinuity_files/figure-html/unnamed-chunk-10-1.png" width="960" /></p>
 </div>
 </div>
@@ -1619,7 +1640,7 @@ Constant
 <h2><span class="header-section-number">3.3</span> Plotting results</h2>
 <p>As before we can plot the results on a graph, so that we can visualize the discontinuity. We plot results car accidents model.</p>
 <pre class="r"><code># We first predict the final exam grades based on our regression discontinuity model. 
-predfit = predict(reg2, data) 
+predfit &lt;- predict( reg2, data ) 
 
 # We set colors for the graph
 palette( c( adjustcolor( &quot;steelblue&quot;, alpha.f=1 ), 
@@ -1627,14 +1648,14 @@ palette( c( adjustcolor( &quot;steelblue&quot;, alpha.f=1 ),
 
 # To differently color the treatment and control group 
 # we need to create a new Treatment variable that where the Control group = 2. 
-data$Treatment2 = ifelse(data$Treatment==0,2,1)
+data$Treatment2 &lt;- ifelse(data$Treatment==0,2,1)
 
 # Plot our observed value
 plot(data$age_c, data$mva, col=data$Treatment2, pch=19, bty=&quot;n&quot;,
       xlab=&quot;Age (centered)&quot;, ylab=&quot;Car accidents&quot;,  cex=2)
 
 # Plot a line at the cutoff point
-abline(v=0, col = &quot;red&quot;, lwd = 2, lty = 2)
+abline( v=0, col=&quot;red&quot;, lwd=2, lty=2 )
 
 # Plot our predicted values
 points( data$age_c, predfit, col=&quot;black&quot;, lwd=5, pch = 20 )
@@ -1642,8 +1663,8 @@ points( data$age_c, predfit, col=&quot;black&quot;, lwd=5, pch = 20 )
 ## Add a legend
 points( 1.5, 36, col=&quot;steelblue&quot;, pch=19, cex=2 )
 text( 1.5, 36, &quot;Treatment group&quot;, col=&quot;steelblue&quot;, pos=4 )
-points( 1.5, 30, col=&quot;darkred&quot;, pch=19, cex=2 )
-text( 1.5, 30, &quot;Control group&quot;, col=&quot;darkred&quot;, pos=4 )</code></pre>
+points( 1.5, 33, col=&quot;darkred&quot;, pch=19, cex=2 )
+text( 1.5, 33, &quot;Control group&quot;, col=&quot;darkred&quot;, pos=4 )</code></pre>
 <p><img src="p-060-reg-discontinuity_files/figure-html/unnamed-chunk-16-1.png" width="960" /></p>
 </div>
 </div>

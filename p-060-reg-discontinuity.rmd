@@ -322,7 +322,7 @@ plot( Attendance_c, Performance, cex=2,
       ylab="Final exam grade")
 
 # Plot a line at the cutoff
-abline( v=0, col = "red", lwd = 2, lty = 2 )
+abline( v=0, col="red", lwd=2, lty=2 )
 
 # Plot the counterfactual
 # Note that we add a bit of noise in the data to facilitate visualization
@@ -469,7 +469,7 @@ plot(data$age_c, data$mva, col=data$Treatment2, pch=19, bty="n",
       xlab="Age (centered)", ylab="Car accidents",  cex=2)
 
 # Plot a line at the cutoff point
-abline(v=0, col <- "red", lwd = 2, lty = 2)
+abline( v=0, col="red", lwd=2, lty=2 )
 
 # Plot our predicted values
 points( data$age_c, predfit, col="black", lwd=5, pch = 20 )
