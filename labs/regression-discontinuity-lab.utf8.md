@@ -15,14 +15,10 @@ output:
 
 
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, message=F, warning=F, fig.width = 10, fig.pos = 'H')
-```
 
 
-```{r, echo=FALSE, results="hide"}
-library(stargazer)
-```
+
+
 
 # Overview 
 
@@ -36,7 +32,8 @@ Remember to:
 * Submit the r markdown file with all your codes. 
 * Bold your answers.
 
-```{r, echo = T}
+
+```r
 URL <- "https://raw.githubusercontent.com/DS4PS/pe4ps-textbook/master/labs/DATA/RegDisc_lab2.csv"
 data <- read.csv( URL, stringsAsFactors=F )
 ```
@@ -116,6 +113,6 @@ Examine the counterfactual.
 * **BQ4:** What is the model without the score variable testing? Explain the counterfactual. 
 
 
-```{css, echo=F}
+<style type="text/css">
 
-```
+</style>
