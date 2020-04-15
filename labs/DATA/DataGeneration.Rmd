@@ -25,8 +25,10 @@ install.packages("fastDummes", repos="https://cran.cnr.berkeley.edu")
 
 ```{r, echo=FALSE, results="hide"}
 
-library("scales")
-library("fastDummes")
+library( scales )
+library( fastDummes )
+library( dplyr )
+library( pander )
 
 ```
 
@@ -146,7 +148,7 @@ dat <- data.frame(y, x1, x2, x3, z)
 ```{r, eval = F}
 
 set.seed(650)
-Attendance1 = rbeta(1000, shape1 = 7, shape2 = 2,  ncp = 0)
+Attendance1 = rbeta( 1000, shape1 = 7, shape2 = 2,  ncp = 0 )
 Attendance = rescale(Attendance1, to = c(20,100))
 
 Treatment = Attendance
@@ -163,6 +165,9 @@ Performance = rescale(Y, to = c(0,100))
 data = as.data.frame(cbind(Performance, Treatment, Attendance, Attendance_c))
 
 ```
+
+
+
 
 ##SummerSchool (lab data)
 
@@ -193,7 +198,19 @@ data = as.data.frame(cbind(GPA_9, GPA_8, Treatment, STD_math_7, STD_math_8, STD_
 
 data$STD_math_c <- NULL
 
+d2 <- select( data, STD_math_7, STD_math_8, GPA_9, GPA_8 )
 ```
+
+```{r, eval=F}
+write.csv( data, "RegDisc_lab2.csv" )
+write.csv( d2, "regression-discontinuity-lab.csv", row.names=F )
+```
+
+
+```{r}
+head( d2 ) %>% pander()
+```
+
 
 # TIME SERIES 
 
