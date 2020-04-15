@@ -95,7 +95,7 @@ You propose to use a regression discontinuity method to analyze the impact of su
 Now prepare your data for the analysis:
 
 * **Q2a:** Write the formula for the regression discontinuity model with this data. (5 points)
-* **Q2b:** Create the new variables that you need: a Treatment variable and centered rating variable. (5 points)
+* **Q2b:** Create the 8th grade standardized test variable centered on the summer school cutoff score. (5 points)
 
 
 

@@ -173,36 +173,88 @@ data = as.data.frame(cbind(Performance, Treatment, Attendance, Attendance_c))
 
 ```{r, eval = F}
 
-set.seed(963)
+
+
+set.seed(964)
 STD_math_7 = rbeta(1000, shape1 = 7, shape2 = 2,  ncp = 0)
-STD_math_7 = rescale(STD_math_7, to = c(0, 100))
+STD_math_7 = rescale(STD_math_7, to = c(15, 100))
 
-STD_math_8 = rbeta(1000, shape1 = 11, shape2 = 2,  ncp = 0)
-STD_math_8 = rescale(STD_math_8, to = c(0, 100))
 
-Treatment = STD_math_8
-Treatment = ifelse(Treatment < 60, 1, 0)
+STD_math_8 <- STD_math_7 + rnorm(1000,0,3)
+# STD_math_8 = rbeta(1000, shape1 = 11, shape2 = 2,  ncp = 0)
+STD_math_8 = rescale( STD_math_8, to = c(0, 100) )
+
+
+x <- STD_math_7 + rnorm(1000,0,3)
+x[ x < 10 ] <- 10 
+x[ x > 100 ] <- 100
+x <- round(x,0)
+
+STD_math_8 <- x
+
+Treatment = ifelse( STD_math_8 < 60, 1, 0)
 
 STD_math_8c = STD_math_8 - 60
 
-err = rnorm(1000, 600, 100)
+err = rnorm( 1000, 600, 100 )
 
 GPA_8 = 13 + 52 * STD_math_7 + 2.1 * err
-
-GPA_9 = 15 + 183.5 * Treatment + 46 * STD_math_8c + 2.2 * err
-
-GPA_9 = rescale(GPA_9, to = c(0, 4))
 GPA_8 = rescale(GPA_8, to = c(0, 4))
 
-data = as.data.frame(cbind(GPA_9, GPA_8, Treatment, STD_math_7, STD_math_8, STD_math_8c))
+# GPA_9 = 15 + 183.5 * Treatment + 46 * STD_math_8c + 2.2 * err
+# GPA_9 = rescale(GPA_9, to = c(0, 4))
 
-data$STD_math_c <- NULL
+GPA_9 = GPA_8 + 0.2 * Treatment + rnorm( 1000, 0, 0.2 )
+GPA_9[ GPA_9 > 4 ] <- 4
 
-d2 <- select( data, STD_math_7, STD_math_8, GPA_9, GPA_8 )
+
+
+
+
+data = data.frame( GPA_8, GPA_9, Treatment, STD_math_7, STD_math_8, STD_math_8c ) 
+
+
+
+
+
+d2 <- select( data, STD_math_7, STD_math_8, GPA_8, GPA_9 )
+
 names( d2 ) <- c("math_7", "math_8", "gpa_8", "gpa_9" )
 
+d2$math_7 <- round( d2$math_7, 0 )
+d2$math_8 <- round( d2$math_8, 0 )
+d2$gpa_8 <- round( d2$gpa_8, 2 )
+d2$gpa_9 <- round( d2$gpa_9, 2 )
 
+head( d2 )
 ```
+
+
+```{r, eval=F}
+plot( d2$math_7, d2$gpa_8 )
+plot( d2$math_8, d2$gpa_9 )
+
+
+d2$treatment <- ifelse( d2$math_8 < 60, 1, 0 )
+
+summary( lm( gpa_9 ~ treatment + math_8, data=d2 ) )
+
+
+d3 <- select( d2, treatment, gpa_8 )
+names( d3 ) <- c("treat","gpa")
+d3$post <- 0
+
+d4 <- select( d2, treatment, gpa_9 )
+names( d4 ) <- c("treat","gpa")
+d4$post <- 1
+
+d5 <- rbind( d3, d4 )
+
+d5$treat.post <- d5$treat * d5$post
+
+summary( lm( gpa ~ treat + post + treat.post, data=d5 ) )
+```
+
 
 ```{r, eval=F}
 write.csv( data, "RegDisc_lab2.csv" )
@@ -213,6 +265,8 @@ write.csv( d2, "regression-discontinuity-lab.csv", row.names=F )
 ```{r}
 head( d2 ) %>% pander()
 ```
+
+
 
 
 # TIME SERIES 
