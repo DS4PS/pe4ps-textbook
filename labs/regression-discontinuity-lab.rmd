@@ -136,8 +136,8 @@ In this lab we have GPA data from before and after the treatment period (8th gra
 
 * **BQ2a:** To run the difference-in-difference model you need to stack the performance data. Create a subset of data with the 8th grade GPA and the treatment dummy. Add a post-treatment dummy coded 0 for all of these cases. Create another subset with 9th grade GPA and the treatment dummy. Add a post-treatment dummy coded 1 for all of these cases. Rename both GPA variables to "gpa", then stack these two data frames (try **rbind()** for "row bind"). Create your treat_x_post dummy.
 * **BQ2b** Run a difference-in-difference model and report your results. 
-* **BQ2c** Is the estimate of the program impact consistent with the RDD model? 
-* **BQ2d** Is the counterfactual for the treatment group without summer school consistent with the RDD data?
+* **BQ2c** Is the estimate of the program impact (**B3**) consistent with the RDD model? 
+* **BQ2d** Is the counterfactual for the treatment group without summer school (**B0+B1+B2**) consistent with the RDD data?
 
 
 ```{css, echo=F}
