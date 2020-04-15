@@ -1746,20 +1746,19 @@ summary {
 <p>For this lab you will use the <strong>regression-discontinuity-lab.csv</strong> dataset.</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" title="1">URL &lt;-<span class="st"> &quot;https://raw.githubusercontent.com/DS4PS/pe4ps-textbook/master/labs/DATA/regression-discontinuity-lab.csv&quot;</span></a>
 <a class="sourceLine" id="cb1-2" title="2">data &lt;-<span class="st"> </span><span class="kw">read.csv</span>( URL, <span class="dt">stringsAsFactors=</span>F )</a></code></pre></div>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" title="1"><span class="kw">head</span>( data ) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">pander</span>()</a></code></pre></div>
-<table style="width:60%;">
+<table style="width:49%;">
 <colgroup>
-<col width="18%"></col>
-<col width="18%"></col>
+<col width="12%"></col>
+<col width="12%"></col>
 <col width="11%"></col>
 <col width="12%"></col>
 </colgroup>
 <thead>
 <tr class="header">
-<th align="center">STD_math_7</th>
-<th align="center">STD_math_8</th>
-<th align="center">GPA_9</th>
-<th align="center">GPA_8</th>
+<th align="center">math_7</th>
+<th align="center">math_8</th>
+<th align="center">gpa_8</th>
+<th align="center">gpa_9</th>
 </tr>
 </thead>
 <tbody>
@@ -1817,20 +1816,20 @@ summary {
 </thead>
 <tbody>
 <tr class="odd">
-<td>STD_math_7</td>
-<td>Standardized math score in 7th-grade, from 0 to 100</td>
+<td>math_7</td>
+<td>Score on standardized math exam at the end of 7th-grade, from 0 to 100</td>
 </tr>
 <tr class="even">
-<td>GPA_8</td>
-<td>Math GPA at the end of 8th-grade (before summer school), from 0 to 4</td>
+<td>gpa_8</td>
+<td>Math GPA during the 8th-grade academic year (prior to summer school), from 0 to 4</td>
 </tr>
 <tr class="odd">
-<td>STD_math_8</td>
-<td>Standardized math scores in 8th-grade, from 0 to 100</td>
+<td>math_8</td>
+<td>Score on standardized math exam at the end of 8th-grade, from 0 to 100</td>
 </tr>
 <tr class="even">
-<td>GPA_9</td>
-<td>Math GPA at the end of 9th-grade (after summer school), from 0 to 4</td>
+<td>gpa_9</td>
+<td>Math GPA during the 9th-grade academic year (following summer school), from 0 to 4</td>
 </tr>
 </tbody>
 </table>

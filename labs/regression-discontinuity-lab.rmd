@@ -59,7 +59,7 @@ URL <- "https://raw.githubusercontent.com/DS4PS/pe4ps-textbook/master/labs/DATA/
 data <- read.csv( URL, stringsAsFactors=F )
 ```
 
-```{r}
+```{r, echo=F}
 head( data ) %>% pander()
 ```
 
@@ -71,10 +71,10 @@ The dataset that the school principal provides you contains four variables:
 
  **Variable name   **   | **Description    **                                                                                          
 ----------------------- | ------------------------------------------------------------------------------------------------------------
-STD_math_7              |Standardized math score in 7th-grade, from 0 to 100                                                                     
-GPA_8                   |Math GPA at the end of 8th-grade (before summer school), from 0 to 4
-STD_math_8              |Standardized math scores in 8th-grade, from 0 to 100                                                                     
-GPA_9                   |Math GPA at the end of 9th-grade (after summer school), from 0 to 4
+math_7              | Score on standardized math exam at the end of 7th-grade, from 0 to 100                                                                     
+gpa_8                   | Math GPA during the 8th-grade academic year (prior to summer school), from 0 to 4
+math_8              | Score on standardized math exam at the end of 8th-grade, from 0 to 100                                                                     
+gpa_9                   | Math GPA during the 9th-grade academic year (following summer school), from 0 to 4
 
 You propose to use a regression discontinuity method to analyze the impact of summer school on students' grades.
 
