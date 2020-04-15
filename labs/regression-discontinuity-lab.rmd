@@ -16,17 +16,17 @@ output:
 
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, message=F, warning=F, fig.width = 10, fig.pos = 'H')
+knitr::opts_chunk$set( echo = TRUE, message=F, warning=F, fig.width = 10, fig.pos = 'H' )
 ```
 
 
 ```{r, echo=FALSE, results="hide"}
-library(stargazer)
+library( stargazer )
+library( dplyr )
+library( pander )
 ```
 
 # Overview 
-
-For this lab you need to upload the RegDisc_lab data available in the class R package. 
 
 There are **4 sets of questions** to be answered. You can get up to 100 points + bonus questions. Points are indicated next to each question. 
 
@@ -36,10 +36,6 @@ Remember to:
 * Submit the r markdown file with all your codes. 
 * Bold your answers.
 
-```{r, echo = T}
-URL <- "https://raw.githubusercontent.com/DS4PS/pe4ps-textbook/master/labs/DATA/RegDisc_lab2.csv"
-data <- read.csv( URL, stringsAsFactors=F )
-```
 
 
 ## The policy problem
@@ -52,11 +48,24 @@ Summer school programs are designed to help students [improve their reading and 
 For this lab, we are interested in testing the following:
 
 > **Hypothesis**: 
-> Students who attend summer school will report higher grades in spring. 
+> Students who attend summer school will achieve higher grades the following year. 
 
 ## Data
 
-Data were collected among 500 students in a US public middle school. Students participated in the summer school program at the end of the 8th-grade (end of middle school) if they had a standardized math score lower than 60. We want to understand whether attending the summer school has an affect on the math GPA at the of the 9th-grade.
+For this lab you will use the **regression-discontinuity-lab.csv** dataset. 
+
+```{r, echo = T}
+URL <- "https://raw.githubusercontent.com/DS4PS/pe4ps-textbook/master/labs/DATA/regression-discontinuity-lab.csv"
+data <- read.csv( URL, stringsAsFactors=F )
+```
+
+```{r}
+head( data ) %>% pander()
+```
+
+The synthetic data contains observations on 1,000 high school students from a US public school system. Students that failed to demonstrate what the district deemed to be mathematical foundations necessary to be successful in high school were required to participate in a summer school program after 8th grade before their first year in high schoo (9th grade). A score of 60 or above on the 8th grade standardized math exam was deemed competent, a score below 60 resulted in summer school. 
+
+We want to understand whether attending summer school district improved student performance in math, measured by student math GPAs at the end of 9th-grade.
 
 The dataset that the school principal provides you contains four variables: 
 

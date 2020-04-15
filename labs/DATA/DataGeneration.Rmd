@@ -199,6 +199,9 @@ data = as.data.frame(cbind(GPA_9, GPA_8, Treatment, STD_math_7, STD_math_8, STD_
 data$STD_math_c <- NULL
 
 d2 <- select( data, STD_math_7, STD_math_8, GPA_9, GPA_8 )
+names( d2 ) <- c("math_7", "math_8", "gpa_8", "gpa_9" )
+
+
 ```
 
 ```{r, eval=F}

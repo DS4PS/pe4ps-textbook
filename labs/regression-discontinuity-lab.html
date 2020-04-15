@@ -1723,7 +1723,6 @@ summary {
 
 <div id="overview" class="section level1">
 <h1>Overview</h1>
-<p>For this lab you need to upload the RegDisc_lab data available in the class R package.</p>
 <p>There are <strong>4 sets of questions</strong> to be answered. You can get up to 100 points + bonus questions. Points are indicated next to each question.</p>
 <p>Remember to:</p>
 <ul>
@@ -1731,8 +1730,6 @@ summary {
 <li>Submit the r markdown file with all your codes.</li>
 <li>Bold your answers.</li>
 </ul>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" title="1">URL &lt;-<span class="st"> &quot;https://raw.githubusercontent.com/DS4PS/pe4ps-textbook/master/labs/DATA/RegDisc_lab2.csv&quot;</span></a>
-<a class="sourceLine" id="cb1-2" title="2">data &lt;-<span class="st"> </span><span class="kw">read.csv</span>( URL, <span class="dt">stringsAsFactors=</span>F )</a></code></pre></div>
 <div id="the-policy-problem" class="section level2">
 <h2>The policy problem</h2>
 <blockquote>
@@ -1741,12 +1738,71 @@ summary {
 <p>Summer school programs are designed to help students <a href="https://www.wallacefoundation.org/knowledge-center/documents/an-analysis-of-the-effects-of-an-academic-summer-program-for-middle-school-students.pdf">improve their reading and math ability</a>. They are generallly <a href="https://digitalcommons.nl.edu/cgi/viewcontent.cgi?article=1234&amp;context=diss">dedicated to students who have not yet achieved the skills required by the next level</a>. There are, however, mixed evidence on <a href="https://www.npr.org/sections/ed/2014/07/07/323659124/what-we-dont-know-about-summer-school">whether summer school works</a>.</p>
 <p>For this lab, we are interested in testing the following:</p>
 <blockquote>
-<p><strong>Hypothesis</strong>: Students who attend summer school will report higher grades in spring.</p>
+<p><strong>Hypothesis</strong>: Students who attend summer school will achieve higher grades the following year.</p>
 </blockquote>
 </div>
 <div id="data" class="section level2">
 <h2>Data</h2>
-<p>Data were collected among 500 students in a US public middle school. Students participated in the summer school program at the end of the 8th-grade (end of middle school) if they had a standardized math score lower than 60. We want to understand whether attending the summer school has an affect on the math GPA at the of the 9th-grade.</p>
+<p>For this lab you will use the <strong>regression-discontinuity-lab.csv</strong> dataset.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" title="1">URL &lt;-<span class="st"> &quot;https://raw.githubusercontent.com/DS4PS/pe4ps-textbook/master/labs/DATA/regression-discontinuity-lab.csv&quot;</span></a>
+<a class="sourceLine" id="cb1-2" title="2">data &lt;-<span class="st"> </span><span class="kw">read.csv</span>( URL, <span class="dt">stringsAsFactors=</span>F )</a></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" title="1"><span class="kw">head</span>( data ) <span class="op">%&gt;%</span><span class="st"> </span><span class="kw">pander</span>()</a></code></pre></div>
+<table style="width:60%;">
+<colgroup>
+<col width="18%"></col>
+<col width="18%"></col>
+<col width="11%"></col>
+<col width="12%"></col>
+</colgroup>
+<thead>
+<tr class="header">
+<th align="center">STD_math_7</th>
+<th align="center">STD_math_8</th>
+<th align="center">GPA_9</th>
+<th align="center">GPA_8</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">76.64</td>
+<td align="center">86.48</td>
+<td align="center">3.127</td>
+<td align="center">2.892</td>
+</tr>
+<tr class="even">
+<td align="center">32.75</td>
+<td align="center">84.79</td>
+<td align="center">2.761</td>
+<td align="center">1.067</td>
+</tr>
+<tr class="odd">
+<td align="center">65.42</td>
+<td align="center">57.96</td>
+<td align="center">2.17</td>
+<td align="center">2.452</td>
+</tr>
+<tr class="even">
+<td align="center">19</td>
+<td align="center">42.02</td>
+<td align="center">1.31</td>
+<td align="center">0.5653</td>
+</tr>
+<tr class="odd">
+<td align="center">63.56</td>
+<td align="center">68.7</td>
+<td align="center">2.818</td>
+<td align="center">2.709</td>
+</tr>
+<tr class="even">
+<td align="center">40.79</td>
+<td align="center">53.01</td>
+<td align="center">1.923</td>
+<td align="center">1.515</td>
+</tr>
+</tbody>
+</table>
+<p>The synthetic data contains observations on 1,000 high school students from a US public school system. Students that failed to demonstrate what the district deemed to be mathematical foundations necessary to be successful in high school were required to participate in a summer school program after 8th grade before their first year in high schoo (9th grade). A score of 60 or above on the 8th grade standardized math exam was deemed competent, a score below 60 resulted in summer school.</p>
+<p>We want to understand whether attending summer school district improved student performance in math, measured by student math GPAs at the end of 9th-grade.</p>
 <p>The dataset that the school principal provides you contains four variables:</p>
 <table>
 <colgroup>
