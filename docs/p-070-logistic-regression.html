@@ -1,0 +1,2483 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+
+<title>Logit model</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script src="site_libs/navigation-1.1/codefolding.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+<link rel="stylesheet" href="assets\custom.css" type="text/css" />
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #ffffff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+
+
+<div class="navbar navbar-inverse  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">HOME</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="p-020-time-series.html">TimeSeries</a>
+</li>
+<li>
+  <a href="p-030-diff-in-diff.html">Diff-in-Diff</a>
+</li>
+<li>
+  <a href="p-040-fixed-effects.html">FixedEffects</a>
+</li>
+<li>
+  <a href="p-050-instrumental-variables.html">InstrumentalVariables</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="https://github.com/DS4PS/pe4ps-textbook">
+    <span class="fa fa-github fa-2x"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+<div class="btn-group pull-right">
+<button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu" style="min-width: 50px;">
+<li><a id="rmd-show-all-code" href="#">Show All Code</a></li>
+<li><a id="rmd-hide-all-code" href="#">Hide All Code</a></li>
+</ul>
+</div>
+
+
+
+<h1 class="title toc-ignore">Logit model</h1>
+
+</div>
+
+<div id="TOC">
+<ul>
+<li><a href="#the-key-concept"><span class="toc-section-number">1</span> The key concept</a></li>
+<li><a href="#linear-probability-model-lpm"><span class="toc-section-number">2</span> Linear probability model (LPM)</a><ul>
+<li><a href="#limitations-of-the-lpm"><span class="toc-section-number">2.1</span> Limitations of the LPM</a></li>
+</ul></li>
+<li><a href="#the-logit-model"><span class="toc-section-number">3</span> The logit model</a><ul>
+<li><a href="#maximum-likelihood-estimation"><span class="toc-section-number">3.1</span> Maximum Likelihood Estimation</a><ul>
+<li><a href="#an-example"><span class="toc-section-number">3.1.1</span> An example</a></li>
+</ul></li>
+<li><a href="#interpretation"><span class="toc-section-number">3.2</span> Interpretation</a><ul>
+<li><a href="#log-odds"><span class="toc-section-number">3.2.1</span> Log odds</a></li>
+<li><a href="#probabilities"><span class="toc-section-number">3.2.2</span> Probabilities</a></li>
+<li><a href="#marginal-effects"><span class="toc-section-number">3.2.3</span> Marginal effects</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#replication"><span class="toc-section-number">4</span> Replication</a><ul>
+<li><a href="#odds-ratio"><span class="toc-section-number">4.1</span> Odds ratio</a></li>
+<li><a href="#probabilities-1"><span class="toc-section-number">4.2</span> Probabilities</a></li>
+<li><a href="#marginal-effects-1"><span class="toc-section-number">4.3</span> Marginal effects</a></li>
+<li><a href="#summary"><span class="toc-section-number">4.4</span> Summary</a></li>
+<li><a href="#additional-resources"><span class="toc-section-number">4.5</span> Additional resources</a></li>
+</ul></li>
+</ul>
+</div>
+
+<p><strong>Packages</strong></p>
+<p>The following packages will be used in the lecture:</p>
+<ul>
+<li><strong>stargazer</strong> for nice tables</li>
+<li><strong>sandwich</strong> for robust standard errors</li>
+<li><strong>margins</strong> for calculating marginal effects in logit models</li>
+<li><strong>car</strong> and <strong>lmtest</strong> are support packages to attach robust SE to coefficients</li>
+<li><strong>wooldridge</strong> contains econometric datasets</li>
+</ul>
+<pre class="r"><code>install.packages( &quot;stargazer&quot; )
+install.packages( &quot;car&quot; )
+install.packages( &quot;wooldridge&quot; )
+install.packages( &quot;sandwich&quot; )
+install.packages( &quot;lmtest&quot; )
+install.packages( &quot;margins&quot; )
+install.packages( &quot;scales&quot; )</code></pre>
+<pre class="r"><code>library( &quot;stargazer&quot; )
+library( &quot;car&quot; )
+library( &quot;wooldridge&quot; )
+library( &quot;sandwich&quot; )
+library( &quot;lmtest&quot; )
+library( &quot;margins&quot; )
+library( &quot;scales&quot; )
+library( pander )</code></pre>
+<p><strong>What you will learn</strong></p>
+<ul>
+<li>How do you build a regression model when your outcome is binary (yes/no or 1/0)?</li>
+<li>When is a linear probability model appropriate?</li>
+<li>What is the difference between a linear probability model and a logit model?</li>
+<li>Why do we use a logit model?</li>
+<li>How do we interpret results from a logit model?</li>
+<li>What is the difference between odds ratios, probabilities, log odds and marginal effects?</li>
+</ul>
+<div id="the-key-concept" class="section level1">
+<h1><span class="header-section-number">1</span> The key concept</h1>
+<p>So far we have been working with continuous, normally distributed variables, as the one represented on the left in graph <a href="#fig:distr">1.1</a>. A normally distributed variable has a distribution similar to a bell.</p>
+<p>In this lecture we are going to look at <strong>binary variables</strong>. Binary variables can assume only two values, conventionally, 0 and 1. Examples of binary variables are:</p>
+<ul>
+<li>participation into a policy program (0 = No, 1 = Yes)</li>
+<li>being in the treatement group (0 = No, 1 = Yes)</li>
+<li>occurence of an event (0 = Not occured, 1 = Occured)</li>
+<li>attending college (0 = No, 1 = Yes), and so on.</li>
+</ul>
+<p>The distribution of a binary variable is fundamentally different than the distribution of a continuous variable as values are equal only to 0 or 1. A binary variable is represented in the right side of graph<a href="#fig:distr">1.1</a>.</p>
+<pre class="r"><code>par( mfrow = c( 1,2 ) )  
+
+plot( density( rnorm( 1000, 1, 0 ) ), xlab = &quot;Values&quot;, lwd = 2, col = &quot;darkred&quot; )
+
+X &lt;- rbinom( 500, 1, 0.3 )
+
+barplot( table( X ) )</code></pre>
+<div class="figure"><span id="fig:distr"></span>
+<img src="p-070-logistic-regression_files/figure-html/distr-1.png" alt="Distribution of a normal variable" width="960" />
+<p class="caption">
+Figure 1.1: Distribution of a normal variable
+</p>
+</div>
+<p>Models with binary variables aim to calculate the likelihood that ‘something’ (an event, participation into a program…) will occur (=1) versus the probability that it will not occur (=0).</p>
+</div>
+<div id="linear-probability-model-lpm" class="section level1">
+<h1><span class="header-section-number">2</span> Linear probability model (LPM)</h1>
+<div class="figure" style="text-align: center"><span id="fig:image"></span>
+<img src="FIGURE/Logit/SupremeCourt.jpg" alt="US Supreme Courte, Washington DC" width="80%" />
+<p class="caption">
+Figure 2.1: US Supreme Courte, Washington DC
+</p>
+</div>
+<p>We start with a simple example to illustrate the <strong>Linear Probability Model</strong>. We want to estimate the probability that a student will be admitted to law school based on <a href="https://www.usnews.com/education/blogs/law-admissions-lowdown/2012/11/12/learn-the-5-deciding-factors-in-law-school-admissions">some key variables</a>. Admission to law school can be challenging, although there are claims that the <a href="https://www.nytimes.com/2015/10/27/business/dealbook/study-cites-lower-standards-in-law-school-admissions.html">average score for admission has decreased</a> over the past years.</p>
+<pre class="r"><code>df &lt;- read.csv( &quot;data/admissions.csv&quot; )</code></pre>
+<p>Our variables include:</p>
+<table>
+<thead>
+<tr class="header">
+<th><strong>Variable name </strong></th>
+<th><strong>Description </strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(\text{LSAT}\)</span></td>
+<td>LSAT score (from 120 to 180)</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\text{Essay}\)</span></td>
+<td>Essays score (from 1 to 365)</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(\text{GPA}\)</span></td>
+<td>Average GPA (from 0 to 5)</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\text{Admission}\)</span></td>
+<td>The student has been admitted (=1) or not (=0)</td>
+</tr>
+</tbody>
+</table>
+<p>We can have a look at the summary statistics for each variable.</p>
+<pre class="r"><code>stargazer( df,  
+           type = &quot;html&quot;, 
+           omit.summary.stat = c(&quot;p25&quot;, &quot;p75&quot;),
+           digits = 2 )</code></pre>
+<table style="text-align:center">
+<tr>
+<td colspan="6" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Statistic
+</td>
+<td>
+N
+</td>
+<td>
+Mean
+</td>
+<td>
+St. Dev.
+</td>
+<td>
+Min
+</td>
+<td>
+Max
+</td>
+</tr>
+<tr>
+<td colspan="6" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Admission
+</td>
+<td>
+1,000
+</td>
+<td>
+0.61
+</td>
+<td>
+0.49
+</td>
+<td>
+0
+</td>
+<td>
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+LSAT
+</td>
+<td>
+1,000
+</td>
+<td>
+152.19
+</td>
+<td>
+9.90
+</td>
+<td>
+120.00
+</td>
+<td>
+180.00
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Essay
+</td>
+<td>
+1,000
+</td>
+<td>
+53.16
+</td>
+<td>
+16.54
+</td>
+<td>
+1.00
+</td>
+<td>
+100.00
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+GPA
+</td>
+<td>
+1,000
+</td>
+<td>
+2.37
+</td>
+<td>
+0.81
+</td>
+<td>
+0.00
+</td>
+<td>
+5.00
+</td>
+</tr>
+<tr>
+<td colspan="6" style="border-bottom: 1px solid black">
+</td>
+</tr>
+</table>
+<p>We expect that students with higher scores will be more likely to be admitted (i.e., they will have a higher probability of admission).</p>
+<p>In previous lectures we used OLS models to estimate the relationship between an outcome variable and some independent variables. We can use a similar approach with a binary variable. This model is called the <em>linear probability model</em>.</p>
+<p><span class="math display" id="eq:LPM">\[\begin{equation} 
+\text{Y} = \beta_0 + \beta_1*LSAT + \beta_1*Essay + \beta_1*GPA + \text{e}
+  \tag{2.1}
+\end{equation}\]</span></p>
+<p>As before, we use the <em>lm</em> function to estimate our coefficients. Results are summarized in the table below.</p>
+<pre class="r"><code># We use the &quot;lm&quot; function to estimate the linear probability model with an OLS estimator.
+LPM &lt;- lm( Admission ~ LSAT + Essay + GPA, data=df )
+
+stargazer( LPM,
+           type = &quot;html&quot;, digits = 3,
+           intercept.bottom = FALSE,
+           covariate.labels = c(&quot;Constant&quot;, &quot;LSAT&quot;, &quot;Essay&quot;, &quot;GPA&quot;),
+           omit.stat = c(&quot;ser&quot;,&quot;f&quot;,&quot;rsq&quot;,&quot;adj.rsq&quot;) )</code></pre>
+<table style="text-align:center">
+<tr>
+<td colspan="2" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+<em>Dependent variable:</em>
+</td>
+</tr>
+<tr>
+<td>
+</td>
+<td colspan="1" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+Admission
+</td>
+</tr>
+<tr>
+<td colspan="2" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Constant
+</td>
+<td>
+-3.166<sup>***</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.209)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+LSAT
+</td>
+<td>
+0.019<sup>***</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.001)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Essay
+</td>
+<td>
+0.010<sup>***</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.001)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+GPA
+</td>
+<td>
+0.132<sup>***</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.016)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td colspan="2" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Observations
+</td>
+<td>
+1,000
+</td>
+</tr>
+<tr>
+<td colspan="2" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+<em>Note:</em>
+</td>
+<td style="text-align:right">
+<sup><em></sup>p&lt;0.1; <sup><strong></sup>p&lt;0.05; <sup></strong></em></sup>p&lt;0.01
+</td>
+</tr>
+</table>
+<p>Results from a LPM can be interpreted in the same way we interpret results from an OLS model. However, in a LPM we refer to the outcome in terms of probability. For instance:</p>
+<ul>
+<li>for each one-unit increase in the LSAT score, the probability of being admitted to law school increases of 0.019;</li>
+<li>for a one-unit increase in the Essay score, the probability of being admitted to law school increases of 0.010;</li>
+<li>for one-unit increase in the GPA, the probability of being admitted to law school increases of 0.132.</li>
+</ul>
+<div id="limitations-of-the-lpm" class="section level2">
+<h2><span class="header-section-number">2.1</span> Limitations of the LPM</h2>
+<p>Yet there are some limitations when using an OLS estimator with a binary variable.</p>
+<ol style="list-style-type: decimal">
+<li>First, the model suffers from <em>heteroskedasticity</em>. Heteroskedasticity occurs when the variance of the error terms is not constant but varies for different values of Y. We can see this graphically by plotting the residuals against the predicted values. If the model was homoskedastic, we would expect the residuals to be randomly distributed.</li>
+</ol>
+<pre class="r"><code># Save the residuals
+res &lt;- LPM$residuals
+
+# Predicted values based on the linear probability model
+yhat &lt;- predict( LPM )
+
+# Plot residuals against the predicted value. 
+# If the model is homoskedastic, we would 
+# observe a random distribution. If the model 
+# is heteroskedastic, we would observe some 
+# kind of correlation between residuals and 
+# predicted values.
+plot( yhat, res, 
+      xlab = &quot;Predicted values&quot;, 
+      ylab = &quot;Residuals&quot; )</code></pre>
+<div class="figure"><span id="fig:residuals"></span>
+<img src="p-070-logistic-regression_files/figure-html/residuals-1.png" alt="Residuals vs fitted values" width="960" />
+<p class="caption">
+Figure 2.2: Residuals vs fitted values
+</p>
+</div>
+<p>To overcome heteroskedasticity, we can use <em>robust standard errors</em> . Robust standard errors allow the variance of the residuals to be difference across observations and “fix” the standard errors accordingly.</p>
+<pre class="r"><code># Note: you need to install the lmtest and 
+# sandwich packages to run the following line. 
+
+# Calculate robust standard errors
+coeftest( LPM, vcov = vcovHC(LPM, type=&quot;HC1&quot;) )</code></pre>
+<pre><code>## 
+## t test of coefficients:
+## 
+##                Estimate  Std. Error  t value  Pr(&gt;|t|)    
+## (Intercept) -3.16600667  0.17342135 -18.2562 &lt; 2.2e-16 ***
+## LSAT         0.01936839  0.00114585  16.9031 &lt; 2.2e-16 ***
+## Essay        0.00968187  0.00071566  13.5286 &lt; 2.2e-16 ***
+## GPA          0.13214028  0.01498497   8.8182 &lt; 2.2e-16 ***
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<p>In the previous example, the standard errors change little after we use a robust estimator. For GPA, the standard error decreases from 0.016 to 0.0149. The essay standard error decreases from 0.001 to 0.0006.</p>
+<ol start="2" style="list-style-type: decimal">
+<li>Second, a LPM assumes a linear relationships between Y and the independent variables. A linear relationship might be a good approximation of the “true” relationship when the dependent variable is continuous but it is not necessarily a good approximation when the dependent variable is binary.</li>
+</ol>
+<p>We can see this in practice. When using an OLS estimator with a binary dependent variable, it’s like grouping your DVs based on a independent variable and calculating the average probability for each group.</p>
+<p>This process is easily understood with an example. Let’s think about our previous model and see what happens when we predict the probabilities of being admitted to a law school based on LSAT scores.</p>
+<p>First, we order our observations by LSAT score and take the 50 students with the lowest LSAT score. Their average LSAT score is 131.44 while their average probability of being admitted to law school is equal to 0.16. The probability of being admitted to law school is simply the average number of students admitted on the total number of students in the group.</p>
+<pre class="r"><code># We order our observation by LSAT score
+df &lt;- df[ order( df$LSAT ), ] 
+
+# We can calculate the LSAT mean for the 50 students with the lowest score. 
+mean( df$LSAT[ 1:50 ] )</code></pre>
+<pre><code>## [1] 131.4376</code></pre>
+<pre class="r"><code># We calculate the mean of Admission, which represents the probability of being admitted to law school for the 50 students with the lowest LSAT score. 
+mean( df$Admission[ 1:50 ] )</code></pre>
+<pre><code>## [1] 0.26</code></pre>
+<p>We can repeat the process and take the average probability for the 51st observation to the 100th observations. The probability of being admitted to law school is equal to 0.34, while the average LSAT score has also increased to 137.54. This suggests a positive relationship between LSAT and Admission.</p>
+<pre class="r"><code># We can calculate the LSAT mean for the 51st-100th students in the LSAT score ranking. 
+mean( df$LSAT[ 51:100 ] )</code></pre>
+<pre><code>## [1] 137.5416</code></pre>
+<pre class="r"><code># We calculate the mean of Admission, which represents the probability of being admitted to law school for the 51st-100th students in the LSAT score ranking. 
+mean( df$Admission[ 51:100 ] )</code></pre>
+<pre><code>## [1] 0.2</code></pre>
+<p>We can apply the same process for all groups of 50 observations (101st-150th, 151st-200th, and so on) and plot the average LSAT score of each group against the admission probability for that same group. We also add the regression line for a linear probability model including only the LSAT score.</p>
+<pre class="r"><code># We order our observation by LSAT score
+df &lt;- df[order(df$LSAT),] 
+
+# We create groups of 50 observation. 
+df$d &lt;- rep( 1:20, each=50 )
+
+# Average LSAT score for each group. 
+# Note that the LSAT variable is positioned 
+# in the second column of the df dataset, 
+# so it can be indicated at df[, 2].
+gr_mean2 &lt;- aggregate( df[,&quot;LSAT&quot;], list(df$d), mean )
+
+# We calculate the probability of being admitted to law school. The Admission variable is in the first column of the dataset.
+gr_mean &lt;- aggregate(df[, 1], list(df$d), mean)
+
+# We plot the average LSAT score against the group average probability of being admitted to law school. 
+plot( df$LSAT, df$Admission, 
+      col = adjustcolor(&quot;gray&quot;, alpha.f= 0.3), 
+      pch=19, bty=&quot;n&quot;, cex = 2, 
+      xlab=&quot;LSAT&quot;, ylab=&quot;Admission into law school&quot; )
+points( gr_mean2$x, gr_mean$x, col = &quot;red&quot;, lwd = 4) #Add points to the graph
+abline(lm(df$Admission ~ df$LSAT), col = &quot;darkred&quot;, lwd = 3) #Add a regression line</code></pre>
+<p><img src="p-070-logistic-regression_files/figure-html/unnamed-chunk-11-1.png" width="960" /></p>
+<p>We can observe that:</p>
+<ul>
+<li><p>the OLS line does a pretty good job in approximating the average probabilities, suggesting that the LPM model is a valid estimation of the probability to be admitted into law school. This is especially true for the observations in the middle.</p></li>
+<li><p>However, the OLS ‘misses’ observations that are at the extreme points - when the LSAT scores are particularly high or low, the OLS line does not approximate the probability very well.</p></li>
+<li><p>Because of this last point, several persons prefer a logit model over a LPM. In a logit model, we move from a linear relationship between X and Y to a s-shaped relationship (see <a href="#the-logit-model">3</a>).</p></li>
+</ul>
+<ol start="3" style="list-style-type: decimal">
+<li>Third, while we interpret the results of LPM in terms of probabilities, the predicted values are not constrained between 0 and 1. As a result, we could obtain negative predicted values or predicted values that are greater than 1. You can look at the descriptive statistics of yhat (the predicted values) of the previous LPM.</li>
+</ol>
+<p>Values range from -0.015 to 1.30. But a probability greater than 1 is not realistic. This is another reason why most people prefer a logit model. A logit model will contraint the outcome variable to range from 0 to 1.</p>
+<pre class="r"><code>summary(yhat)</code></pre>
+<pre><code>##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+## -0.1975  0.4331  0.5960  0.6090  0.7935  1.3678</code></pre>
+</div>
+</div>
+<div id="the-logit-model" class="section level1">
+<h1><span class="header-section-number">3</span> The logit model</h1>
+<p>A logistic (or logit) model relies on a S-shaped logistic function to estimate the likelihood of an event to occur.</p>
+<p>We can see the S-shaped logistic function in the graph below. Again we plot LSAT scores against the probability of being admitted to law school. We also add the group average probabilities that we estimate in the previous section.</p>
+<p>But, instead than plotting the regression line of the LPM, we plot the s-shape function of a logit model.</p>
+<p>While there are not big differences in the middle of the graph, the s-shaped function better approximates the values at the two extremes (very high or very low LSAT scores).</p>
+<pre class="r"><code># Logit model
+log &lt;- glm( Admission ~ LSAT, data = df, family = &quot;binomial&quot;)
+
+# Plot of LSAT scores against the probability of being admitted to law school
+plot(df$LSAT, df$Admission, col = adjustcolor(&quot;gray&quot;, alpha.f= 0.3), pch=19, bty=&quot;n&quot;, cex = 2, xlab=&quot;LSAT&quot;, ylab=&quot;Admission into law school&quot;)
+points(gr_mean2$x, gr_mean$x, col = &quot;red&quot;, lwd = 4) #Group averages
+
+# Logit s-shaped curve
+curve( predict( log, data.frame(LSAT = x), type = &quot;response&quot;), 
+      lty = 1, lwd = 2, col = &quot;blue&quot;,                            
+      add = TRUE)</code></pre>
+<div class="figure"><span id="fig:binaryfunction"></span>
+<img src="p-070-logistic-regression_files/figure-html/binaryfunction-1.png" alt="Binary function" width="960" />
+<p class="caption">
+Figure 3.1: Binary function
+</p>
+</div>
+<div id="maximum-likelihood-estimation" class="section level2">
+<h2><span class="header-section-number">3.1</span> Maximum Likelihood Estimation</h2>
+<p>In order to utilize a s-shaped function, we need to move from an OLS model to a Maximum Likelihood estimator. It is beyond the scope of this lecture to enter into detailes about maximum likelihood estimation. We present only some key points:</p>
+<ol style="list-style-type: decimal">
+<li>The Maximum Likelihood (ML) is an estimation method (like OLS).</li>
+</ol>
+<p>An estimation method is a statistical technique that helps us to find a set of parameters (the coefficients) generating the data.</p>
+<ol start="2" style="list-style-type: decimal">
+<li>The ML estimator requires assumptions about the distribution function - in other words, it wants to know the nature of the process that generated the data.</li>
+</ol>
+<p>In the case of a binary variable, we assume that the generation process follows an S-shaped curve as the one we plotted in figure <a href="#fig:binaryfunction">3.1</a> instead than a linear curve as in the OLS model.</p>
+<ol start="3" style="list-style-type: decimal">
+<li>Once we decide a distribution function, ML tries to find the most likely values (our coefficients) that would explain the data (the outcome variable) given our distribution function.</li>
+</ol>
+<p>The ML estimator utilizes an iterative process - in simple words, it tries several combination of values until it finds the one that gets closer to the real data. The output is a set of a coefficients that predict our dependent variable.</p>
+<p>When using a statistical software, these values are searched by various algorithms.</p>
+<ol start="4" style="list-style-type: decimal">
+<li>At the end of the process, the ML estimator returns coefficients, standard errors, and t-test as an OLS model. Moreover, we get a likelihood function which measures the probability of observing our dependent variable values given our chosen set of coefficients. As you might imagine, the scope of MLE is to maximize the likelihood function.</li>
+</ol>
+<div id="an-example" class="section level3">
+<h3><span class="header-section-number">3.1.1</span> An example</h3>
+<p>The Maximum Likelihood is easy to implement. The <em>glm</em> function in R utilizes a Maximum Likelihood Estimator to calculate the coefficients. We can use the same data of the LPM (see @ref(linear-probability-model-(lpm))) to run a logit model predicting the probability of being admitted to law school.</p>
+<pre class="r"><code># The glm function has a code similar to the lm function. But you need to specify the generation process (i.e., the curve that you want to use). In this case, we have a binary dependent variable so we use a &#39;binomial&#39; distribution (the s-shaped curve)
+
+log &lt;- glm( Admission ~ LSAT + Essay + GPA, data = df, family = &quot;binomial&quot;)
+
+stargazer( log,
+           type = &quot;html&quot;, digits = 3,
+           intercept.bottom = FALSE,
+           covariate.labels = c(&quot;Constant&quot;, &quot;LSAT Score&quot;, &quot;Essay&quot;, &quot;GPA&quot;),
+           omit.stat = c(&quot;ser&quot;,&quot;f&quot;,&quot;rsq&quot;,&quot;adj.rsq&quot;) )</code></pre>
+<table style="text-align:center">
+<tr>
+<td colspan="2" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+<em>Dependent variable:</em>
+</td>
+</tr>
+<tr>
+<td>
+</td>
+<td colspan="1" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+Admission
+</td>
+</tr>
+<tr>
+<td colspan="2" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Constant
+</td>
+<td>
+-23.059<sup>***</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(1.728)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+LSAT Score
+</td>
+<td>
+0.122<sup>***</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.010)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Essay
+</td>
+<td>
+0.061<sup>***</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.006)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+GPA
+</td>
+<td>
+0.825<sup>***</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.105)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td colspan="2" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Observations
+</td>
+<td>
+1,000
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Log Likelihood
+</td>
+<td>
+-487.976
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Akaike Inf. Crit.
+</td>
+<td>
+983.951
+</td>
+</tr>
+<tr>
+<td colspan="2" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+<em>Note:</em>
+</td>
+<td style="text-align:right">
+<sup><em></sup>p&lt;0.1; <sup><strong></sup>p&lt;0.05; <sup></strong></em></sup>p&lt;0.01
+</td>
+</tr>
+</table>
+<p>The output does not fundamentally change from an OLS model. We have the coefficients, standard errors and significance levels.</p>
+<p>The two parameter reported at the bottom of the table are the Log Likelihood and the Akaike Inferior Criteria (AIC). Both values are not meaningful per se, but we will use them to compare across models.</p>
+<ul>
+<li><p>the log likelihood is the logarithm of the likelihood function - i.e., the probability of observing the true values of Y given our coefficients (<a href="#maximum-likelihood-estimation">3.1</a>). We can use the log likelihood to compare across models. The lower the log-likelihood, the better the model fits the data.</p></li>
+<li><p>the AIC represents how much information gets lost when estimating the model. Each model losses some information (each model has residuals!) but higher quality models will have a lower AIC, which indicates that less information has been lost.</p></li>
+</ul>
+<p>While there is not a “good” AIC or a “good” log likelihood, you can use these two parameters to compare models.</p>
+</div>
+</div>
+<div id="interpretation" class="section level2">
+<h2><span class="header-section-number">3.2</span> Interpretation</h2>
+<p>The tricky part of a logit model is the interpretation of the coefficients. In this section we explain why it is problematic before discussing an example.</p>
+<p>One problem with modeling probabilities is the limited range, as a probability ranges only from 0 to 1. The LPM solves this problem by ignoring the limited range of the dependent variable and predicting values that are smaller than 0 or greater than 1.</p>
+<p>By contrast, the logit model transforms the dependent variable so that it assumes values ranging from negative infinite to positive infinite as shown in the table below:</p>
+<div class="figure"><span id="fig:VarRange"></span>
+<img src="FIGURE/Logit/VarRange.png" alt="Variable transformation" width="40%" />
+<p class="caption">
+Figure 3.2: Variable transformation
+</p>
+</div>
+<p>The first transformation is from probabilities to <strong>odds ratios</strong>. Odds ratio are a probability ratio; if the probability of an event to occur is equal to 0.4, then the probability of the event not to occur is 0.6 (= 1 - 0.4). The odds ratios are:</p>
+<center>
+<span class="math inline">\(\text{Prob of Success  / Prob of Failure}\)</span>
+</center>
+<p><br>
+in other words 0.4 / 0.6 = 0.67. The probability of an event to occur is 0.67 against 1.</p>
+<p>We can take another example. If an event has a probability to occur equal to 0.8, then its probability not to occur is 0.2. The odds ratio is 0.8/0.2 = 4. The event is 4 times more likely to occur than not to occur.</p>
+<p>Graph <a href="#fig:prOR">3.3</a> shows the relationship between probabilities and odds ratios. An increase in the probability of an event to occur increases its odds ratio.</p>
+<p>Note that odds ratios can assume values greater than 1 but not smaller than 0. Odds ratios can assume only positive values, whereas an odds ratio greater than 1 indicates that an event is more likely to occur than not to occur. Vice versa an odds ratio smaller than 1 indicates that an event is more likely not to occur than to occur.</p>
+<pre class="r"><code># Some probabilities
+pr &lt;- c(0.001, 0.01, 0.10, 0.15, 
+       0.2, 0.25, 0.3, 0.35, 0.4, 
+       0.45, 0.5, 0.55, 0.6, 0.65, 
+       0.7, 0.75, 0.8, 0.85, 0.9)
+
+# We put them in a data frame.
+data = as.data.frame(pr)
+
+# Calculate their respective odds ratios
+data$OR = round(data$pr/(1-data$pr), 2)
+
+# We plot probabilities against their odds ratios.
+plot(data$pr, data$OR, 
+     xlab = &quot;Probability&quot;, 
+     ylab = &quot;Odds Ratio&quot;, 
+     lty = 1, type = &quot;l&quot;)</code></pre>
+<div class="figure"><span id="fig:prOR"></span>
+<img src="p-070-logistic-regression_files/figure-html/prOR-1.png" alt="Relationship between probability and odd ratio" width="960" />
+<p class="caption">
+Figure 3.3: Relationship between probability and odd ratio
+</p>
+</div>
+<p>Second, we transform the odds ratios into <strong>log odds</strong> using a logarithm transformation. This is called the <em>logit transformation</em>. A logit transformation enlarges the range of the value of our DV to include negative numbers.</p>
+<p>We can see it by plotting the odds ratios against the log odds. The log odds can assume both positive and negative values.</p>
+<pre class="r"><code># We use a logit transformation to transform the odds ratios into log odds. 
+data$LogsO = log(data$OR)
+
+# We plot the odds ratios against the log odds. 
+plot( data$OR, data$LogsO, 
+      xlab = &quot;Odds Ratio&quot;, 
+      ylab = &quot;Log Odds&quot;, 
+      lty = 1, type = &quot;l&quot;)</code></pre>
+<p><img src="p-070-logistic-regression_files/figure-html/unnamed-chunk-14-1.png" width="960" /></p>
+<p>Log odds represent the unit of analysis of our coefficients. Each coefficient represents a one-unit change in the log odds that the event will occur.</p>
+<p>While the transformation from a binary variable to log odds facilitate the model estimation, it does not help with interpretation.</p>
+<ol style="list-style-type: decimal">
+<li>Log odds are not very meaningful. Because of this, we need to tranform our coefficients into odds ratio or probabilities, which are easier to interpret.</li>
+<li>Yet probabilities are distributes along a s-shaped line. While in linear models the relationship between X and Y is constant, in non-linear models the relationship varies according to the value of x (look again at graph <a href="#fig:binaryfunction">3.1</a>).</li>
+</ol>
+<div id="log-odds" class="section level3">
+<h3><span class="header-section-number">3.2.1</span> Log odds</h3>
+<p>To get more meaningful information, we can start by transforming the coefficients into logs ratio. We reverse the log transformation by exponentiating the coefficients.</p>
+<pre class="r"><code>exp( coef( log ) )</code></pre>
+<pre><code>##  (Intercept)         LSAT        Essay          GPA 
+## 9.671261e-11 1.129732e+00 1.062380e+00 2.282129e+00</code></pre>
+<p>We can also combine them with the confidence intervals.</p>
+<pre class="r"><code>exp( cbind( OR = coef(log), confint(log) ) )</code></pre>
+<pre><code>##                       OR        2.5 %       97.5 %
+## (Intercept) 9.671261e-11 2.929856e-12 2.576964e-09
+## LSAT        1.129732e+00 1.108151e+00 1.153055e+00
+## Essay       1.062380e+00 1.051070e+00 1.074374e+00
+## GPA         2.282129e+00 1.864247e+00 2.814786e+00</code></pre>
+<p>Let’s read some results.</p>
+<ul>
+<li>As the LSAT score increases of one point, the odds ratios of being admitted to law school increase of 1.13</li>
+<li>As the essay score increases of one point, the odds ratio of being admitted to law school increase of 1.06</li>
+<li>As the GPA increases of one point, the odds ratio of being admitted to law school increase of 2.28</li>
+</ul>
+<p><strong>Note</strong>: if you remember how odds ratio are calculated from section <a href="#interpretation">3.2</a>, odds ratio below 1 indicates that the probability of success decreases, while odds ratio above 1 indicates that the probability increases.</p>
+</div>
+<div id="probabilities" class="section level3">
+<h3><span class="header-section-number">3.2.2</span> Probabilities</h3>
+<p>Another option is to calculate probabilities.</p>
+<p>Probabilities are calculated according to the following formula:</p>
+<p><span class="math display" id="eq:probabilities">\[\begin{equation} 
+\begin{split}
+\text{p=} \frac{e^{\beta{_0} + \beta{_1}*X_1 + \beta{_2}*X_2 + \beta{_3}*X_3 }}{e^{\beta{_0} + \beta{_1}*X_1 + \beta{_2}*X_2 + \beta{_3}*X_3 } - 1} = \frac{1}{ 1 + b^{-\beta{_0} + \beta{_1}*X_1 + \beta{_2}*X_2 + \beta{_3}*X_3 }}
+\end{split}
+\tag{3.1}
+\end{equation}\]</span></p>
+<p>Note that this formula convert the sum of the odd logs (all the coefficient) back into log ratios (by exponentiating them), and then in probabilities. Let’s do a practical example.</p>
+<p>We noted before that the relationship between X and Y changes depending on the value of X (graph <a href="#fig:binaryfunction">3.1</a>). Because of that, we need to fix values for each of our coefficient.</p>
+<p>Ideally, you want to pick values that make sense for the variables. It is common to take the mean. For instance, we can look at the probability to be admitted to college for an average student (i.e., average LSAT, essay score and GPA).</p>
+<pre class="r"><code>mean(LSAT)</code></pre>
+<pre><code>## [1] 152.186</code></pre>
+<pre class="r"><code>mean(Essay)</code></pre>
+<pre><code>## [1] 53.15828</code></pre>
+<pre class="r"><code>mean(GPA)</code></pre>
+<pre><code>## [1] 2.366707</code></pre>
+<p>We can plug this number into our formula <a href="#eq:probabilities">(3.1)</a>.</p>
+<p><span class="math display" id="eq:probabilities">\[\begin{equation} 
+\begin{split}
+\text{p=} \frac{1}{ 1 + b^-{(-23.059 + 0.122*152.186 + 0.061*53.158 + 0.825*2.3667)}}
+\end{split}
+\tag{3.1}
+\end{equation}\]</span></p>
+<p>We can use R to make the calculation.</p>
+<pre class="r"><code>1 / ( 1 + exp(-(-23.059 + 0.122*152.186 + 0.061*53.158 + 0.825*2.3667)))</code></pre>
+<pre><code>## [1] 0.668821</code></pre>
+<p>The probability of being admitted to college for an average student is 0.66.</p>
+<p>If you have several independent variables, you can also use the function <em>predict</em> to calculate the probability, as illustrated below.</p>
+<pre class="r"><code># We first create a new dataset where our independent variables assume the values we are interested in. In this case, male will be equal to 1, while all other variables are set at their mean. 
+
+data2 &lt;- with( data, 
+               data.frame( LSAT=mean(LSAT), 
+                           Essay=mean(Essay), 
+                           GPA = mean(GPA) ))
+
+# We then predict our probabilities. 
+# Note that you need to include the 
+# option &quot;type&quot; set to &quot;response&quot; to 
+# specify that the model is non-linear.
+
+data2$Admission_Prop &lt;- predict( log, newdata = data2, type = &quot;response&quot; )
+
+data2$Admission_Prop</code></pre>
+<pre><code>## [1] 0.662384</code></pre>
+<p>Again, the probability is equal to 0.66.</p>
+<p>You can create several probabilities. For instance, let’s see what happens if we assume our student has a GPA of 4.</p>
+<pre class="r"><code># We first create a new dataset where our 
+# independent variables assume the values we 
+# are interested in. In this case, male will 
+# be equal to 1, while all other variables 
+# are set at their mean. 
+
+data2 &lt;- with(data, data.frame(LSAT = mean(LSAT), Essay = mean(Essay), GPA = 4))
+
+# We then predict our probabilities. Note that 
+# you need to include the option &quot;type&quot; set to 
+# &quot;response&quot; to specify that the model is non-linear.
+
+data2$Admission_Prop &lt;- predict(log, newdata = data2, type = &quot;response&quot;)
+
+data2$Admission_Prop</code></pre>
+<pre><code>## [1] 0.8830444</code></pre>
+<p>In this case, the probability increases to 0.88.</p>
+<p>We can also look at our the probability changes across multiple values of GPA and plot results on a graph.</p>
+<p>The graph shows that the higher the GPA, the higher the probability to get into college.</p>
+<p>However, the marginal effect decreases - moving from a GPA of 2 to a GPA of 3 increases the probability of being admitted more than moving from a GPA of 4 to a GPA of 5. We discuss more marginal effects in the next section.</p>
+<pre class="r"><code>data2 &lt;- with( data, 
+               data.frame( LSAT = mean(LSAT), 
+                           Essay = mean(Essay), 
+                           GPA = c(1,2,3,4,5) ) )
+
+data2$Admission_Prop &lt;- predict(log, newdata = data2, type = &quot;response&quot;)
+
+data2$Admission_Prop</code></pre>
+<pre><code>## [1] 0.3884707 0.5917884 0.7678966 0.8830444 0.9451473</code></pre>
+<pre class="r"><code>plot(data2$GPA, data2$Admission_Prop, 
+     xlab = &quot;GPA&quot;, 
+     ylab = &quot;Probabilities of being admitted to college&quot;, 
+     main = &quot;Probability of being admitted to college for various levels of GPA&quot;, 
+     lwd = 6)</code></pre>
+<div class="figure"><span id="fig:GPAplot"></span>
+<img src="p-070-logistic-regression_files/figure-html/GPAplot-1.png" alt="Probability of being admit based on GPA" width="960" />
+<p class="caption">
+Figure 3.4: Probability of being admit based on GPA
+</p>
+</div>
+<p>You should also note that your interpretation of the graph should consider that you are keeping Essay and LSAT at their mean value. The graph will be different if we change the values of LSAT and essay since <em>the probability depends upon the effect of all covariates in the model</em>.</p>
+<p>For instance, let’s at how probabilities change for a student who scored at the 95th quantile in both her GPA and Essay.</p>
+<pre class="r"><code>data2 &lt;- with(data, data.frame( LSAT = quantile(LSAT, 0.95), 
+                                Essay = mean(Essay, 0.95), 
+                                GPA = c(1,2,3,4,5)))
+
+data2$Admission_Prop &lt;- predict(log, newdata = data2, type = &quot;response&quot;)
+
+data2$Admission_Prop</code></pre>
+<pre><code>## [1] 0.8104688 0.9070527 0.9570277 0.9807042 0.9914522</code></pre>
+<pre class="r"><code>plot(data2$GPA, data2$Admission_Prop, 
+     xlab = &quot;GPA&quot;, 
+     ylab = &quot;Probabilities of being admitted to college&quot;, 
+     main = &quot;Probability of being admitted to college for various levels of GPA&quot;, 
+     lwd = 6)</code></pre>
+<p><img src="p-070-logistic-regression_files/figure-html/unnamed-chunk-21-1.png" width="960" /></p>
+</div>
+<div id="marginal-effects" class="section level3">
+<h3><span class="header-section-number">3.2.3</span> Marginal effects</h3>
+<p>Marginal effects is also a common approach to interpretation. Marginal effects estimate the tangent line of the s-shaped function in a specific point. A tangent line at a given point is the straight line that “touches” the curve at that point and have a similar slope (you might remember discussing tangent lines in calculus or you can find some more explanation <a href="http://tutorial.math.lamar.edu/Classes/CalcI/Tangents_Rates.aspx">here</a>).</p>
+<p>Graph <a href="#fig:tang">3.5</a> represents a tangent line.</p>
+<div class="figure"><span id="fig:tang"></span>
+<img src="FIGURE/Logit/Tangent1.png" alt="Variable transformation" width="85%" />
+<p class="caption">
+Figure 3.5: Variable transformation
+</p>
+</div>
+<p>We can calculate the margins by using the <em>margins</em> function in R and applied it to our previous model.</p>
+<p>For instance, let’s look at the marginal effect when the GPA is at its mean value.</p>
+<pre class="r"><code>## To use the margins command, you need to 
+# identify the predictive logit model (log); 
+# set the value of the variable that you are 
+# interested in using &quot;at&quot;, and then request 
+# the outcome for that specific variable. 
+
+margins(log, at = list(GPA = mean(GPA)), variable = &quot;GPA&quot;)</code></pre>
+<pre><code>##  at(GPA)    GPA
+##    2.367 0.1373</code></pre>
+<p>When GPA is at its mean, an increas in GPA will increase the probability of being admitted of 0.1373.</p>
+<p>This might get more clear if we look at the example we discussed in graph (<a href="#fig:GPAplot">3.4</a>). We noted that the marginal effect is greater for a student with a GPA of 3 than for a student with a GPA of 4. The margins function allows to quantify this.</p>
+<pre class="r"><code>## In this function we fix our GPA to 3 and 4.
+
+margins(log, at = list(GPA = c(3,4)), variable = &quot;GPA&quot;)</code></pre>
+<pre><code>##  at(GPA)     GPA
+##        3 0.12447
+##        4 0.09552</code></pre>
+<p>For a student with a GPA of 3 the marginal effect of increasing its GPA is 0.12. But for a student with a GPA of 4 the increase in probability is only equal to 0.09. It’s more convenient to invest on GPA for a student with a low GPA.</p>
+<p>In general, we can look at the marginal effects for significant values - for instance, the first and third quantile (25% and 75%, respectively).</p>
+<pre class="r"><code>## In this function we fix our GPA to 3 and 4.
+
+GPA_25 = margins(log, at = list(GPA = quantile(GPA, 0.25)), variable = &quot;GPA&quot;)
+GPA_75 = margins(log, at = list(GPA = quantile(GPA, 0.75)), variable = &quot;GPA&quot;)</code></pre>
+<pre class="r"><code>## In this function we fix our GPA to 3 and 4.
+
+margins(log, at = list(LSAT = quantile(LSAT, 0.25)), variable = &quot;LSAT&quot;)</code></pre>
+<pre><code>##  at(LSAT)    LSAT
+##     145.5 0.02361</code></pre>
+<pre class="r"><code>margins(log, at = list(LSAT = quantile(LSAT, 0.75)), variable = &quot;LSAT&quot;)</code></pre>
+<pre><code>##  at(LSAT)    LSAT
+##     159.2 0.01764</code></pre>
+<pre class="r"><code>## In this function we fix our GPA to 3 and 4.
+
+margins(log, at = list(Essay = quantile(Essay, 0.25)), variable = &quot;Essay&quot;)</code></pre>
+<pre><code>##  at(Essay)   Essay
+##      41.41 0.01119</code></pre>
+<pre class="r"><code>margins(log, at = list(Essay = quantile(Essay, 0.75)), variable = &quot;Essay&quot;)</code></pre>
+<pre><code>##  at(Essay)    Essay
+##      64.63 0.008977</code></pre>
+<p>GPA provides the greatest marginal effect for students both at 25th and 75th percentile.</p>
+<p>Margins is also used to calucalte the <em>average marginal effect</em>, which represent the average slope of all tangents for all values of a variable.</p>
+<pre class="r"><code>#Calculate margins
+m &lt;- margins(log)
+
+# Add p-value, standard errors, and confidence intervals.
+summary(m)</code></pre>
+<pre><code>##  factor    AME     SE       z      p  lower  upper
+##   Essay 0.0098 0.0007 14.0744 0.0000 0.0084 0.0111
+##     GPA 0.1334 0.0151  8.8591 0.0000 0.1039 0.1629
+##    LSAT 0.0197 0.0012 17.0133 0.0000 0.0175 0.0220</code></pre>
+<p>The average marginal effect for GPA is 0.13, for Essay is 0.0098 and for LSAT is 0.0197.</p>
+</div>
+</div>
+</div>
+<div id="replication" class="section level1">
+<h1><span class="header-section-number">4</span> Replication</h1>
+<div class="figure"><span id="fig:figure1"></span>
+<img src="FIGURE/Logit/Picture1.jpg" alt="Covariance structure of an omitted variable model" width="40%" />
+<p class="caption">
+Figure 4.1: Covariance structure of an omitted variable model
+</p>
+</div>
+<p>To discuss interpretation, let’s start with a simple model predict the likelihood of having an affair. Our independent variables include: gender, age, years of marriage, and happiness in the marriage.</p>
+<p>Data are available in the Wooldridge package and were used by <a href="http://people.stern.nyu.edu/wgreene/Lugano2013/Fair-ExtramaritalAffairs.pdf">Fair (1978)</a> to investigate extra-martical affairs.</p>
+<pre class="r"><code># library( &quot;wooldridge&quot; )
+data(&#39;affairs&#39;)
+data &lt;- affairs</code></pre>
+<p>We are going to use the following independent variables</p>
+<table>
+<colgroup>
+<col width="28%" />
+<col width="71%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>Variable name </strong></th>
+<th><strong>Description </strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">\(\text{affairs}\)</span></td>
+<td>If the person has had an affair in the past year</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\text{Male}\)</span></td>
+<td>=1 if male, =0 is female</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(\text{Age}\)</span></td>
+<td>Average age</td>
+</tr>
+<tr class="even">
+<td><span class="math inline">\(\text{yrsmarr}\)</span></td>
+<td>Years of marriage</td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">\(\text{ratemarr}\)</span></td>
+<td>Reported happiness within the marriage from 5 = very happy to 1 = very unhappy</td>
+</tr>
+</tbody>
+</table>
+<p>For a full data dictionary in the Wooldrige package type <strong>help(affairs)</strong>.</p>
+<p>We can have a look at the summary statistics for each variable.</p>
+<pre class="r"><code>stargazer( data,  
+           type = &quot;html&quot;, 
+           omit.summary.stat = c(&quot;p25&quot;, &quot;p75&quot;),
+           digits = 2 )</code></pre>
+<table style="text-align:center">
+<tr>
+<td colspan="6" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Statistic
+</td>
+<td>
+N
+</td>
+<td>
+Mean
+</td>
+<td>
+St. Dev.
+</td>
+<td>
+Min
+</td>
+<td>
+Max
+</td>
+</tr>
+<tr>
+<td colspan="6" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+id
+</td>
+<td>
+601
+</td>
+<td>
+1,059.72
+</td>
+<td>
+914.90
+</td>
+<td>
+4
+</td>
+<td>
+9,029
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+male
+</td>
+<td>
+601
+</td>
+<td>
+0.48
+</td>
+<td>
+0.50
+</td>
+<td>
+0
+</td>
+<td>
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+age
+</td>
+<td>
+601
+</td>
+<td>
+32.49
+</td>
+<td>
+9.29
+</td>
+<td>
+18
+</td>
+<td>
+57
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+yrsmarr
+</td>
+<td>
+601
+</td>
+<td>
+8.18
+</td>
+<td>
+5.57
+</td>
+<td>
+0
+</td>
+<td>
+15
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+kids
+</td>
+<td>
+601
+</td>
+<td>
+0.72
+</td>
+<td>
+0.45
+</td>
+<td>
+0
+</td>
+<td>
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+relig
+</td>
+<td>
+601
+</td>
+<td>
+3.12
+</td>
+<td>
+1.17
+</td>
+<td>
+1
+</td>
+<td>
+5
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+educ
+</td>
+<td>
+601
+</td>
+<td>
+16.17
+</td>
+<td>
+2.40
+</td>
+<td>
+9
+</td>
+<td>
+20
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+occup
+</td>
+<td>
+601
+</td>
+<td>
+4.19
+</td>
+<td>
+1.82
+</td>
+<td>
+1
+</td>
+<td>
+7
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+ratemarr
+</td>
+<td>
+601
+</td>
+<td>
+3.93
+</td>
+<td>
+1.10
+</td>
+<td>
+1
+</td>
+<td>
+5
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+naffairs
+</td>
+<td>
+601
+</td>
+<td>
+1.46
+</td>
+<td>
+3.30
+</td>
+<td>
+0
+</td>
+<td>
+12
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+affair
+</td>
+<td>
+601
+</td>
+<td>
+0.25
+</td>
+<td>
+0.43
+</td>
+<td>
+0
+</td>
+<td>
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+vryhap
+</td>
+<td>
+601
+</td>
+<td>
+0.39
+</td>
+<td>
+0.49
+</td>
+<td>
+0
+</td>
+<td>
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+hapavg
+</td>
+<td>
+601
+</td>
+<td>
+0.32
+</td>
+<td>
+0.47
+</td>
+<td>
+0
+</td>
+<td>
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+avgmarr
+</td>
+<td>
+601
+</td>
+<td>
+0.15
+</td>
+<td>
+0.36
+</td>
+<td>
+0
+</td>
+<td>
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+unhap
+</td>
+<td>
+601
+</td>
+<td>
+0.11
+</td>
+<td>
+0.31
+</td>
+<td>
+0
+</td>
+<td>
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+vryrel
+</td>
+<td>
+601
+</td>
+<td>
+0.12
+</td>
+<td>
+0.32
+</td>
+<td>
+0
+</td>
+<td>
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+smerel
+</td>
+<td>
+601
+</td>
+<td>
+0.32
+</td>
+<td>
+0.47
+</td>
+<td>
+0
+</td>
+<td>
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+slghtrel
+</td>
+<td>
+601
+</td>
+<td>
+0.21
+</td>
+<td>
+0.41
+</td>
+<td>
+0
+</td>
+<td>
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+notrel
+</td>
+<td>
+601
+</td>
+<td>
+0.27
+</td>
+<td>
+0.45
+</td>
+<td>
+0
+</td>
+<td>
+1
+</td>
+</tr>
+<tr>
+<td colspan="6" style="border-bottom: 1px solid black">
+</td>
+</tr>
+</table>
+<p>First, we estimate the logit model using the glm function.</p>
+<pre class="r"><code>log &lt;- glm( affair ~ as.factor(male) + age + 
+              yrsmarr +  ratemarr, 
+            data = data, 
+            family = &quot;binomial&quot;)
+
+stargazer( log,
+           
+           type=&quot;html&quot;, digits=3,
+           
+           intercept.bottom = FALSE,
+          
+            covariate.labels = c(&quot;Constant&quot;,
+                                &quot;Male&quot;,
+                                &quot;Age&quot;,
+                                &quot;Years of marriage&quot;, 
+                                &quot;Happiness in Marrigae&quot; ),
+           
+           omit.stat = c(&quot;ser&quot;,&quot;f&quot;,&quot;rsq&quot;,&quot;adj.rsq&quot;) )</code></pre>
+<table style="text-align:center">
+<tr>
+<td colspan="2" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+<em>Dependent variable:</em>
+</td>
+</tr>
+<tr>
+<td>
+</td>
+<td colspan="1" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+affair
+</td>
+</tr>
+<tr>
+<td colspan="2" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Constant
+</td>
+<td>
+1.185<sup>**</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.563)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Male
+</td>
+<td>
+0.391<sup>*</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.205)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Age
+</td>
+<td>
+-0.045<sup>**</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.018)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Years of marriage
+</td>
+<td>
+0.095<sup>***</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.029)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Happiness in Marrigae
+</td>
+<td>
+-0.483<sup>***</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.088)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td colspan="2" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Observations
+</td>
+<td>
+601
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Log Likelihood
+</td>
+<td>
+-312.787
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Akaike Inf. Crit.
+</td>
+<td>
+635.575
+</td>
+</tr>
+<tr>
+<td colspan="2" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+<em>Note:</em>
+</td>
+<td style="text-align:right">
+<sup><em></sup>p&lt;0.1; <sup><strong></sup>p&lt;0.05; <sup></strong></em></sup>p&lt;0.01
+</td>
+</tr>
+</table>
+<p>Results show that all the independent variables are significantly correlated with the likelihood of having had an affair in the past year. Age and Happiness in Marriage decrease the likelihood of having had an affair in the past year, while gender and years of marriage increase the likelihood of having had an affair in the past year.</p>
+<p>Yet the interpretation is not very meaningful at this stage. Coefficient represent changes in the log odds. For instance, the Years of Marriage variable indicates that the log odds increase 0.095 for each year of marriage. This information is not very easy to process.</p>
+<p>We provide three alternative ways to interpret the coefficients based on what we discussed above:</p>
+<ol style="list-style-type: decimal">
+<li>Odds ratios (easy conversation but still difficult to conceptualize)</li>
+<li>Predicted probabilities and Discret change (<em>preferred method</em>)</li>
+<li>Marginal effects (tricky interpretation, but often used in economics)</li>
+</ol>
+<div id="odds-ratio" class="section level2">
+<h2><span class="header-section-number">4.1</span> Odds ratio</h2>
+<p>First, we look at odds ratios and their confidence intervals.</p>
+<pre class="r"><code>exp( cbind( OR = coef(log), confint(log) ) )</code></pre>
+<pre><code>##                         OR     2.5 %     97.5 %
+## (Intercept)      3.2714934 1.1006055 10.0482888
+## as.factor(male)1 1.4778886 0.9910584  2.2118497
+## age              0.9562074 0.9226287  0.9894904
+## yrsmarr          1.0996014 1.0394146  1.1644512
+## ratemarr         0.6170588 0.5182310  0.7323792</code></pre>
+<p>Now we can provide a better interpretation of each coefficient.</p>
+<ul>
+<li>For each each year of marriage, the odds ratio of having had an affair in the past year increases of 1.1.</li>
+<li>The variable Male indicates that men’s odds ratio are 1.48 times higher than women.</li>
+<li>The variable Age indicates that each year, individuals become 0.95 times less likely to have had an affair in the past year.</li>
+<li>As Happiness in Marriage increases, the probability of having had an affair in the past year decreases of 0.62.</li>
+</ul>
+</div>
+<div id="probabilities-1" class="section level2">
+<h2><span class="header-section-number">4.2</span> Probabilities</h2>
+<p>To calculate probabilities, we ned to pick the mean of each variable (you should remember this from before). For instance, we can look at the probability to have an affair for a man, who has an average age, average years of marriage, and average happiness.</p>
+<pre class="r"><code># We first create a new dataset where our independent variables assume the values we are interested in. In this case, male will be equal to 1, while all other variables are set at their mean. 
+
+data2 &lt;- with(data, data.frame(male = 1, age = mean(age), yrsmarr = mean(yrsmarr), ratemarr = mean(ratemarr)))
+
+# We then predict our probabilities. Note that you need to include the option &quot;type&quot; set to &quot;response&quot; to specify that the model is non-linear.
+
+data2$affairP &lt;- predict(log, newdata = data2, type = &quot;response&quot;)
+
+data2$affairP</code></pre>
+<pre><code>## [1] 0.2687999</code></pre>
+<p>The probability of having had an affair in the past year for our ‘average’ man is 0.27.</p>
+<p>We can play around. For instance, you can look at the probability for a man that has been married long time</p>
+<pre class="r"><code>data2 &lt;- with(data, data.frame(male = 1, age = mean(age), yrsmarr = 30, ratemarr = mean(ratemarr)))
+
+data2$affairP &lt;- predict(log, newdata = data2, type = &quot;response&quot;)
+
+data2$affairP</code></pre>
+<pre><code>## [1] 0.7448364</code></pre>
+<p>The probability increases to 0.74!</p>
+<p>The difference between the two probabilities is often called a “discrete change”, which refers to how much the probability changes as we increase or decrease the value of one independent variable. In this case, the discrete change from a man with an average length of marriage to a man with 30 years of marriage is equal to 0.47.</p>
+<p>We can also calculate predicted probabilities at multiple points and plot them on a graph as we did with GPA. For instance, here we can look at the predicted probabilities at different years of marriage.</p>
+<pre class="r"><code>data3 &lt;- with(data, data.frame(male = 1, age = mean(age), yrsmarr = c(5,10,15,20,25,30,35), ratemarr = mean(ratemarr)))
+
+data3$affairP &lt;- predict(log, newdata = data3, type = &quot;response&quot;)
+
+data3$affairP</code></pre>
+<pre><code>## [1] 0.2137554 0.3041324 0.4126654 0.5304078 0.6448598 0.7448364 0.8243350</code></pre>
+<pre class="r"><code>plot(data3$yrsmarr, data3$affairP, xlab = &quot;Years of Marriage&quot;, ylab = &quot;Probabilities of having an affair&quot;, main = &quot;Probability of having an affair at different years of marriage&quot;, lwd = 6)</code></pre>
+<p><img src="p-070-logistic-regression_files/figure-html/unnamed-chunk-34-1.png" width="960" /></p>
+<p>From 5 years of marriage to 35 years of marriage, the probabilities increases of 21 percentage points.</p>
+<p>We can use a similar approach for dummy and categorical variables. For instance, we can compare the probability for man and woman. In this case, we want the variable male to be both equal to 1 and 0.</p>
+<pre class="r"><code>data2 &lt;- with(data, data.frame(male = c(0,1), age = mean(age), yrsmarr = mean(yrsmarr), ratemarr = mean(ratemarr)))
+
+data2$affairP &lt;- predict(log, newdata = data2, type = &quot;response&quot;)
+
+data2$affairP</code></pre>
+<pre><code>## [1] 0.1991948 0.2687999</code></pre>
+<p>We can see how the probability changes between men and women. For women the probability is equal to 0.2 while for the men the probability is equal to 0.27. The difference is approximately 0.07.</p>
+<p>We can also add a categorical variable to our model to look at whether religiosity affects the probability of having had an affair.</p>
+<p>The variable has 5 categories: 5 = very relig., 4 = somewhat, 3 = slightly, 2 = not at all, 1 = anti-religion.</p>
+<pre class="r"><code>data(&#39;affairs&#39;)
+data = affairs
+
+log &lt;- glm(affair ~ as.factor(male) + age + yrsmarr +  ratemarr + as.factor(relig), data = data, family = &quot;binomial&quot;)
+
+stargazer( log,
+           type = &quot;html&quot;, digits = 3,
+           intercept.bottom = FALSE,
+           covariate.labels = c(&quot;Constant&quot;,
+                                &quot;Male&quot;,
+                                &quot;Age&quot;,
+                                &quot;Years of marriage&quot;, 
+                                &quot;Happiness in Marrigae&quot;, 
+                                &quot;Not at all religious&quot;, 
+                                &quot;Slightly religious&quot;,
+                                &quot;Somewhat religious&quot;,
+                                &quot;Very religious&quot;),
+           omit.stat = c(&quot;ser&quot;,&quot;f&quot;,&quot;rsq&quot;,&quot;adj.rsq&quot;) )</code></pre>
+<table style="text-align:center">
+<tr>
+<td colspan="2" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+<em>Dependent variable:</em>
+</td>
+</tr>
+<tr>
+<td>
+</td>
+<td colspan="1" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+affair
+</td>
+</tr>
+<tr>
+<td colspan="2" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Constant
+</td>
+<td>
+1.967<sup>***</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.668)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Male
+</td>
+<td>
+0.396<sup>*</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.209)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Age
+</td>
+<td>
+-0.042<sup>**</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.018)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Years of marriage
+</td>
+<td>
+0.109<sup>***</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.030)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Happiness in Marrigae
+</td>
+<td>
+-0.484<sup>***</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.091)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Not at all religious
+</td>
+<td>
+-0.943<sup>***</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.365)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Slightly religious
+</td>
+<td>
+-0.578
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.369)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Somewhat religious
+</td>
+<td>
+-1.530<sup>***</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.372)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Very religious
+</td>
+<td>
+-1.407<sup>***</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.452)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td colspan="2" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Observations
+</td>
+<td>
+601
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Log Likelihood
+</td>
+<td>
+-301.335
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Akaike Inf. Crit.
+</td>
+<td>
+620.671
+</td>
+</tr>
+<tr>
+<td colspan="2" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+<em>Note:</em>
+</td>
+<td style="text-align:right">
+<sup><em></sup>p&lt;0.1; <sup><strong></sup>p&lt;0.05; <sup></strong></em></sup>p&lt;0.01
+</td>
+</tr>
+</table>
+<p>We can look at the predicted probabilities for each level of religiosity.</p>
+<pre class="r"><code>data2 &lt;- with(data, data.frame(male = 1, age = mean(age), yrsmarr = mean(yrsmarr), ratemarr = mean(ratemarr), relig = c(1,2,3,4,5)))
+
+data2$affairP &lt;- predict(log, newdata = data2, type = &quot;response&quot;)
+
+data2$affairP</code></pre>
+<pre><code>## [1] 0.4936917 0.2753018 0.3536455 0.1743431 0.1927715</code></pre>
+<p>In this case, people who are anti-religion are the most likely to have an affair, while individuals that are somewhat religious or very religious are less likely to have an affair.</p>
+</div>
+<div id="marginal-effects-1" class="section level2">
+<h2><span class="header-section-number">4.3</span> Marginal effects</h2>
+<p>As we did before we can calculate the margins by using the <em>margins</em> function in R and applied it to our previous model.</p>
+<pre class="r"><code>#Calculate margins
+m &lt;- margins(log)
+
+# Add p-value, standard errors, and confidence intervals.
+summary(m)</code></pre>
+<pre><code>##    factor     AME     SE       z      p   lower   upper
+##       age -0.0069 0.0030 -2.3324 0.0197 -0.0128 -0.0011
+##     male1  0.0652 0.0343  1.9035 0.0570 -0.0019  0.1324
+##  ratemarr -0.0795 0.0138 -5.7460 0.0000 -0.1066 -0.0524
+##    relig2 -0.1887 0.0753 -2.5047 0.0123 -0.3363 -0.0410
+##    relig3 -0.1213 0.0783 -1.5486 0.1215 -0.2747  0.0322
+##    relig4 -0.2773 0.0725 -3.8258 0.0001 -0.4194 -0.1352
+##    relig5 -0.2609 0.0815 -3.2027 0.0014 -0.4205 -0.1012
+##   yrsmarr  0.0178 0.0048  3.6970 0.0002  0.0084  0.0273</code></pre>
+<p>The highest average marginal effect is being a male!</p>
+<p>We can also look at marginal effects at key values, for instance 25th and 75th quantile for years of marriage.</p>
+<pre class="r"><code>margins(log, at = list(yrsmarr = quantile(data$yrsmarr, 0.25)), variable = &quot;yrsmarr&quot;)</code></pre>
+<pre><code>##  at(yrsmarr) yrsmarr
+##            4  0.0145</code></pre>
+<pre class="r"><code>margins(log, at = list(yrsmarr = quantile(data$yrsmarr, 0.75)), variable = &quot;yrsmarr&quot;)</code></pre>
+<pre><code>##  at(yrsmarr) yrsmarr
+##           15 0.02253</code></pre>
+<p>In this case…</p>
+</div>
+<div id="summary" class="section level2">
+<h2><span class="header-section-number">4.4</span> Summary</h2>
+<p>There key points that you need to remember about LPM and logit models:</p>
+<ol style="list-style-type: decimal">
+<li><p>Both PLM and logit models aim to predict <em>probabilities</em>. We want to estimate how likely an event is.</p></li>
+<li><p>Coeffients are <em>generally</em> interpreted as increase or decrease in probabilities. BUT</p></li>
+<li><p>Because probabilities range only from 0 to 1, we transform the data, first in odds ratio and then in log odds. This transformation allows to work with continuous unbounded variables.</p></li>
+<li><p>To interpret results from a logit model, we need to transform our variable back into odds ratio and finally probabilities.</p></li>
+<li><p>Probabilities and discrete changes in probabilities are the easiest way to interpret results.</p></li>
+<li><p>Marginal effects represent the tangent line slope at a given point. It helps us understand how probabilities change across different individuals.</p></li>
+</ol>
+</div>
+<div id="additional-resources" class="section level2">
+<h2><span class="header-section-number">4.5</span> Additional resources</h2>
+<p>There are several information online about logit models. These are two good resources that you can look at:</p>
+<ul>
+<li><p><a href="https://www3.nd.edu/~rwilliam/stats2/l81.pdf" class="uri">https://www3.nd.edu/~rwilliam/stats2/l81.pdf</a></p></li>
+<li><p><a href="https://stats.idre.ucla.edu/other/mult-pkg/faq/general/faq-how-do-i-interpret-odds-ratios-in-logistic-regression/" class="uri">https://stats.idre.ucla.edu/other/mult-pkg/faq/general/faq-how-do-i-interpret-odds-ratios-in-logistic-regression/</a></p></li>
+</ul>
+<style type="text/css">
+p {
+color: black;
+margin: 0 0 20px 0;
+}
+
+td {
+    padding: 3px 10px 3px 10px;
+}
+
+p.caption {
+    text-align: center;
+    font-style: italic;
+}
+
+table
+{ 
+    margin-left: auto;
+    margin-right: auto;
+    margin-top:80px;
+    margin-bottom:100px;
+}
+
+h1, h2{
+  margin-top:100px;
+  margin-bottom:20px;
+}
+
+H5{
+    text-align: center;
+    color: gray;
+    font-size:0.8em;
+}
+
+img {
+    max-width: 90%;
+    display: block;
+    margin-right: auto;
+    margin-left: auto;
+    margin-top:30px;
+    margin-bottom:20px;
+}
+
+pre {
+  overflow-x: auto;
+}
+
+pre code {
+   display: block; 
+   padding: 0.5em;
+   margin-bottom:20px;
+}
+
+code {
+  font-size: 92%;
+  border: 10px solid #F8F8F8;
+  margin-bottom: 2px;
+}
+
+code[class] {
+  background-color: #F8F8F8;
+}
+
+
+caption {
+  font-style: bold;
+}
+
+</style>
+</div>
+</div>
+
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+<script>
+$(document).ready(function () {
+  window.initializeCodeFolding("show" === "show");
+});
+</script>
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

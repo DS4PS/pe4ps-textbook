@@ -1716,14 +1716,14 @@ summary {
 <li><a href="#q2">Q2:</a></li>
 <li><a href="#q3">Q3:</a></li>
 <li><a href="#q4">Q4:</a></li>
-<li><a href="#bonus-question">BONUS QUESTION:</a></li>
+<li><a href="#bonus-question-1">BONUS QUESTION 1:</a></li>
+<li><a href="#bonus-question-2">BONUS QUESTION 2:</a></li>
 </ul></li>
 </ul>
 </div>
 
 <div id="overview" class="section level1">
 <h1>Overview</h1>
-<p>For this lab you need to upload the RegDisc_lab data available in the class R package.</p>
 <p>There are <strong>4 sets of questions</strong> to be answered. You can get up to 100 points + bonus questions. Points are indicated next to each question.</p>
 <p>Remember to:</p>
 <ul>
@@ -1731,7 +1731,6 @@ summary {
 <li>Submit the r markdown file with all your codes.</li>
 <li>Bold your answers.</li>
 </ul>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" title="1">data &lt;-<span class="st"> </span><span class="kw">read.csv</span>( <span class="st">&quot;data/RegDisc_lab2.csv&quot;</span>, <span class="dt">stringsAsFactors=</span>F )</a></code></pre></div>
 <div id="the-policy-problem" class="section level2">
 <h2>The policy problem</h2>
 <blockquote>
@@ -1740,12 +1739,70 @@ summary {
 <p>Summer school programs are designed to help students <a href="https://www.wallacefoundation.org/knowledge-center/documents/an-analysis-of-the-effects-of-an-academic-summer-program-for-middle-school-students.pdf">improve their reading and math ability</a>. They are generallly <a href="https://digitalcommons.nl.edu/cgi/viewcontent.cgi?article=1234&amp;context=diss">dedicated to students who have not yet achieved the skills required by the next level</a>. There are, however, mixed evidence on <a href="https://www.npr.org/sections/ed/2014/07/07/323659124/what-we-dont-know-about-summer-school">whether summer school works</a>.</p>
 <p>For this lab, we are interested in testing the following:</p>
 <blockquote>
-<p><strong>Hypothesis</strong>: Students who attend summer school will report higher grades in spring.</p>
+<p><strong>Hypothesis</strong>: Students who attend summer school will achieve higher grades the following year.</p>
 </blockquote>
 </div>
 <div id="data" class="section level2">
 <h2>Data</h2>
-<p>Data were collected among 500 students in a US public middle school. Students participated in the summer school program at the end of the 8th-grade (end of middle school) if they had a standardized math score lower than 60. We want to understand whether attending the summer school has an affect on the math GPA at the of the 9th-grade.</p>
+<p>For this lab you will use the <strong>regression-discontinuity-lab.csv</strong> dataset.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" title="1">URL &lt;-<span class="st"> &quot;https://raw.githubusercontent.com/DS4PS/pe4ps-textbook/master/labs/DATA/regression-discontinuity-lab.csv&quot;</span></a>
+<a class="sourceLine" id="cb1-2" title="2">data &lt;-<span class="st"> </span><span class="kw">read.csv</span>( URL, <span class="dt">stringsAsFactors=</span>F )</a></code></pre></div>
+<table style="width:47%;">
+<colgroup>
+<col width="12%"></col>
+<col width="12%"></col>
+<col width="11%"></col>
+<col width="11%"></col>
+</colgroup>
+<thead>
+<tr class="header">
+<th align="center">math_7</th>
+<th align="center">math_8</th>
+<th align="center">gpa_8</th>
+<th align="center">gpa_9</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center">28</td>
+<td align="center">34</td>
+<td align="center">0.65</td>
+<td align="center">1.12</td>
+</tr>
+<tr class="even">
+<td align="center">86</td>
+<td align="center">84</td>
+<td align="center">3.32</td>
+<td align="center">3.39</td>
+</tr>
+<tr class="odd">
+<td align="center">71</td>
+<td align="center">69</td>
+<td align="center">2.57</td>
+<td align="center">2.46</td>
+</tr>
+<tr class="even">
+<td align="center">97</td>
+<td align="center">92</td>
+<td align="center">3.57</td>
+<td align="center">3.32</td>
+</tr>
+<tr class="odd">
+<td align="center">47</td>
+<td align="center">45</td>
+<td align="center">1.58</td>
+<td align="center">1.71</td>
+</tr>
+<tr class="even">
+<td align="center">79</td>
+<td align="center">76</td>
+<td align="center">3</td>
+<td align="center">2.83</td>
+</tr>
+</tbody>
+</table>
+<p>The synthetic data contains observations on 1,000 high school students from a US public school system. Students that failed to demonstrate what the district deemed to be mathematical foundations necessary to be successful in high school were required to participate in a summer school program after 8th grade before their first year in high schoo (9th grade). A score of 60 or above on the 8th grade standardized math exam was deemed competent, a score below 60 resulted in summer school.</p>
+<p>We want to understand whether attending summer school district improved student performance in math, measured by student math GPAs at the end of 9th-grade.</p>
 <p>The dataset that the school principal provides you contains four variables:</p>
 <table>
 <colgroup>
@@ -1760,20 +1817,20 @@ summary {
 </thead>
 <tbody>
 <tr class="odd">
-<td>STD_math_7</td>
-<td>Standardized math score in 7th-grade, from 0 to 100</td>
+<td>math_7</td>
+<td>Score on standardized math exam at the end of 7th-grade, from 0 to 100</td>
 </tr>
 <tr class="even">
-<td>GPA_8</td>
-<td>Math GPA at the end of 8th-grade (before summer school), from 0 to 4</td>
+<td>gpa_8</td>
+<td>Math GPA during the 8th-grade academic year (prior to summer school), from 0 to 4</td>
 </tr>
 <tr class="odd">
-<td>STD_math_8</td>
-<td>Standardized math scores in 8th-grade, from 0 to 100</td>
+<td>math_8</td>
+<td>Score on standardized math exam at the end of 8th-grade, from 0 to 100</td>
 </tr>
 <tr class="even">
-<td>GPA_9</td>
-<td>Math GPA at the end of 9th-grade (after summer school), from 0 to 4</td>
+<td>gpa_9</td>
+<td>Math GPA during the 9th-grade academic year (following summer school), from 0 to 4</td>
 </tr>
 </tbody>
 </table>
@@ -1786,18 +1843,19 @@ summary {
 <h2>Q1:</h2>
 <p><strong>Let’s start by discussing why regression discontinuity is the right approach here</strong></p>
 <ul>
-<li><strong>Q1a:</strong> Calculate the mean GPA for the treatment and the control group in grade 9th. Is there a statistically significant difference? (5 + 5 points)</li>
-<li><strong>Q1b:</strong> What does this suggest about the effect of the treatment (i.e., attending the summer school)? (5 points)</li>
-<li><strong>Q1c:</strong> Plot the relationship between standardized math scores in the 7th-grade and GPA in grade 8th. (5 + 5 points)</li>
-<li><strong>Q1d:</strong> After creating the plot, do we still trust the results form Q1a? Why? (10 points)</li>
+<li><strong>Q1a:</strong> Create a treatment dummy variable that is coded 1 for students that scored below a 60 on the 8th grade standardized math exam, and 0 otherwise. (5 points)</li>
+<li><strong>Q1b:</strong> Calculate the mean GPA for the treatment and the control group in 9th grade. Is there a statistically significant difference? (5 + 5 points)</li>
+<li><strong>Q1c:</strong> What does this suggest about the effect of the treatment (attending summer school)? (5 points)</li>
+<li><strong>Q1d:</strong> Plot the relationship between standardized math scores in the 7th grade and the math GPA in 8th grade. Compare the mean 8th grade math GPA for students that scored above and below 60 on the 7th grade standardized exam. Is there a statistically significant difference? Note that this data all comes from the pre-treatment period. (5 + 5 points)</li>
+<li><strong>Q1e:</strong> Looking at the results from Q1d, do we still trust the results form Q1a? Why? (10 points)</li>
 </ul>
 </div>
 <div id="q2" class="section level2">
 <h2>Q2:</h2>
 <p>Now prepare your data for the analysis:</p>
 <ul>
-<li><strong>Q2a:</strong> Write the model formula. (5 points)</li>
-<li><strong>Q2b:</strong> Create the new variables that you need: a Treatment variable and centered rating variable. (5 points for each variable)</li>
+<li><strong>Q2a:</strong> Write the formula for the regression discontinuity model with this data. (5 points)</li>
+<li><strong>Q2b:</strong> Create the 8th grade standardized test variable centered on the summer school cutoff score. (5 points)</li>
 </ul>
 </div>
 <div id="q3" class="section level2">
@@ -1813,20 +1871,33 @@ summary {
 <h2>Q4:</h2>
 <p>Examine the counterfactual.</p>
 <ul>
-<li><strong>Q4a:</strong> For each additional point in the STD math score a student obtains, how much does the GPA increase? (5 points)</li>
-<li><strong>Q4b:</strong> Based on your results, what is the GPA of a student whose standardized math score is equal to 60 (the cutoff) and attended the summer school? (5 points)</li>
-<li><strong>Q4c:</strong> What would be the GPA of a student who had a standardized math score equal to 50 and attended the summer school? (5 points)</li>
-<li><strong>Q4d:</strong> What if the student did not attend the summer school? In other words, what is the counterfactual? (5 points)</li>
+<li><strong>Q4a:</strong> For each additional point a student obtains on the standardized math exam, on average what is the corresponding increase in their 9th grade math GPA? (5 points)</li>
+<li><strong>Q4b:</strong> What is the predicted 9th grade math GPA of a student whose 8th grade standardized test score is equal to 60 (the cutoff)? (5 points)</li>
+<li><strong>Q4c:</strong> What about the same student, except now they have attended summer school? What is their predicted math GPA in 9th grade? (5 points)</li>
+<li><strong>Q4d:</strong> Do we expect students that scored a 59 on the standardized exam and students that score a 19 to both benefit from summer school? Does the model allow for differences in response to the treatment? What are the predicted GPA gains for a student that scored 19 on the exam? (5 points)</li>
 </ul>
 </div>
-<div id="bonus-question" class="section level2">
-<h2>BONUS QUESTION:</h2>
-<p><strong>What is the purpose of including the rating / score variable in the model? (10 points)</strong></p>
+<div id="bonus-question-1" class="section level2">
+<h2>BONUS QUESTION 1:</h2>
+<p><strong>What is the purpose of including the rating / score variable in the model? (3 points)</strong></p>
 <ul>
-<li><strong>BQ1:</strong> Run the model without the rating / score variable.</li>
-<li><strong>BQ2:</strong> What does the intercept represent?</li>
-<li><strong>BQ3:</strong> What does the Treatment coefficient represent?</li>
-<li><strong>BQ4:</strong> What is the model without the score variable testing? Explain the counterfactual.</li>
+<li><strong>BQ1a:</strong> Run the model without the rating / score variable.</li>
+<li><strong>BQ1b:</strong> What does the intercept represent?</li>
+<li><strong>BQ1c:</strong> What does the Treatment coefficient represent?</li>
+<li><strong>BQ1d:</strong> What is the model without the score variable testing? Explain the counterfactual.</li>
+<li><strong>BQ1e&quot;</strong> What is the average 9th grade math GPA of the treatment group? What would the average have been if the district had not offered summer school?</li>
+</ul>
+</div>
+<div id="bonus-question-2" class="section level2">
+<h2>BONUS QUESTION 2:</h2>
+<p>The regression discontinuity model is powerful in instances where program participation is determined by some qualification criteria that is measured using a numeric scale (e.g. a test score or a means-test for social services using income), and we only have performance data from the post-treatment period. In these instances the post-test only estimate would be extremely biased since the treatment and control groups represented high and low performers prior to the treatment. The RDD uses the selection criteria and eligibility cut-off score to mitigate the bias. Thus it might be the ONLY way to get a clean estimate of program impact in these circumstances.</p>
+<p>In this lab we have GPA data from before and after the treatment period (8th grade and 9th grade math GPAs). As a result, we can also run a difference-in-difference model to estimate the impact of summer school on 9th grade math performance.</p>
+<p><strong>Run a difference-in-difference model and compare results with the RDD models above. (7 points)</strong></p>
+<ul>
+<li><strong>BQ2a:</strong> To run the difference-in-difference model you need to stack the performance data. Create a subset of data with the 8th grade GPA and the treatment dummy. Add a post-treatment dummy coded 0 for all of these cases. Create another subset with 9th grade GPA and the treatment dummy. Add a post-treatment dummy coded 1 for all of these cases. Rename both GPA variables to “gpa”, then stack these two data frames (try <strong>rbind()</strong> for “row bind”). Create your treat_x_post dummy.</li>
+<li><strong>BQ2b</strong> Run a difference-in-difference model and report your results.</li>
+<li><strong>BQ2c</strong> Is the estimate of the program impact (<strong>B3</strong>) consistent with the RDD model?</li>
+<li><strong>BQ2d</strong> Is the counterfactual for the treatment group without summer school (<strong>B0+B1+B2</strong>) consistent with the RDD data?</li>
 </ul>
 <style type="text/css">
 

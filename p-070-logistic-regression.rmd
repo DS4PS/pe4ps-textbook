@@ -8,42 +8,15 @@ knitr::opts_chunk$set(echo = TRUE, message=F, warning=F, fig.width = 10)
 
 **Packages**
 
-Here are the packages we will use in this lecture. If you don't remember how to install them, you can have a look at the code. 
+The following packages will be used in the lecture: 
 
 * **stargazer** for nice tables
 * **sandwich** for robust standard errors
 * **margins** for calculating marginal effects in logit models
 * **car** and **lmtest** are support packages to attach robust SE to coefficients
-
-```{r, eval=F}
-
-install.packages( stargazer )
-library( "stargazer" )
-
-install.packages( sandwich )
-library( "sandwich" )
-
-install.packages( margins )
-library( "margins" )
-
-install.packages( car )
-library( "car" )
-
-install.packages( lmtest )
-library( "lmtest" )
-
-```
-
-**What you will learn**
-
-* What is a linear probability model?
-* What is the difference between a linear probability model and a logit model?
-* Why do we use a logit model?
-* How can you interpret results from a logit model?
-* What is the difference between odds ratios, probabilities, log odds and marginal effects?
+* **wooldridge** contains econometric datasets 
 
 ```{r, echo=TRUE, eval=FALSE, results="hide"}
-
 install.packages( "stargazer" )
 install.packages( "car" )
 install.packages( "wooldridge" )
@@ -51,11 +24,10 @@ install.packages( "sandwich" )
 install.packages( "lmtest" )
 install.packages( "margins" )
 install.packages( "scales" )
-
 ```
 
-```{r, echo=FALSE, results="hide"}
 
+```{r, echo=TRUE, results="hide"}
 library( "stargazer" )
 library( "car" )
 library( "wooldridge" )
@@ -63,8 +35,19 @@ library( "sandwich" )
 library( "lmtest" )
 library( "margins" )
 library( "scales" )
-
+library( pander )
 ```
+
+
+**What you will learn**
+
+* How do you build a regression model when your outcome is binary (yes/no or 1/0)? 
+* When is a linear probability model appropriate? 
+* What is the difference between a linear probability model and a logit model?
+* Why do we use a logit model?
+* How do we interpret results from a logit model?
+* What is the difference between odds ratios, probabilities, log odds and marginal effects?
+
 
 # The key concept 
 
@@ -95,7 +78,7 @@ Models with binary variables aim to calculate the likelihood that 'something' (a
 
 # Linear probability model (LPM)
 
-```{r, echo = F}
+```{r, echo = F, eval=F}
 
 set.seed(666)
 
@@ -107,7 +90,8 @@ GPA = rnorm(1000)
 
 err = rnorm(1000)
 
-z = 1 + 1.8*LSAT + 1.4 * Essay + 1.1 * GPA + err            # linear combination with a bias
+# linear combination with a bias
+z = 1 + 1.8*LSAT + 1.4 * Essay + 1.1 * GPA + err           
 
 pr = 1/(1+exp(-z))         # pass through an inv-logit function
 
@@ -121,6 +105,7 @@ df = data.frame(y = Admission, x1 = LSAT, x2 = Essay, x3 = GPA)
 
 colnames(df) <- c("Admission", "LSAT", "Essay", "GPA")
 
+# write.csv( df, "admissions.csv", row.names=F )
 ```
 
 ```{r image, fig.cap = "US Supreme Courte, Washington DC", out.width='80%', echo=F, fig.align='center' }
@@ -128,6 +113,19 @@ knitr::include_graphics( "FIGURE/Logit/SupremeCourt.jpg" )
 ```
 
 We start with a simple example to illustrate the **Linear Probability Model**. We want to estimate the probability that a student will be admitted to law school based on [some key variables](https://www.usnews.com/education/blogs/law-admissions-lowdown/2012/11/12/learn-the-5-deciding-factors-in-law-school-admissions). Admission to law school can be challenging, although there are claims that the [average score for admission has decreased](https://www.nytimes.com/2015/10/27/business/dealbook/study-cites-lower-standards-in-law-school-admissions.html) over the past years.
+
+
+```{r}
+df <- read.csv( "data/admissions.csv" )
+```
+
+
+```{r, echo=F}
+Admission <- df$Admission
+LSAT <- df$LSAT
+Essay <- df$Essay
+GPA <- df$GPA
+```
 
 Our variables include:
 
@@ -163,7 +161,7 @@ As before, we use the *lm* function to estimate our coefficients. Results are su
 ```{r, results='asis'}
 
 # We use the "lm" function to estimate the linear probability model with an OLS estimator.
-LPM = lm( Admission ~ LSAT + Essay + GPA )
+LPM <- lm( Admission ~ LSAT + Essay + GPA, data=df )
 
 stargazer( LPM,
            type = "html", digits = 3,
@@ -186,21 +184,29 @@ Yet there are some limitations when using an OLS estimator with a binary variabl
 
 ```{r residuals, fig.cap= "Residuals vs fitted values"}
 
-# Estimate the residuals
-res = LPM$residuals
+# Save the residuals
+res <- LPM$residuals
 
 # Predicted values based on the linear probability model
-yhat = predict( LPM )
+yhat <- predict( LPM )
 
-# Plot residuals against the predicted value. If the model is homoskedastic, we would observe a random distribution. If the model is heteroskedastic, we would observe some kind of correlation between residuals and predicted values.
-plot( yhat, res, xlab = "Predicted values", ylab = "Residuals" )
+# Plot residuals against the predicted value. 
+# If the model is homoskedastic, we would 
+# observe a random distribution. If the model 
+# is heteroskedastic, we would observe some 
+# kind of correlation between residuals and 
+# predicted values.
+plot( yhat, res, 
+      xlab = "Predicted values", 
+      ylab = "Residuals" )
 ```
 
 To overcome heteroskedasticity, we can use *robust standard errors* . Robust standard errors allow the variance of the residuals to be difference across observations and "fix" the standard errors accordingly.
 
 ```{r}
 
-# Note: you need to install the lmtest and sandwich packages to run the following line. 
+# Note: you need to install the lmtest and 
+# sandwich packages to run the following line. 
 
 # Calculate robust standard errors
 coeftest( LPM, vcov = vcovHC(LPM, type="HC1") )
@@ -251,18 +257,23 @@ We can apply the same process for all groups of 50 observations (101st-150th, 15
 df <- df[order(df$LSAT),] 
 
 # We create groups of 50 observation. 
-df$d = c(rep(1,50), rep(2,50), rep(3,50), rep(4,50), rep(5,50), rep(6,50), rep(7,50), rep(8,50), rep(9,50), rep(10,50), rep(11,50), rep(12,50), rep(13,50), rep(14,50), rep(15,50), rep(16,50),
-rep(17,50), rep(18,50), rep(19,50), rep(20,50))
+df$d <- rep( 1:20, each=50 )
 
-# Average LSAT score for each group. Note that the LSAT variable is positioned in the second column of the df dataset, so it can be indicated at df[, 2].
-gr_mean2 = aggregate(df[, 2], list(df$d), mean)
+# Average LSAT score for each group. 
+# Note that the LSAT variable is positioned 
+# in the second column of the df dataset, 
+# so it can be indicated at df[, 2].
+gr_mean2 <- aggregate( df[,"LSAT"], list(df$d), mean )
 
 # We calculate the probability of being admitted to law school. The Admission variable is in the first column of the dataset.
-gr_mean = aggregate(df[, 1], list(df$d), mean)
+gr_mean <- aggregate(df[, 1], list(df$d), mean)
 
 # We plot the average LSAT score against the group average probability of being admitted to law school. 
-plot(df$LSAT, df$Admission, col = adjustcolor("gray", alpha.f= 0.3), pch=19, bty="n", cex = 2, xlab="LSAT", ylab="Admission into law school")
-points(gr_mean2$x, gr_mean$x, col = "red", lwd = 4) #Add points to the graph
+plot( df$LSAT, df$Admission, 
+      col = adjustcolor("gray", alpha.f= 0.3), 
+      pch=19, bty="n", cex = 2, 
+      xlab="LSAT", ylab="Admission into law school" )
+points( gr_mean2$x, gr_mean$x, col = "red", lwd = 4) #Add points to the graph
 abline(lm(df$Admission ~ df$LSAT), col = "darkred", lwd = 3) #Add a regression line
 
 ```
@@ -298,7 +309,7 @@ While there are not big differences in the middle of the graph, the s-shaped fun
 ```{r binaryfunction, fig.cap= "Binary function"}
 
 # Logit model
-log = glm( Admission ~ LSAT, data = df, family = "binomial")
+log <- glm( Admission ~ LSAT, data = df, family = "binomial")
 
 # Plot of LSAT scores against the probability of being admitted to law school
 plot(df$LSAT, df$Admission, col = adjustcolor("gray", alpha.f= 0.3), pch=19, bty="n", cex = 2, xlab="LSAT", ylab="Admission into law school")
@@ -388,7 +399,10 @@ Note that odds ratios can assume values greater than 1 but not smaller than 0. O
 ```{r prOR, fig.cap = "Relationship between probability and odd ratio"}
 
 # Some probabilities
-pr = c(0.001, 0.01, 0.10, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9)
+pr <- c(0.001, 0.01, 0.10, 0.15, 
+       0.2, 0.25, 0.3, 0.35, 0.4, 
+       0.45, 0.5, 0.55, 0.6, 0.65, 
+       0.7, 0.75, 0.8, 0.85, 0.9)
 
 # We put them in a data frame.
 data = as.data.frame(pr)
@@ -397,7 +411,10 @@ data = as.data.frame(pr)
 data$OR = round(data$pr/(1-data$pr), 2)
 
 # We plot probabilities against their odds ratios.
-plot(data$pr, data$OR, xlab = "Probability", ylab = "Odds Ratio", lty = 1, type = "l")
+plot(data$pr, data$OR, 
+     xlab = "Probability", 
+     ylab = "Odds Ratio", 
+     lty = 1, type = "l")
 
 ```
 
@@ -411,7 +428,10 @@ We can see it by plotting the odds ratios against the log odds. The log odds can
 data$LogsO = log(data$OR)
 
 # We plot the odds ratios against the log odds. 
-plot(data$OR, data$LogsO, xlab = "Odds Ratio", ylab = "Log Odds", lty = 1, type = "l")
+plot( data$OR, data$LogsO, 
+      xlab = "Odds Ratio", 
+      ylab = "Log Odds", 
+      lty = 1, type = "l")
 
 ```
 
@@ -498,11 +518,17 @@ If you have several independent variables, you can also use the function *predic
 
 # We first create a new dataset where our independent variables assume the values we are interested in. In this case, male will be equal to 1, while all other variables are set at their mean. 
 
-data2 <- with(data, data.frame(LSAT = mean(LSAT), Essay = mean(Essay), GPA = mean(GPA)))
+data2 <- with( data, 
+               data.frame( LSAT=mean(LSAT), 
+                           Essay=mean(Essay), 
+                           GPA = mean(GPA) ))
 
-# We then predict our probabilities. Note that you need to include the option "type" set to "response" to specify that the model is non-linear.
+# We then predict our probabilities. 
+# Note that you need to include the 
+# option "type" set to "response" to 
+# specify that the model is non-linear.
 
-data2$Admission_Prop <- predict(log, newdata = data2, type = "response")
+data2$Admission_Prop <- predict( log, newdata = data2, type = "response" )
 
 data2$Admission_Prop
 ```
@@ -513,11 +539,17 @@ You can create several probabilities. For instance, let's see what happens if we
 
 ```{r}
 
-# We first create a new dataset where our independent variables assume the values we are interested in. In this case, male will be equal to 1, while all other variables are set at their mean. 
+# We first create a new dataset where our 
+# independent variables assume the values we 
+# are interested in. In this case, male will 
+# be equal to 1, while all other variables 
+# are set at their mean. 
 
 data2 <- with(data, data.frame(LSAT = mean(LSAT), Essay = mean(Essay), GPA = 4))
 
-# We then predict our probabilities. Note that you need to include the option "type" set to "response" to specify that the model is non-linear.
+# We then predict our probabilities. Note that 
+# you need to include the option "type" set to 
+# "response" to specify that the model is non-linear.
 
 data2$Admission_Prop <- predict(log, newdata = data2, type = "response")
 
@@ -534,13 +566,20 @@ However, the marginal effect decreases - moving from a GPA of 2 to a GPA of 3 in
 
 ```{r GPAplot, fig.cap= "Probability of being admit based on GPA"}
 
-data2 <- with(data, data.frame(LSAT = mean(LSAT), Essay = mean(Essay), GPA = c(1,2,3,4,5)))
+data2 <- with( data, 
+               data.frame( LSAT = mean(LSAT), 
+                           Essay = mean(Essay), 
+                           GPA = c(1,2,3,4,5) ) )
 
 data2$Admission_Prop <- predict(log, newdata = data2, type = "response")
 
 data2$Admission_Prop
 
-plot(data2$GPA, data2$Admission_Prop, xlab = "GPA", ylab = "Probabilities of being admitted to college", main = "Probability of being admitted to college for various levels of GPA", lwd = 6)
+plot(data2$GPA, data2$Admission_Prop, 
+     xlab = "GPA", 
+     ylab = "Probabilities of being admitted to college", 
+     main = "Probability of being admitted to college for various levels of GPA", 
+     lwd = 6)
 ```
 
 You should also note that your interpretation of the graph should consider that you are keeping Essay and LSAT at their mean value. The graph will be different if we change the values of LSAT and essay since *the probability depends upon the effect of all covariates in the model*.
@@ -549,13 +588,19 @@ For instance, let's at how probabilities change for a student who scored at the 
 
 ```{r}
 
-data2 <- with(data, data.frame(LSAT = quantile(LSAT, 0.95), Essay = mean(Essay, 0.95), GPA = c(1,2,3,4,5)))
+data2 <- with(data, data.frame( LSAT = quantile(LSAT, 0.95), 
+                                Essay = mean(Essay, 0.95), 
+                                GPA = c(1,2,3,4,5)))
 
 data2$Admission_Prop <- predict(log, newdata = data2, type = "response")
 
 data2$Admission_Prop
 
-plot(data2$GPA, data2$Admission_Prop, xlab = "GPA", ylab = "Probabilities of being admitted to college", main = "Probability of being admitted to college for various levels of GPA", lwd = 6)
+plot(data2$GPA, data2$Admission_Prop, 
+     xlab = "GPA", 
+     ylab = "Probabilities of being admitted to college", 
+     main = "Probability of being admitted to college for various levels of GPA", 
+     lwd = 6)
 ```
 
 ### Marginal effects
@@ -576,7 +621,11 @@ For instance, let's look at the marginal effect when the GPA is at its mean valu
 
 ```{r}
 
-## To use the margins command, you need to identify the predictive logit model (log); set the value of the variable that you are interested in using "at", and then request the outcome for that specific variable. 
+## To use the margins command, you need to 
+# identify the predictive logit model (log); 
+# set the value of the variable that you are 
+# interested in using "at", and then request 
+# the outcome for that specific variable. 
 
 margins(log, at = list(GPA = mean(GPA)), variable = "GPA")
 
@@ -630,7 +679,6 @@ GPA provides the greatest marginal effect for students both at 25th and 75th per
 Margins is also used to calucalte the *average marginal effect*, which represent the average slope of all tangents for all values of a variable. 
 
 ```{r}
-
 #Calculate margins
 m <- margins(log)
 
@@ -650,19 +698,13 @@ To discuss interpretation, let's start with a simple model predict the likelihoo
 
 Data are available in the Wooldridge package and were used by [Fair (1978)](http://people.stern.nyu.edu/wgreene/Lugano2013/Fair-ExtramaritalAffairs.pdf) to investigate extra-martical affairs.
 
-```{r, eval=F}
-
-install.packages( wooldridge )
-library( "wooldridge" )
-
-```
-
-```{r}
-
+```{r, eval=T}
+# library( "wooldridge" )
 data('affairs')
-data = affairs
-
+data <- affairs
 ```
+
+
 
 We are going to use the following independent variables
 
@@ -674,10 +716,11 @@ $\text{Age}$         |Average age                                  |
 $\text{yrsmarr}$    |Years of marriage     |
 $\text{ratemarr}$   |Reported happiness within the marriage from 5 = very happy to 1 = very unhappy                  |
 
+For a full data dictionary in the Wooldrige package type **help(affairs)**.
+
 We can have a look at the summary statistics for each variable.
 
 ```{r, echo=T, results='asis'}
-
 stargazer( data,  
            type = "html", 
            omit.summary.stat = c("p25", "p75"),
@@ -687,8 +730,10 @@ stargazer( data,
 First, we estimate the logit model using the glm function.
 
 ```{r, results = 'asis'}
-
-log <- glm(affair ~ as.factor(male) + age + yrsmarr +  ratemarr, data = data, family = "binomial")
+log <- glm( affair ~ as.factor(male) + age + 
+              yrsmarr +  ratemarr, 
+            data = data, 
+            family = "binomial")
 
 stargazer( log,
            

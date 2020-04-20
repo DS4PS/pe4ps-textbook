@@ -16,17 +16,17 @@ output:
 
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, message=F, warning=F, fig.width = 10, fig.pos = 'H')
+knitr::opts_chunk$set( echo = TRUE, message=F, warning=F, fig.width = 10, fig.pos = 'H' )
 ```
 
 
 ```{r, echo=FALSE, results="hide"}
-library(stargazer)
+library( stargazer )
+library( dplyr )
+library( pander )
 ```
 
 # Overview 
-
-For this lab you need to upload the RegDisc_lab data available in the class R package. 
 
 There are **4 sets of questions** to be answered. You can get up to 100 points + bonus questions. Points are indicated next to each question. 
 
@@ -36,9 +36,6 @@ Remember to:
 * Submit the r markdown file with all your codes. 
 * Bold your answers.
 
-```{r, echo = T}
-data <- read.csv( "data/RegDisc_lab2.csv", stringsAsFactors=F )
-```
 
 
 ## The policy problem
@@ -51,20 +48,33 @@ Summer school programs are designed to help students [improve their reading and 
 For this lab, we are interested in testing the following:
 
 > **Hypothesis**: 
-> Students who attend summer school will report higher grades in spring. 
+> Students who attend summer school will achieve higher grades the following year. 
 
 ## Data
 
-Data were collected among 500 students in a US public middle school. Students participated in the summer school program at the end of the 8th-grade (end of middle school) if they had a standardized math score lower than 60. We want to understand whether attending the summer school has an affect on the math GPA at the of the 9th-grade.
+For this lab you will use the **regression-discontinuity-lab.csv** dataset. 
+
+```{r, echo = T}
+URL <- "https://raw.githubusercontent.com/DS4PS/pe4ps-textbook/master/labs/DATA/regression-discontinuity-lab.csv"
+data <- read.csv( URL, stringsAsFactors=F )
+```
+
+```{r, echo=F}
+head( data ) %>% pander()
+```
+
+The synthetic data contains observations on 1,000 high school students from a US public school system. Students that failed to demonstrate what the district deemed to be mathematical foundations necessary to be successful in high school were required to participate in a summer school program after 8th grade before their first year in high schoo (9th grade). A score of 60 or above on the 8th grade standardized math exam was deemed competent, a score below 60 resulted in summer school. 
+
+We want to understand whether attending summer school district improved student performance in math, measured by student math GPAs at the end of 9th-grade.
 
 The dataset that the school principal provides you contains four variables: 
 
  **Variable name   **   | **Description    **                                                                                          
 ----------------------- | ------------------------------------------------------------------------------------------------------------
-STD_math_7              |Standardized math score in 7th-grade, from 0 to 100                                                                     
-GPA_8                   |Math GPA at the end of 8th-grade (before summer school), from 0 to 4
-STD_math_8              |Standardized math scores in 8th-grade, from 0 to 100                                                                     
-GPA_9                   |Math GPA at the end of 9th-grade (after summer school), from 0 to 4
+math_7              | Score on standardized math exam at the end of 7th-grade, from 0 to 100                                                                     
+gpa_8                   | Math GPA during the 8th-grade academic year (prior to summer school), from 0 to 4
+math_8              | Score on standardized math exam at the end of 8th-grade, from 0 to 100                                                                     
+gpa_9                   | Math GPA during the 9th-grade academic year (following summer school), from 0 to 4
 
 You propose to use a regression discontinuity method to analyze the impact of summer school on students' grades.
 
@@ -74,17 +84,18 @@ You propose to use a regression discontinuity method to analyze the impact of su
 
 **Let's start by discussing why regression discontinuity is the right approach here** 
 
-* **Q1a:** Calculate the mean GPA for the treatment and the control group in grade 9th. Is there a statistically significant difference? (5 + 5 points)
-* **Q1b:** What does this suggest about the effect of the treatment (i.e., attending the summer school)? (5 points)
-* **Q1c:** Plot the relationship between standardized math scores in the 7th-grade and GPA in grade 8th. (5 + 5 points)
-* **Q1d:** After creating the plot, do we still trust the results form Q1a? Why? (10 points)
+* **Q1a:** Create a treatment dummy variable that is coded 1 for students that scored below a 60 on the 8th grade standardized math exam, and 0 otherwise. (5 points)
+* **Q1b:** Calculate the mean GPA for the treatment and the control group in 9th grade. Is there a statistically significant difference? (5 + 5 points)
+* **Q1c:** What does this suggest about the effect of the treatment (attending summer school)? (5 points)
+* **Q1d:** Plot the relationship between standardized math scores in the 7th grade and the math GPA in 8th grade. Compare the mean 8th grade math GPA for students that scored above and below 60 on the 7th grade standardized exam. Is there a statistically significant difference? Note that this data all comes from the pre-treatment period. (5 + 5 points)
+* **Q1e:** Looking at the results from Q1d, do we still trust the results form Q1a? Why? (10 points)
 
 ## Q2: 
 
 Now prepare your data for the analysis:
 
-* **Q2a:** Write the model formula. (5 points)
-* **Q2b:** Create the new variables that you need: a Treatment variable and centered rating variable. (5 points for each variable)
+* **Q2a:** Write the formula for the regression discontinuity model with this data. (5 points)
+* **Q2b:** Create the 8th grade standardized test variable centered on the summer school cutoff score. (5 points)
 
 
 
@@ -100,19 +111,33 @@ Once data are ready, you can estimate the regression discontinuity model. Pay at
 
 Examine the counterfactual.
 
-* **Q4a:** For each additional point in the STD math score a student obtains, how much does the GPA increase? (5 points)
-* **Q4b:** Based on your results, what is the GPA of a student whose standardized math score is equal to 60 (the cutoff) and attended the summer school? (5 points)
-* **Q4c:** What would be the GPA of a student who had a standardized math score equal to 50 and attended the summer school? (5 points)
-* **Q4d:** What if the student did not attend the summer school? In other words, what is the counterfactual? (5 points)
+* **Q4a:** For each additional point a student obtains on the standardized math exam, on average what is the corresponding increase in their 9th grade math GPA? (5 points)
+* **Q4b:** What is the predicted 9th grade math GPA of a student whose 8th grade standardized test score is equal to 60 (the cutoff)? (5 points)
+* **Q4c:** What about the same student, except now they have attended summer school? What is their predicted math GPA in 9th grade? (5 points)
+* **Q4d:** Do we expect students that scored a 59 on the standardized exam and students that score a 19 to both benefit from summer school? Does the model allow for differences in response to the treatment? What are the predicted GPA gains for a student that scored 19 on the exam? (5 points)
 
-## BONUS QUESTION: 
+## BONUS QUESTION 1: 
 
-**What is the purpose of including the rating / score variable in the model? (10 points)**
+**What is the purpose of including the rating / score variable in the model? (3 points)**
 
-* **BQ1:** Run the model without the rating / score variable. 
-* **BQ2:** What does the intercept represent? 
-* **BQ3:** What does the Treatment coefficient represent? 
-* **BQ4:** What is the model without the score variable testing? Explain the counterfactual. 
+* **BQ1a:** Run the model without the rating / score variable. 
+* **BQ1b:** What does the intercept represent? 
+* **BQ1c:** What does the Treatment coefficient represent? 
+* **BQ1d:** What is the model without the score variable testing? Explain the counterfactual.
+* **BQ1e"** What is the average 9th grade math GPA of the treatment group? What would the average have been if the district had not offered summer school? 
+
+## BONUS QUESTION 2:
+
+The regression discontinuity model is powerful in instances where program participation is determined by some qualification criteria that is measured using a numeric scale (e.g. a test score or a means-test for social services using income), and we only have performance data from the post-treatment period. In these instances the post-test only estimate would be extremely biased since the treatment and control groups represented high and low performers prior to the treatment. The RDD uses the selection criteria and eligibility cut-off score to mitigate the bias. Thus it might be the ONLY way to get a clean estimate of program impact in these circumstances. 
+
+In this lab we have GPA data from before and after the treatment period (8th grade and 9th grade math GPAs). As a result, we can also run a difference-in-difference model to estimate the impact of summer school on 9th grade math performance. 
+
+**Run a difference-in-difference model and compare results with the RDD models above. (7 points)**
+
+* **BQ2a:** To run the difference-in-difference model you need to stack the performance data. Create a subset of data with the 8th grade GPA and the treatment dummy. Add a post-treatment dummy coded 0 for all of these cases. Create another subset with 9th grade GPA and the treatment dummy. Add a post-treatment dummy coded 1 for all of these cases. Rename both GPA variables to "gpa", then stack these two data frames (try **rbind()** for "row bind"). Create your treat_x_post dummy.
+* **BQ2b** Run a difference-in-difference model and report your results. 
+* **BQ2c** Is the estimate of the program impact (**B3**) consistent with the RDD model? 
+* **BQ2d** Is the counterfactual for the treatment group without summer school (**B0+B1+B2**) consistent with the RDD data?
 
 
 ```{css, echo=F}
