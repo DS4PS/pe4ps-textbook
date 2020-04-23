@@ -1,0 +1,157 @@
+---
+title: "LAB: Binary Dependent Variables"
+output:
+  html_document:
+    theme: readable
+    df_print: paged
+    highlight: tango
+    toc: yes
+    toc_float: no
+    css: 'css/lab-instructions.css'
+    includes:
+      after_body: 'footer.html'
+--- 
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message=F, warning=F, fig.width = 10)
+```
+
+```{r, echo=FALSE, results="hide"}
+library(stargazer)
+```
+
+
+The lab is loosely based on the research conducted by [Doan & Kirkpatrick (2013)](https://onlinelibrary.wiley.com/doi/10.1111/psj.12018) entitled "Giving Girls a Shot: An Examination of Mandatory Vaccination Legislation" and published on Policy Studies Journal, 41(2), 295-318
+
+There are **4 sets of questions** to be answered. You can get up to 100 points + bonus questions. Points are indicated next to each question. 
+
+Remember to:
+
+* Format your table using stargazer 
+* Submit the r markdown file with all your codes. 
+* Bold your answers. 
+
+
+
+
+
+# The policy problem
+
+> **Research question**: 
+
+> What factors influence a state's decision to introduce a mandatory HPV vaccine legislation for young girls? 
+
+Doan and Kirkpatrick (2013) analyze state's decision to introduce a mandatory vaccine for the human papillomavirus (HPV) for all fifth- and sixth-grade girls in public schools. The vaccine was approved in 2006 and patented by Merck & Co. The two researchers were particularly interested in the influence of competing morality, economic, and public-health determinants on states' decision making. 
+
+With regards to morality, they suggest that state politicians are responsive to the public opinion within their own state, such that they will respond to positive or negative approval of the new legislation. For instance, a high proportion of Evangelics or Catholics within the state might discourage mandatory HPV vaccine legislation as those groups have conservative view regarding sexuality and sexual activity and might disapprove the vaccine at such early age. Similarly, a high rate of negative media attention might decrease politicians' motivation to introduce legislation mandating the HPV vaccine in order to remaining aligned with the electorate's preferences.
+
+By contrast, we could expect politicians to support their party's values. "Social welfare" is generally an issue associated with Democrats, which might have greater incentives to pass a mandatory HPV vaccine regulation to appeal their electoral basis as compared to Republicans. 
+
+Finally, politicians might respond to political interests and support policies in favor of private organizations providing resources for their electoral campaign. We might expect that states were politicians receive more money from Merck & Co will be more likely to adopt such legislation.
+
+In summary: 
+
+> **Hypotheses**
+
+> Media salience is negatively correlated with mandatory legislation.
+
+> Proportion of stage legislature that is Democrat is positively correlated with mandatory legislation.
+
+> Religiosity (percentage of the population that is Catholic or Evangelical) is negatively correlated with mandatory legislation.
+
+> Merck PAC contribution is positively correlated with mandatory legislation.
+
+
+
+# Data
+
+```{r, eval=F}
+data <- read.csv("logit-lab.csv", stringsAsFactors=F)
+```
+
+The following variables are available in your dataset. 
+
+ **Variable name**       | **Description**                                   
+------------------------ | -----------------------------------------------------
+Adoption                 | Whether a state legislature has considered a mandatory vaccine law (=1) or not (=0)  
+Democrats                | Percentage of House Democrats in the state legislature      
+Evangelic                | Percentage of Evangelic population       
+Catholics                | Percentage of Catholic population      
+Media                    | Number of articles covering the HPV vaccine issue in major news sources in a state in the past year
+Merck                    | Average total dollar amount of contributions given to candidates for state offices 
+
+Given that the dependent variable is a binary outcome (1/0), a probability model is appropriate. 
+
+Answer the questions below using a linear probability model and a logistic regression model. 
+
+
+
+# Robust Standard Errors 
+
+Robust standard errors mitigate the effects of skew or outliers in the residuals to offer a more robust standard error statistic when the data is idiosyncratic for a number of reasons, including binary outcomes. 
+
+It is harder to add these to Stargazer than it should be. Here is some code to help out: 
+
+```{r, results="asis"}
+x1 <- rnorm(100)
+x2 <- rnorm(100) 
+y <- 3*x1 + x2 + rnorm(100,0,10)
+
+m.01 <- lm( y ~ x1 )
+m.02 <- lm( y ~ x2 )
+
+# install.packages( "sandwhich" )
+# install.packages( "lmtest" )
+
+library(sandwich)
+library(lmtest)
+
+# Adjust standard errors
+cov1         <- vcovHC( m.01, type="HC1" )
+robust1      <- sqrt( diag( cov1 ) )
+cov2         <- vcovHC( m.02, type="HC1" )
+robust2      <- sqrt( diag( cov2 ) )
+
+# add to stargazer 
+stargazer( m.01, m.02, type = "html" ,
+           se        = list( robust1, robust2 ) )
+```
+
+
+
+# Questions
+
+## Q1
+
+**First, let's run a linear probability model.**
+
+* **Q1a:** Run a linear probability model and report results. Remember to use robust standard errors (you might need to install lmtest and sandwich packages) (5 + 5 points)
+* **Q1b:** Which variables affect the probability that a state considers mandatory vaccine legislation? (5 points)
+* **Q1c:** What is the impact of Media coverage on the probability that a state considers mandatory vaccine legislation? (5 points)
+* **Q1d:** Robust standard errors solve heteroskedasticity problems. What other two issues are problematic in the linear probability models? (5 + 5 points)
+
+## Q2
+
+**Alternatively we can use a logit model.** 
+
+* **Q2a:** Which estimator do we use in a logit model? What is the function shape? (5 + 5 points)
+* **Q2b:** Run the logit model and report results in a stargazer table (5 + 5 points)
+
+## Q3: 
+
+**Interpretation of the coefficient in a logit model can be tricky.**
+
+* **Q3a:** Transform the model coefficient in odd ratios. (5 points)
+* **Q3b:** As the evangelic population increases of one unit, how does the log odds of adopting a mandatory vaccine legislation change? (5 points)
+* **Q3c:** Use the probability formula to calculate the probability of adopting a mandatory vaccine legislation for an average state (i.e., a state where all variables are equal to the mean) (5 points)
+* **Q3d:** Compared to the average state, how much does the probability change if a state that has a particularly high media coverage, equal to the 95% quantile? You can use the probability formula or the predict function, as you prefer. (5 points)
+* **Q3e:** Compared to the average state, how much does the probability change if a state that has a particularly low percentage of Evangelics, equal to the 25% quantile? You can use the probability formula or the predict function, as you prefer. (5 points)
+* **Q3f:** Now create a graph plotting how probabilities change as the percentage of Evangelics goes from 0 to 100 (just consider values every 10 percentage points, e.g., 0, 10, 20...) (5 points)
+
+## Q4
+
+**Another way to interpret the coefficients is using marginal effect**
+
+**Q4a:** Which variable has the highest marginal effect between Media and Evangelics? (5 points)
+**Q4b** Does an increase in Evangelic population have a greater effect in a state where the current % is equal to 20% or 40%? (5 points)
+**Q4c:** Imagine to work for an advocacy group that is trying to promote the adoption of mandatory HPV vaccine legislation across states. Part of your effort is to decrease negative media coverage. Would you rather invest in a state where the media coverage is equal to 200 or in a state where the media coverage is equal to 400?  (10 points)
