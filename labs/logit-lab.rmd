@@ -152,6 +152,8 @@ stargazer( m.01, m.02, type = "html" ,
 
 **Another way to interpret the coefficients is using marginal effect**
 
-**Q4a:** Which variable has the highest marginal effect between Media and Evangelics? (5 points)
-**Q4b** Does an increase in Evangelic population have a greater effect in a state where the current % is equal to 20% or 40%? (5 points)
-**Q4c:** Imagine to work for an advocacy group that is trying to promote the adoption of mandatory HPV vaccine legislation across states. Part of your effort is to decrease negative media coverage. Would you rather invest in a state where the media coverage is equal to 200 or in a state where the media coverage is equal to 400?  (10 points)
+**Q4a:** Which variable has the highest marginal effect between Media and Evangelics? (5 points)  
+**Q4b** Does an increase in Evangelic population have a greater effect in a state where the current % is equal to 20% or 40%? (5 points)  
+**Q4c:** Imagine to work for an advocacy group that is trying to promote the adoption of mandatory HPV vaccine legislation across states. Part of your effort is to decrease negative media coverage. Would you rather invest in a state where the media coverage is equal to 200 or in a state where the media coverage is equal to 400?  (10 points)  
+
+
