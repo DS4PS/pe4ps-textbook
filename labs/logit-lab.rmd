@@ -335,7 +335,7 @@ points( group.x, ave.y, pch=19, col="steelblue", cex=1.2, type="b" )
 smooth.y <- smooth( ave.y )
 
 plot( x, y, pch=19, col=gray(0.5,0.1), bty="n", cex=1.5,
-      ylab="Prob( Y=1 )", xlab="Independent Variable" )
+      ylab="Prob( Y=1 for bin of X )", xlab="Independent Variable" )
 abline( h=seq(0,1,0.1), lty=3, col=gray(0.5,0.5) )
 abline( v=seq(0,100,5), lty=3, col=gray(0.5,0.5) )
 points( group.x, ave.y, pch=19, col=adjustcolor( "steelblue", alpha=0.5), cex=1.5 )
@@ -351,7 +351,7 @@ m2 <- glm( y ~ x, family="binomial" )
 plot.order <- order(x)
 
 plot( x, y, pch=19, col=gray(0.5,0.1), bty="n", cex=1.5,
-      ylab="Prob( Y=1 )", xlab="Independent Variable" )
+      ylab="Prob( Y=1 for bin of X )", xlab="Independent Variable" )
 abline( h=seq(0,1,0.1), lty=3, col=gray(0.5,0.5) )
 abline( v=seq(0,100,5), lty=3, col=gray(0.5,0.5) )
 points( group.x, ave.y, pch=19, col=adjustcolor( "steelblue", alpha=0.5), cex=1.5 )
