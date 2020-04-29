@@ -324,7 +324,7 @@ $(document).ready(function () {
 <div id="TOC">
 <ul>
 <li><a href="#key-insights"><span class="toc-section-number">1</span> Key Insights</a><ul>
-<li><a href="#example-1"><span class="toc-section-number">1.1</span> Example 1</a></li>
+<li><a href="#example"><span class="toc-section-number">1.1</span> Example</a></li>
 </ul></li>
 <li><a href="#matching-scores"><span class="toc-section-number">2</span> Matching Scores</a><ul>
 <li><a href="#identify-the-covariates"><span class="toc-section-number">2.1</span> Identify the covariates</a></li>
@@ -380,9 +380,15 @@ library( stargazer )</code></pre>
 <p>Propensity score matching is a methodology that tries to achieve the favorable conditions of a randomized controlled trail while using observational data thas has potential selection bias. In several circumstances, individuals self-select into the treatment or the control group because of “certain characteristics” that make them more likely to select into one group or the other.</p>
 <p>For instance, we might be interested in understanding whether government funding provided to small businesses to hire individuals from disadvantaged populations promotes higher employment rates for this segment of the labor force. If we only consider the businesses that applied and received the funding we would likely find a positive correlation between program dollars and employment of disadvantaged populations. But to what extent were these businesses already planning to hire individuals from disadvantaged populations before the program started? In order words, what would have these businesses done had they not receive funding? How many business apply for the funds because they already employ a large number of people that meet the eligibility criteria versus businesses changing their hiring practices to qualify? In non-randomized studies the selection problem undermine the ability to use non-treated individuals as the counterfactual to treated individuals in the sample.</p>
 <p>The <strong>propensity score</strong> model came about when scholars asked, if the choice to participate in the program is introducing omitted variable bias into the study, can we control for the decision? Can we model the <strong>propensity</strong> or likelihood that a person participates in the program? The goal of <strong>propensity scores</strong> is to find individuals that are almost idenentical on a given set of measured characteristics so that they are both equally likely to participate in a program, i.e. self-select into the treatment group. However, we are matching those that participated in the treatment to those that are not. In order words, in the example above we are looking for businesses with identical work forces, one of which received funding for hiring disadvantaged populations (the treatment), another which did not apply but would have received it if they had since they are almost identical to the organizaton that was treated (control or counterfactual). We can then compare their outcomes.</p>
-<p>In very simple terms, we are looking for <strong>doppelgangers</strong>! <a href="https://en.wikipedia.org/wiki/Doppelg%C3%A4nger">Doppelgangers</a> are individuals that look identical even if they are not genetically related.</p>
-<div id="example-1" class="section level2">
-<h2><span class="header-section-number">1.1</span> Example 1</h2>
+<p>In very simple terms, we are looking for <a href="https://en.wikipedia.org/wiki/Doppelg%C3%A4nger"><strong>doppelgangers</strong></a>, individuals that <strong>look identical</strong> even if they are not genetically related.</p>
+<div class="figure"><span id="fig:doppel"></span>
+<img src="FIGURE/Matching/doppelganger.jpg" alt="Doppelg?nger" width="80%" />
+<p class="caption">
+Figure 1.1: Doppelg?nger
+</p>
+</div>
+<div id="example" class="section level2">
+<h2><span class="header-section-number">1.1</span> Example</h2>
 <p>Let’s consider a case with a top dollar admissions coaching service for college students interested in law school. The services helps coach students on application materials and selection of programs. You pay a premium for the services, though.</p>
 <p>The question, however, is whether the program really works? They boast high success rates on their website, but what types of students would sign up for their services in the first place? Those that really want to attend law school. We almost certainly have a selection problem, where merely signing up for the program is a signal of commitment to law school. Those students are likely different than other students. Is the program actually improving chances of getting admitted to a good program? Or is the organization merely capturing the top students that are already strong candidates?</p>
 <p>The challenge is going to be that students signing up for an expensive admissions coaching program are likely doing a lot of other things to improve their chances of success. Those that sign up for admissions coaching are not “typical” students in the pool of applicants. They tend to have high GPAs and good LSAT scores, making their likelihood of success high even without the coaching.</p>
@@ -718,7 +724,6 @@ Adjusted R<sup>2</sup>
 </div>
 <div id="matching-scores" class="section level1">
 <h1><span class="header-section-number">2</span> Matching Scores</h1>
-<p>In</p>
 <div class="figure"><span id="fig:exampleCover"></span>
 <img src="FIGURE/Matching/Picture1.jpg" alt="Source: https://pixabay.com/images/search/classroom/" width="60%" />
 <p class="caption">
