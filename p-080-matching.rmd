@@ -1,5 +1,5 @@
 ---
-title: "Propensity Score Matching"
+title: "Matching"
 ---
 
 ```{r setup, include=FALSE}
@@ -7,180 +7,428 @@ knitr::opts_chunk$set(echo = TRUE, message=F, warning=F, fig.width = 10)
 ```
 **Packages**
 
-Here are the packages we will use in this lecture. If you don't remember how to install them, you can have a look at the code. 
+We will use the following packages in this lecture. 
 
 * **kableExtra** for nice tables
 * **dplyr** to support formatting options in your table
 * **MatchIt** to perform matching algorithms in R
 * **ggplot2** for nice visualizations of covariates
 
+```{r, eval=T}
+
+# install.packages( "dplyr" )
+# install.packages( "kableExtra" )
+# install.packages( "MatchIt" )
+# install.packages( "ggplot2" )
+
+library( dplyr )
+library( kableExtra )
+library( MatchIt )
+library( ggplot2 )
+library( stargazer )
+
+```
+
+
+```{r, echo=F}
+library( scales )
+```
+
+
+**Learning Objectives:**
+
+* What problem does matching solve and when is it appropriate? 
+* What are different methods used to match observations? What are pros and cons of each?
+* What is a propensity scores?
+* How can you estimate propensity scores and use them for matching?
+* What is the primary weakness of matching?
+
+
+# Key Insights
+
+
+We have learned that the selection problem is the primary challenge to causal estimation of policy or program impact. When people can decide whether or not to participate in a voluntary program, almost universally the types of people that enroll are different than the types that do not. Or conversely, the types of people that are selected during an a competitive process are different from other applicants. The types of organizations that are required to do remedial training because they failed an inspection or safety checks are different than organizations that pass. These differences typically lead to unobservable omitted variables that will bias any estimates of program effectiveness. 
+
+
+Randomized controlled trials are the gold standard approach to mitigating selection problems. Randomization ensures that observable characteristics like gender and age will be equally distributed between the treatment and control groups. It also ensures that latent or unobservable characteristics like motivation, ability, experience, and support are also balanced. As a result, it breaks any correlations that exist between the choice to enroll in a program and all other traits of study participants. If randomization is successful, it makes the treatment (or level of treatment) completely exogenous. Thus, differences between treated and untreated subjects (or levels of treatment), can be interpretted as **caused** by the treatment, and not other factors. *This assumes 'happy' randomization and no non-random attrition, but these are testable assumptions.*
+
+Note that randomization ensures that there are no pre-treatment differences between study groups, thus the post-test only estimator is appropriate. 
+
+![](FIGURE/Matching/post-test-only-estimator.png)
+
+Unfortunately in many cases, a randomized control trial is not a feasible option and we need to consider other methods, such as some of the quasi-experimental methodologies that we have seen so far. 
+
+Propensity score matching is a methodology that tries to achieve the favorable conditions of a randomized controlled trail while using observational data thas has potential selection bias. In several circumstances, individuals self-select into the treatment or the control group because of "certain characteristics" that make them more likely to select into one group or the other. 
+
+For instance, we might be interested in understanding whether government funding provided to small businesses to hire individuals from disadvantaged populations promotes higher employment rates for this segment of the labor force. If we only consider the businesses that applied and received the funding we would likely find a positive correlation between program dollars and employment of disadvantaged populations. But to what extent were these businesses already planning to hire individuals from disadvantaged populations before the program started? In order words, what would have these businesses done had they not receive funding? How many business apply for the funds because they already employ a large number of people that meet the eligibility criteria versus businesses changing their hiring practices to qualify? In non-randomized studies the selection problem undermine the ability to use non-treated individuals as the counterfactual to treated individuals in the sample. 
+
+The **propensity score** model came about when scholars asked, if the choice to participate in the program is introducing omitted variable bias into the study, can we control for the decision? Can we model the **propensity** or likelihood that a person participates in the program? The goal of **propensity scores** is to find individuals that are almost idenentical on a given set of measured characteristics so that they are both equally likely to participate in a program, i.e. self-select into the treatment group. However, we are matching those that participated in the treatment to those that are not. In order words, in the example above we are looking for businesses with identical work forces, one of which received funding for hiring disadvantaged populations (the treatment), another which did not apply but would have received it if they had since they are almost identical to the organizaton that was treated (control or counterfactual). We can then compare their outcomes.
+
+In very simple terms, we are looking for **doppelgangers**!  [Doppelgangers](https://en.wikipedia.org/wiki/Doppelg%C3%A4nger) are individuals that look identical even if they are not genetically related.
+
+
+## Example 1
+
+Let's consider a case with a top dollar admissions coaching service for college students interested in law school. The services helps coach students on application materials and selection of programs. You pay a premium for the services, though. 
+
+The question, however, is whether the program really works? They boast high success rates on their website, but what types of students would sign up for their services in the first place? Those that really want to attend law school. We almost certainly have a selection problem, where merely signing up for the program is a signal of commitment to law school. Those students are likely different than other students. Is the program actually improving chances of getting admitted to a good program? Or is the organization merely capturing the top students that are already strong candidates? 
+
+
+
+
+The challenge is going to be that students signing up for an expensive admissions coaching program are likely doing a lot of other things to improve their chances of success. Those that sign up for admissions coaching are not "typical" students in the pool of applicants. They tend to have high GPAs and good LSAT scores, making their likelihood of success high even without the coaching. 
+
+![](FIGURE/Matching/law-school-01.png)
+
+
+Looking at the figure, the challenges is the high correlation between participating in the admissions coaching program and admissions to law school. If admissions success was entirely driven by the program the the high correlation would be fine. But we see that admissions is also correlated with GPA and LSAT scores. The strong relationships between these four variables suggests there may be another factor driving the correlations we observe. Admissions does not have to be impacted at all by the coaching program for there to be a strong correlation if there is a common variable like level of motivation shaping all of the covariates in the model. 
+
+![](FIGURE/Matching/law-school-04.png)
+
+Note that including LSAT and GPA in the model will improve estimates beyond a naive model that only includes program participation. But they are not sufficient to control for missing variables. The underlying variable of motivation is still missing, so the estimate of the impact of admissions coaching on the final outcome will still be biased. 
+
+The trick is to recognize that the treatment and control groups are apples and oranges so a raw comparison of success rates between the two groups will be problematic. Since there is no way to measure admissions rates before students sign up for coaching program and apply, we cannot use some of the common models that can help correct for bias such as a difference-in-difference framework or panel methods. We only have outcomes that occur after the treatment. We know that post-test only estimates will only be unbiased if we have groups that are identical prior to the treatment. 
+
+The fix is to use a matching process to identify twins in the data such that two cases are "identical" on measured characteristics but one received the treatment and one did not. In this case we have two control variables only, so we will use a very simplistic method of looking at instances where treated and untreated cases overlap on the scatterplot, dropping the rest of the data:
+
+![](FIGURE/Matching/law-school-02.png)
+
+Note that the covariates are all measures from prior to when the treatment occurred, so they are describing the pre-treatment state of the study group. As a result, by discarding a large proportion of the data and focusing on the subset of matched cases we have re-created the conditions of an RCT, primarily that two groups should be balanced. We can now consider the data in more detail and the evidence for program success. In this case both the treatment and the outcome are binary, so we can use visual inspection and reason through the scenarios:  
+
+![](FIGURE/Matching/law-school-03.png)
+
+Conceptually, each pair represents a counter-factual if we believe the assumption that your untreated doppelganger is a reasonable representation of what you would look like if you had not received the treatment. We can now estimate the impact of admissions coaching by comparion treated and untreated cases. For simplicity, we will use a linear probability model:  
+
+
+```{r, eval=T}
+# > dput(gpa)
+gpa <- 
+c(2.6159787901946, 3.21736812236511, 3.5405463872337, 3.91970108539356, 
+2.03511472781177, 2.68532174464602, 2.28188577528272, 3.08720640268527, 
+3.48284146544279, 3.22380189104055, 3.30665435896137, 3.32780850423293, 
+3.63068142350387, 3.83636515392655, 3.05930145996071, 3.84185246439118, 
+2.5851924685327, 2.00855552381307, 2.79299048387649, 2.70916293710547, 
+3.81917149760915, 3.6228595647663, 2.02911531212327, 4.06257304112354, 
+3.31000053524501, 2.24801764007312, 3.21803571258973, 2.88121994382121, 
+3.28149707848388, 3.37537264518966, 2.06694528290228, 2.8341656291009, 
+2.67077874220602, 2.99320790449838, 3.62199372770993, 2.41017136636896, 
+2.48878104071005, 1.94074545589611, 2.06551642414302, 3.00895809303604, 
+3.17268682678355, 3.63900386751848, 1.95564219272312, 2.90445155197373, 
+2.96985021333923, 2.04184280729974, 3.51497964386235, 3.44927166080488, 
+2.32360299429693, 3.62939363940064, 2.67644331229011, 3.9625794083367, 
+3.78254297208907, 2.65219077868443, 2.04978651754732, 4.14464452793737, 
+2.48963425316853, 3.87916927405778, 2.27686723428854, 3.2758285853739, 
+2.25702120670263, 2.22312919313002, 1.90659155192284, 2.7412970195498, 
+2.05778186661082, 2.32975939146246, 3.97168731681461, 2.19218613139104, 
+3.64476468242825, 2.44186660097907, 2.18107385074341, 2.56219410820381, 
+3.7841979264117, 3.71822022692478, 4.11113336088402, 3.12366098811401, 
+2.60484367948823, 3.44220105531685, 2.87896437353783, 3.25610482267806, 
+2.88243076763779, 2.9046920441307, 2.35062220472042, 2.18646903048459, 
+3.34780158776369, 1.98127124131876, 3.35514639143928, 3.45353594577433, 
+3.49068473784773, 2.0978658668199, 2.8337986455381, 3.3948034778424, 
+3.9917474339063, 2.17246398713074, 2.46460939967413, 2.66652609693591, 
+3.47013062349409, 2.65792960385949, 2.71760079662088, 2.05328463950335
+)
+# > dput(lsat)
+lsat <- 
+c(145.952300905935, 164.888289647179, 159.910726683132, 129.970164649436, 
+166.887384502726, 176.082647938974, 126.107126639122, 138.122725198303, 
+175.01429450674, 124.198774814702, 148.157905651809, 165.902042918279, 
+170.86210876751, 129.99790831433, 158.942759642743, 144.08190941799, 
+157.928700436461, 127.061252394214, 127.976715835044, 143.977311018364, 
+168.106455706551, 153.055960309505, 129.064444014144, 175.849294786817, 
+158.727197609528, 120.151646259827, 140.020994141552, 120.91269127151, 
+144.065689775316, 166.973298192915, 156.958358920427, 155.027941726026, 
+141.951051458246, 133.161455824508, 167.033654426077, 136.925631393548, 
+155.958900412229, 173.109818741141, 167.154034182213, 179.02157657656, 
+131.002511364673, 120.050625056506, 134.837196550179, 145.944899668184, 
+120.95292452038, 123.038299671817, 175.857511479449, 124.055513940446, 
+129.064654266376, 160.908015210708, 128.862085689755, 122.076773077479, 
+147.898610773285, 134.045987415308, 159.03168608195, 157.004128686876, 
+173.101477346685, 140.034635459666, 154.128716946311, 152.00978239957, 
+129.985348798586, 154.973056993292, 134.992192179686, 129.855955393512, 
+167.006113927053, 173.073118368711, 171.768836785606, 151.123510536061, 
+143.107434454865, 129.001508432487, 143.018432642471, 171.956900333934, 
+132.955417572184, 152.919779850605, 145.042058294691, 174.016230162574, 
+178.881300588744, 140.008999177798, 153.04453474676, 174.0134253414, 
+136.101729739799, 175.950286787161, 165.917359624194, 129.991254750415, 
+121.055826911114, 161.95634242456, 123.067521423418, 169.012586453432, 
+178.970514980657, 177.055312739649, 120.009700877406, 151.926746758908, 
+173.993404666208, 120.944944607453, 150.032393136119, 170.036478709669, 
+151.184419758293, 137.937387497094, 156.080379871703, 166.978991885011
+)
+# > dput( coaching )
+coaching <- 
+c(0L, 1L, 0L, 1L, 0L, 1L, 0L, 1L, 1L, 0L, 0L, 0L, 1L, 0L, 0L, 
+1L, 0L, 0L, 1L, 0L, 1L, 1L, 0L, 1L, 0L, 0L, 0L, 0L, 0L, 1L, 0L, 
+0L, 0L, 0L, 1L, 0L, 0L, 0L, 0L, 1L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 
+0L, 0L, 1L, 0L, 0L, 1L, 0L, 0L, 1L, 1L, 1L, 0L, 1L, 0L, 0L, 0L, 
+1L, 0L, 0L, 1L, 0L, 0L, 0L, 0L, 1L, 0L, 0L, 1L, 1L, 1L, 0L, 1L, 
+1L, 0L, 0L, 1L, 0L, 0L, 0L, 0L, 0L, 1L, 0L, 0L, 1L, 0L, 0L, 0L, 
+0L, 0L, 0L, 0L, 0L)
+# > dput( admit )
+admit <- 
+c(0L, 1L, 0L, 1L, 0L, 1L, 0L, 1L, 1L, 0L, 0L, 1L, 1L, 0L, 1L, 
+1L, 0L, 0L, 0L, 0L, 1L, 1L, 0L, 1L, 1L, 0L, 1L, 0L, 0L, 1L, 0L, 
+0L, 1L, 0L, 1L, 0L, 1L, 0L, 0L, 1L, 0L, 0L, 0L, 1L, 1L, 0L, 0L, 
+0L, 0L, 0L, 0L, 1L, 0L, 0L, 0L, 1L, 1L, 0L, 0L, 1L, 0L, 0L, 0L, 
+0L, 0L, 0L, 1L, 0L, 0L, 0L, 0L, 0L, 1L, 0L, 0L, 1L, 1L, 0L, 1L, 
+1L, 0L, 1L, 0L, 1L, 1L, 0L, 0L, 1L, 1L, 0L, 1L, 1L, 0L, 0L, 0L, 
+0L, 0L, 1L, 0L, 0L)
+
+
+data <- data.frame( admit, coaching, gpa, lsat ) 
+```
+
+
+Code for graphs: 
+
 ```{r, eval=F}
+border <- ifelse( coaching==1, "darkorchid4", "gray" )
+background <- ifelse( admit==1, "forestgreen", "gray" )
 
-install.packages( "dplyr" )
-library("dplyr")
+plot( gpa, lsat, 
+      pch=21, cex=3, bty="n", 
+      col=border, bg=adjustcolor( background, alph=0.4),
+      xlab="GPA", ylab="LSAT", lwd=2  )
 
-install.packages( "kableExtra" )
-library("kableExtra")
 
+twins <- c(3,4,8,9,14,22,27,30,32,40,47,50,51,
+           64,67,72,74,79,82,88,92,93,96,97)
 
+plot( gpa[twins], lsat[twins], pch=21, cex=3.5, bty="n", 
+      col=border[twins], 
+      bg=adjustcolor( background[twins], alph=0.4 ),
+      xlab="GPA", ylab="LSAT", lwd=2,
+      xlim=c(2,4), ylim=c(120,180) )
 ```
 
-**What you will learn**
 
-* What are propensity scores?
-* How can you calculate propensity scores?
-* Which strategies can you use to match observations? What are pros and cons?
-* What are some limitations of using propensity scores?
+```{r, echo=F}
+# > dput(gpa)
+gpa <- 
+c(2.6159787901946, 3.21736812236511, 3.5405463872337, 3.91970108539356, 
+2.03511472781177, 2.68532174464602, 2.28188577528272, 3.08720640268527, 
+3.48284146544279, 3.22380189104055, 3.30665435896137, 3.32780850423293, 
+3.63068142350387, 3.83636515392655, 3.05930145996071, 3.84185246439118, 
+2.5851924685327, 2.00855552381307, 2.79299048387649, 2.70916293710547, 
+3.81917149760915, 3.6228595647663, 2.02911531212327, 4.06257304112354, 
+3.31000053524501, 2.24801764007312, 3.21803571258973, 2.88121994382121, 
+3.28149707848388, 3.37537264518966, 2.06694528290228, 2.8341656291009, 
+2.67077874220602, 2.99320790449838, 3.62199372770993, 2.41017136636896, 
+2.48878104071005, 1.94074545589611, 2.06551642414302, 3.00895809303604, 
+3.17268682678355, 3.63900386751848, 1.95564219272312, 2.90445155197373, 
+2.96985021333923, 2.04184280729974, 3.51497964386235, 3.44927166080488, 
+2.32360299429693, 3.62939363940064, 2.67644331229011, 3.9625794083367, 
+3.78254297208907, 2.65219077868443, 2.04978651754732, 4.14464452793737, 
+2.48963425316853, 3.87916927405778, 2.27686723428854, 3.2758285853739, 
+2.25702120670263, 2.22312919313002, 1.90659155192284, 2.7412970195498, 
+2.05778186661082, 2.32975939146246, 3.97168731681461, 2.19218613139104, 
+3.64476468242825, 2.44186660097907, 2.18107385074341, 2.56219410820381, 
+3.7841979264117, 3.71822022692478, 4.11113336088402, 3.12366098811401, 
+2.60484367948823, 3.44220105531685, 2.87896437353783, 3.25610482267806, 
+2.88243076763779, 2.9046920441307, 2.35062220472042, 2.18646903048459, 
+3.34780158776369, 1.98127124131876, 3.35514639143928, 3.45353594577433, 
+3.49068473784773, 2.0978658668199, 2.8337986455381, 3.3948034778424, 
+3.9917474339063, 2.17246398713074, 2.46460939967413, 2.66652609693591, 
+3.47013062349409, 2.65792960385949, 2.71760079662088, 2.05328463950335
+)
+# > dput(lsat)
+lsat <- 
+c(145.952300905935, 164.888289647179, 159.910726683132, 129.970164649436, 
+166.887384502726, 176.082647938974, 126.107126639122, 138.122725198303, 
+175.01429450674, 124.198774814702, 148.157905651809, 165.902042918279, 
+170.86210876751, 129.99790831433, 158.942759642743, 144.08190941799, 
+157.928700436461, 127.061252394214, 127.976715835044, 143.977311018364, 
+168.106455706551, 153.055960309505, 129.064444014144, 175.849294786817, 
+158.727197609528, 120.151646259827, 140.020994141552, 120.91269127151, 
+144.065689775316, 166.973298192915, 156.958358920427, 155.027941726026, 
+141.951051458246, 133.161455824508, 167.033654426077, 136.925631393548, 
+155.958900412229, 173.109818741141, 167.154034182213, 179.02157657656, 
+131.002511364673, 120.050625056506, 134.837196550179, 145.944899668184, 
+120.95292452038, 123.038299671817, 175.857511479449, 124.055513940446, 
+129.064654266376, 160.908015210708, 128.862085689755, 122.076773077479, 
+147.898610773285, 134.045987415308, 159.03168608195, 157.004128686876, 
+173.101477346685, 140.034635459666, 154.128716946311, 152.00978239957, 
+129.985348798586, 154.973056993292, 134.992192179686, 129.855955393512, 
+167.006113927053, 173.073118368711, 171.768836785606, 151.123510536061, 
+143.107434454865, 129.001508432487, 143.018432642471, 171.956900333934, 
+132.955417572184, 152.919779850605, 145.042058294691, 174.016230162574, 
+178.881300588744, 140.008999177798, 153.04453474676, 174.0134253414, 
+136.101729739799, 175.950286787161, 165.917359624194, 129.991254750415, 
+121.055826911114, 161.95634242456, 123.067521423418, 169.012586453432, 
+178.970514980657, 177.055312739649, 120.009700877406, 151.926746758908, 
+173.993404666208, 120.944944607453, 150.032393136119, 170.036478709669, 
+151.184419758293, 137.937387497094, 156.080379871703, 166.978991885011
+)
+# > dput( coaching )
+coaching <- 
+c(0L, 1L, 0L, 1L, 0L, 1L, 0L, 1L, 1L, 0L, 0L, 0L, 1L, 0L, 0L, 
+1L, 0L, 0L, 1L, 0L, 1L, 1L, 0L, 1L, 0L, 0L, 0L, 0L, 0L, 1L, 0L, 
+0L, 0L, 0L, 1L, 0L, 0L, 0L, 0L, 1L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 
+0L, 0L, 1L, 0L, 0L, 1L, 0L, 0L, 1L, 1L, 1L, 0L, 1L, 0L, 0L, 0L, 
+1L, 0L, 0L, 1L, 0L, 0L, 0L, 0L, 1L, 0L, 0L, 1L, 1L, 1L, 0L, 1L, 
+1L, 0L, 0L, 1L, 0L, 0L, 0L, 0L, 0L, 1L, 0L, 0L, 1L, 0L, 0L, 0L, 
+0L, 0L, 0L, 0L, 0L)
+# > dput( admit )
+admit <- 
+c(0L, 1L, 0L, 1L, 0L, 1L, 0L, 1L, 1L, 0L, 0L, 1L, 1L, 0L, 1L, 
+1L, 0L, 0L, 0L, 0L, 1L, 1L, 0L, 1L, 1L, 0L, 1L, 0L, 0L, 1L, 0L, 
+0L, 1L, 0L, 1L, 0L, 1L, 0L, 0L, 1L, 0L, 0L, 0L, 1L, 1L, 0L, 0L, 
+0L, 0L, 0L, 0L, 1L, 0L, 0L, 0L, 1L, 1L, 0L, 0L, 1L, 0L, 0L, 0L, 
+0L, 0L, 0L, 1L, 0L, 0L, 0L, 0L, 0L, 1L, 0L, 0L, 1L, 1L, 0L, 1L, 
+1L, 0L, 1L, 0L, 1L, 1L, 0L, 0L, 1L, 1L, 0L, 1L, 1L, 0L, 0L, 0L, 
+0L, 0L, 1L, 0L, 0L)
 
-```{r, echo=FALSE, results="hide"}
+# > dput( p.coach )
+p.coach <- 
+c(0.193923781681413, 0.47287683402821, 0.580478841925711, 0.413573803803523, 
+0.205863521749613, 0.33620535123994, 0.142167388899611, 0.275947743690683, 
+0.729335627644695, 0.231615242003094, 0.384288947726956, 0.516397819885138, 
+0.734503955800836, 0.445348122867454, 0.397796892728336, 0.449568532253992, 
+0.264307623286641, 0.0895984671123723, 0.210941655993544, 0.221503081065662, 
+0.801763427100846, 0.449937031031123, 0.0846919384681651, 0.899870172386177, 
+0.495945430765638, 0.0762781307879699, 0.30977838541748, 0.168657656768907, 
+0.358988800107053, 0.524681886185771, 0.154763835706046, 0.271489477091039, 
+0.179343048977632, 0.213061554138318, 0.646570697736474, 0.162364557010663, 
+0.215607428515951, 0.211949016414052, 0.205863521749613, 0.550607101745605, 
+0.263585866144653, 0.322987558879105, 0.0969765195678889, 0.293976742403956, 
+0.168657656768907, 0.0736850764950737, 0.64706351074539, 0.251671040958826, 
+0.114109734036, 0.631683516595536, 0.16548717687838, 0.420162554416107, 
+0.553428940948012, 0.199341375483122, 0.161144999013057, 0.728251275134177, 
+0.319048390235219, 0.523432545012868, 0.190377970505028, 0.381212060912859, 
+0.116591096734163, 0.162691016253755, 0.0969765195678889, 0.184433131744098, 
+0.205863521749613, 0.271981974879125, 0.849684562337091, 0.15003538549689, 
+0.475760689724168, 0.114109734036, 0.152967182354891, 0.313487770300792, 
+0.374162267925612, 0.558011726542901, 0.607169458522428, 0.508625198954204, 
+0.412025484313965, 0.390502324059283, 0.332571518640745, 0.627583881763466, 
+0.190007765521348, 0.454563689105695, 0.259763075741113, 0.105813402280968, 
+0.25857759453476, 0.186884216928093, 0.247073173801597, 0.622549043215077, 
+0.677187080078125, 0.248445417988065, 0.137750350183543, 0.410995850132668, 
+0.87448939300524, 0.0865491471428936, 0.20943780051436, 0.35378836858, 
+0.435384265262225, 0.197522230053406, 0.276446699791544, 0.188808574796188
+)
+# > dput( p.admit )
+p.admit <- 
+c(0.193923781681413, 0.47287683402821, 0.580478841925711, 0.413573803803523, 
+0.205863521749613, 0.33620535123994, 0.142167388899611, 0.275947743690683, 
+0.729335627644695, 0.231615242003094, 0.384288947726956, 0.516397819885138, 
+0.734503955800836, 0.445348122867454, 0.397796892728336, 0.449568532253992, 
+0.264307623286641, 0.0895984671123723, 0.210941655993544, 0.221503081065662, 
+0.801763427100846, 0.449937031031123, 0.0846919384681651, 0.899870172386177, 
+0.495945430765638, 0.0762781307879699, 0.30977838541748, 0.168657656768907, 
+0.358988800107053, 0.524681886185771, 0.154763835706046, 0.271489477091039, 
+0.179343048977632, 0.213061554138318, 0.646570697736474, 0.162364557010663, 
+0.215607428515951, 0.211949016414052, 0.205863521749613, 0.550607101745605, 
+0.263585866144653, 0.322987558879105, 0.0969765195678889, 0.293976742403956, 
+0.168657656768907, 0.0736850764950737, 0.64706351074539, 0.251671040958826, 
+0.114109734036, 0.631683516595536, 0.16548717687838, 0.420162554416107, 
+0.553428940948012, 0.199341375483122, 0.161144999013057, 0.728251275134177, 
+0.319048390235219, 0.523432545012868, 0.190377970505028, 0.381212060912859, 
+0.116591096734163, 0.162691016253755, 0.0969765195678889, 0.184433131744098, 
+0.205863521749613, 0.271981974879125, 0.849684562337091, 0.15003538549689, 
+0.475760689724168, 0.114109734036, 0.152967182354891, 0.313487770300792, 
+0.374162267925612, 0.558011726542901, 0.607169458522428, 0.508625198954204, 
+0.412025484313965, 0.390502324059283, 0.332571518640745, 0.627583881763466, 
+0.190007765521348, 0.454563689105695, 0.259763075741113, 0.105813402280968, 
+0.25857759453476, 0.186884216928093, 0.247073173801597, 0.622549043215077, 
+0.677187080078125, 0.248445417988065, 0.137750350183543, 0.410995850132668, 
+0.87448939300524, 0.0865491471428936, 0.20943780051436, 0.35378836858, 
+0.435384265262225, 0.197522230053406, 0.276446699791544, 0.188808574796188
+)
 
-# install.packages( "scales", repos="https://cran.cnr.berkeley.edu" )
-library("scales")
+# p.coach <- p.coach + rnorm(100,0,0.03)
+# p.admit <- p.admit + rnorm(100,0,0.03)
 
-# install.packages( "dplyr", repos="https://cran.cnr.berkeley.edu" )
-library("dplyr")
+# d <- data.frame( p.admit, gpa, lsat, p.coach )
+                 
+panel.cor <- function(x, y, digits=2, prefix="", cex.cor)
+{
+    usr <- par("usr"); on.exit(par(usr))
+    par(usr = c(0, 1, 0, 1))
+    r <- abs(cor(x, y))
+    txt <- format(c(r, 0.123456789), digits=digits)[1]
+    txt <- paste(prefix, txt, sep="")
+    if(missing(cex.cor)) cex <- 0.8/strwidth(txt)
+    
+    test <- cor.test(x,y)
+    # borrowed from printCoefmat
+    Signif <- symnum(test$p.value, corr = FALSE, na = FALSE,
+                  cutpoints = c(0, 0.001, 0.01, 0.05, 0.1, 1),
+                  symbols = c("***", "**", "*", ".", " "))
+    
+    text(0.5, 0.5, txt, cex = 1.5 )
+    text(.7, .8, Signif, cex=cex, col=2)
+}
 
-# install.packages( "kableExtra", repos="https://cran.cnr.berkeley.edu" )
-library("kableExtra")
+panel.smooth <- function (x, y, col = par("col"), bg = NA, pch = par("pch"), 
+    cex = 1.2, col.smooth = "red", span = 2/3, iter = 3, ...) 
+{
+    points(x, y, pch = 19, col = gray(0.7,0.4), bg = bg, cex = cex)
+    ok <- is.finite(x) & is.finite(y)
+    if (any(ok)) 
+        lines(stats::lowess(x[ok], y[ok], f = span, iter = iter), 
+            col = col.smooth, lwd=2, ...)
+}
 
-# install.packages( "MatchIt", repos="https://cran.cnr.berkeley.edu" )
-library("MatchIt")
+# custom plot
+jplot <- function( x1, x2, lab1="", lab2="", draw.line=T, ... )
+{
 
-# install.packages( "ggplot2", repos="https://cran.cnr.berkeley.edu" )
-library("ggplot2")
+    plot( x1, x2,
+          pch=19, 
+          col=gray(0.6, alpha = 0.2), 
+          cex=0.5,  
+          bty = "n",
+          xlab=lab1, 
+          ylab=lab2, cex.lab=1.5,
+        ... )
 
+    if( draw.line==T ){ 
+        ok <- is.finite(x1) & is.finite(x2)
+        lines( lowess(x2[ok]~x1[ok]), col="red", lwd=3 ) }
+
+}
+
+# correlation plots
+# pairs( d, upper.panel=panel.cor, lower.panel=panel.smooth )
 ```
 
-```{r doppel, fig.cap="Doppelg?nger", out.width='80%', echo=F }
-knitr::include_graphics( "FIGURE/MatchScores/doppel.jpg" )
+
+```{r, results="asis"}
+
+# row positions of matched pairs in dataset
+twins <- c(3,4,8,9,14,22,27,30,32,40,47,50,51,
+           64,67,72,74,79,82,88,92,93,96,97)
+
+data.twins <- data[ twins , ]
+
+
+m1 <- lm( admit ~ coaching + gpa + lsat, data=data )
+m2 <- lm( admit ~ coaching + gpa + lsat, data=data.twins )
+  
+stargazer( m1, m2, 
+           type="html", digits=2,
+           omit.stat = c("ser","f") )
 ```
 
-# The key concept
-
-We have learned that randomized controlled trials are the gold standard approach for evaluating program effectiveness. Yet in several cases, a randomized control trial is not a feasible option and we need to consider other methods, such as the quasi-experimental methodologies that we have seen so far. 
-
-Propensity score matching is another methodology that tries to replicate a randomized controlled trail by using observational data. In several circumstances, individuals self-select into the treatment or the control group because of "certain characteristics" that make them more likely to select into one group or the other. For instance, we might be interested in understanding whether government funding provided to small businesses to hire individuals from disadvantaged populations are actually effective. If we just consider the businesses that applied and received the funding, we might estimate a positive correlation... But to what extent were these businesses already planning to hire individuals from disadvantaged populations? In order words, what would have these businesses done had they not receive funding? In non randomized trailes we have self selection biases and we might lack an approprate counterfactual.
-
-The key idea behind **propensity scores** is to find individuals that are similar based on a given set of characteristics but that self-selected into the treatment and the control group. In order words, we are looking for two (or more) similar businesses, one of which applied and received funding (treatment), another which did not apply for funding (control or counterfactual). We can then compare their outcomes.
-
-In very simple terms, we are looking for **doppelg?nger** as the ones in the picture above. A [doppelg?nger](https://en.wikipedia.org/wiki/Doppelg%C3%A4nger) are two individuals that look identical even if they are not genetically related!
 
 
-## A simple example
 
-Let's see this with an example. Immagine you have 10 students. Some of these students participate into an after-school program aimed to increase social cohesion and interaction among students; some other students decide not to participate. We want to estimate what the effect of the program on students' social behavior. Social behavior is measured on a index from 0 to 7.
+> A propensity score represents the probability of being assigned to the treatment group based on a given set of characteristics. 
 
-```{r}
+In this example it would be the likelihood that an applicant had participated in an expensive admissions coaching service. 
 
-tc =c("t", "c", "t", "c", "t", "c", "t", "c", "t", "c", "t", "c")
-n = c(1, 4, 10, 9, 7, 6, 11, 9, 3, 2, 5, 12)
-x = c(2, 2, 4.5, 4.5, 5.5, 5.5, 7, 7, 8, 8, 10, 3)
-y = c(7, 2, 6, 1.2, 6, 2.4, 5, 3, 6.4, 1.9, 3.7, 4.8)
-
-df = as.data.frame(cbind(n, x, y))
-
-df$tc = tc
-
-col_plot = c("darkred", "dodgerblue1")
-
-plot(df$n, df$y, xlab = "Observation", ylab = "Social Behavior Index", lwd = 5, col = col_plot, xaxt = "n")
-axis(1, at=1:12, labels=c("#1", "#2", "#3", "#4", "#5", "#6", "#7", "#8", "#9", "#10", "#11", "#12"))
-
-points(10.8, 2, col = "darkred", lwd = 5)
-text(11.5, 2, "Participants")
-points(10.6, 1.5, col = "dodgerblue1", lwd = 5)
-text(11.5, 1.5, "Non-Participants")
-
-```
-
-We cannot simply compare the two groups. For instance, students who already have many friends might be more likely to decide to participate in the program; therefore they would report greater social skills even without the program. We want to find pairs of students who have a similar number of friends but where one student enrolled in the program and the other did not. We could start by creating a graph plotting each student's number of friends and their social behavior index.
-
-```{r}
-
-plot(x,y, lwd = 5, ylab = "Social Behavior Indext", xlab = "# of friends", col = col_plot, xaxt = "n")
-
-axis(1, at=1:12)
-
-points(9, 2, col = "darkred", lwd = 5)
-text(9.5, 2, "Participants")
-points(8.8, 1.5, col = "dodgerblue1", lwd = 5)
-text(9.5, 1.5, "Non-Participants")
+By matching observations in the treatment and in the control based on their propensity score, we can create artificial treatment and control groups that are more balanced than a blind comparison of the raw data. In some circumstances matching can reduce or eliminate the effects of confounding variables.
 
 
-```
 
-Some students are a perfect match because they have the same number of friends. Some others do not match with any obsevations and we decide to eliminate them.
+# Matching Scores
 
-```{r}
-
-plot(x,y, lwd = 5, ylab = "Social Behavior Indext", xlab = "# of friends", col = col_plot)
-text(10, 3.7, "X", col = "black", font = 2, cex = 2)
-text(3, 4.8, "X", col = "black", font = 2, cex = 2)
-
-points(9, 2, col = "darkred", lwd = 5)
-text(9.5, 2, "Participants")
-points(8.8, 1.5, col = "dodgerblue1", lwd = 5)
-text(9.5, 1.5, "Non-Participants")
-
-```
-
-The remaining individuals are "matches" - same X score, but self selected in the treatment or the control group. In other words we have created a group of individuals who undergo the treatment and their counterfactuals so that we can estimate the effectiveness of the treatment.
-
-```{r}
-
-plot(x,y, lwd = 5, ylab = "Social Behavior Indext", xlab = "# of friends", col = col_plot)
-
-text(2.3, 7, "T1", col = "darkred", font = 2)
-text(2.3, 2, "C1", col = "dodgerblue1", font = 2)
-
-text(4.8, 6, "T2", col = "darkred", font = 2)
-text(4.8, 1.2, "C2", col = "dodgerblue1", font = 2)
-
-text(5.8, 6, "T3", col = "darkred", font = 2)
-text(5.8, 2.4, "C3", col = "dodgerblue1", font = 2)
-
-text(7.3, 5, "T4", col = "darkred", font = 2)
-text(7.3, 3, "C4", col = "dodgerblue1", font = 2)
-
-text(8.3, 6.4, "T5", col = "darkred", font = 2)
-text(8.3, 1.9, "C5", col = "dodgerblue1", font = 2)
-
-text(10, 3.7, "X", col = "black", font = 2, cex = 2)
-text(3, 4.8, "X", col = "black", font = 2, cex = 2)
-
-points(9, 2, col = "darkred", lwd = 5)
-text(9.5, 2, "Participants")
-points(8.8, 1.5, col = "dodgerblue1", lwd = 5)
-text(9.5, 1.5, "Non-Participants")
-
-
-segments(2, 7, 2, 2, lty = 3)
-segments(4.5, 6, 4.5, 1.2, lty = 3)
-segments(5.5, 6, 5.5, 2.4, lty = 3)
-segments(7, 5, 7, 3, lty = 3)
-segments(8, 6.4, 8, 1.9, lty = 3)
-
-```
-
-We can now use a simple t-test to calculate the difference in the outcome. Since the p-value < 0.05, we can reject the null hypothesis that the means of the two groups are equal. Students who participate in the program report a higher social behavior index score compared to students who did not participate in the program. 
-
-```{r}
-
-# We eliminate the two observations that have no match
-df = df[!df$x == 10,]
-df = df[!df$x == 3,]
-
-t.test(df$y[df$tc == "c"], df$y[df$tc == "t"])
-```
-
-This example considers only one covariate (# of friends), but we might want to use several ones to control for differences across gender, race, income, school grades and so on. Propensity score techniques allow us to do so.
-
-> A propensity score represents the probability of being assigned to the treatment or the control group based on a given set of characteristics. By matching observations in the treatment and in the control based on their propensity score, we can create artificial treatment and control groups that can be compared as we have reduced or eliminated the effects of confounding variables.
-
-# A matching score example
+In 
 
 ```{r exampleCover, fig.cap="Source: https://pixabay.com/images/search/classroom/", out.width='60%', echo=F }
-knitr::include_graphics( "FIGURE/MatchScores/Picture1.jpg" )
+knitr::include_graphics( "FIGURE/Matching/Picture1.jpg" )
 ```
 
 ```{r, echo = F}

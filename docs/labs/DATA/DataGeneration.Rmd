@@ -395,6 +395,15 @@ df = data.frame(Adoption, Democrats, Evangelics, Catholics, Media, Merck)
 
 colnames(df) <- c("Adoption", "Democrats", "Evangelics", "Catholics", "Media", "Merck")
 
+
+
+df$Democrats <- round( df$Democrats, 2 )
+df$Evangelics <- round( df$Evangelics, 2 )
+df$Catholics <- round( df$Catholics, 2 )
+df$Media <- round( df$Media, 0 )
+df$Merck <- round( df$Merck, 0 )
+
+# write.csv( df, "logit-lab.csv", row.names=F )
 ```
 
 ## LSAT (lecture data)
