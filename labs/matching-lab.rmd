@@ -235,7 +235,7 @@ dat[ ids, ] %>% pander()
 
 
 
-## Q2 
+### Q2 
 
 Now check the balance on your original dataset and on your new matched dataset. You can use the following function to compare all means at once. 
 
@@ -374,13 +374,25 @@ Create a spreadsheet with your matched pairs listed as "1-C", "2-D", etc. Record
 
 **Report your results to Q1a to Q1d as a table with each matched pair, the distance between observations in the matched pair (like the example above), and the globalaverage distance measure across all 10 cases.**
 
-How sensitive are greedy search arguments to small changes like which data point you start with? 
+
+### Q2 
+
+Answer the following questions:
+
+**Q2a:** For questions Q1a to Q1c, which approach provided the best fit (lowest average distance to the match)? Did this surprise you? 
+
+**Q2b:** How much did allowing for cases to be dropped in Q1d improve fit (i.e. reduce the average distance score) compared to Q1a-Q1c?
+
+**Q2c:** How sensitive are greedy search arguments to small changes like which data points you start with? 
 
 
 
 ### Bonus 
 
-Continue using the greedy search rule (find the nearest neighbor), but you are free to choose the order of observations that you match as long as you match all 10 program participants and do not use replacement. Can you beat the lowest score from Q1a to Q1c? 
+Continue using the greedy search rule (find the nearest neighbor), but you are free to choose the order of observations that you match as long as you match all 10 program participants and do not use replacement. This is an exaple of an optimization approach instead of a heuristic approach. Note that they key is for some cases to select a neighbor that is not the closest candidate so that several second-best choices offset the impact of the current situation where one good choice leads the next match to be poor because you have removed options from the pool. 
+
+Can you beat the lowest score from Q1a to Q1c? The lowest score I was able to achieve is 211 (no idea if that is the global optimal, though). 
+
 
 
 
