@@ -19,7 +19,7 @@ knitr::opts_chunk$set(echo = TRUE, message=F, warning=F, fig.width = 10)
 
 # Policy Context 
 
-Matching is an extremely valuable tool in the program evaluation toolkit because it can be used alone or in combination with other models to account for selection problems when programs are voluntary and mitigate bias. 
+Matching is an extremely valuable tool in the program evaluation toolkit because it can be used alone or in combination with other models to account for selection problems that are ubiquitous when program participation is voluntary. 
 
 Field experiments and RCTs are the gold standard for social science research because randomization ensures that the treatment and control groups are for all practical purposes identical. If randomization is successful then the two groups should be "balanced" on all measured and unmeasured characteristics, meaning observable traits like gender, wealth, IQ, health, speed, and experience should be equally distribute across both groups. Similarly, unobservable traits like motivation, happiness, and grit should also be equally distributed. Any comparison of means of any of these traits between the two groups should result in null effects, i.e. indistinguishable levels or proportions of each trait. 
 
@@ -480,7 +480,7 @@ compare_means( df=d.matched ) %>% pander()
 
 ### Q3
 
-Q1 and Q2 both use greedy search routines. Some of the other search methods borrow from optimization to do a more thorough search for sets of pairs that lowers the average distance in the matched set. Compare the sample created by this type of search to the samples generated from Q1 and Q1. 
+Q1 and Q2 both use greedy search routines. Some of the other search methods borrow from optimization to do a more thorough search for sets of pairs that lowers the average distance in the matched set. Compare the sample created by this type of search to the samples generated from Q1 and Q2. 
 
 * Is the sample size larger or smaller than each?   
 * Is the balance better or worse than each?  
@@ -503,6 +503,11 @@ compare_means( df=d.matched ) %>% pander()
 
 
 
+### BONUS
+
+Using the means and confidence intervals from the compare_means() table create a coefficient plot to visualize improvements to balance after matching by comparing the raw data and a matched sample contrasts. 
+
+![](https://www.researchgate.net/profile/James_Downes2/publication/327339354/figure/fig2/AS:665643158360064@1535713104492/Regression-Coefficient-Plot-with-95-Confidence-Intervals-Inclusion-of-Control-Variables.png)
 
 
 
