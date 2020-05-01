@@ -433,10 +433,11 @@ compare_means( df=d.matched  ) %>% pander()
 
 In the printout above of sample statistics it reports that 13 cases in the control group were unmatched at the end. The **discard=** argument allows he program to drop observations prior to matching. This is helpful when some cases fall outside of the region of common support. 
 
-How does relaxing this contraint change the final sample size? 
+**Q2a:** How does relaxing this contraint change the final sample size? 
 
-Does it generate more or less balance than the defaul method reported in Q1? Is this consistent with Q1d in Part 2? 
+**Q2b:** Does it generate more or less balance than the defaul method reported in Q1? Is this consistent with Q1d in Part 2? 
 
+**Q2c:** How is discarding cases without support similar to the simple nearest neighbors approach in Part 1? How much do the samples you identified with this approach and from Step 1 overlap? 
 
 
 ```{r, eval=F}
