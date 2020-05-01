@@ -16,385 +16,487 @@ output:
 knitr::opts_chunk$set(echo = TRUE, message=F, warning=F, fig.width = 10)
 ```
 
-```{r, echo=FALSE, results="hide"}
-library(stargazer)
+
+# Policy Context 
+
+Matching is an extremely valuable tool in the program evaluation toolkit because it can be used alone or in combination with other models to account for selection problems when programs are voluntary and mitigate bias. 
+
+Field experiments and RCTs are the gold standard for social science research because randomization ensures that the treatment and control groups are for all practical purposes identical. If randomization is successful then the two groups should be "balanced" on all measured and unmeasured characteristics, meaning observable traits like gender, wealth, IQ, health, speed, and experience should be equally distribute across both groups. Similarly, unobservable traits like motivation, happiness, and grit should also be equally distributed. Any comparison of means of any of these traits between the two groups should result in null effects, i.e. indistinguishable levels or proportions of each trait. 
+
+One of the nicest features of experiments is that balancing the groups greatly simplifies the analysis. If all of the covariates are balanced then program effects can be estimated using a simple comparison of means of the treatment and control group in the post-treatment period. Importantly, if randomization is done correctly the latent or observed level of the dependent variable should be identical prior to the treatment, meaning the estimator **T2-C2** will capture the treatment effects and not secular trends. 
+
+This point is important because there are many research questions where pre-treatment measures do not exist. If you are studying the effect of a specific type of counseling that is supposed to help violent first-time offenders develop better conflict resolution skills so they do not recidivate, then returning to prison is the outcome of interest. How do you measure recidivism if the prisoners prior to the program if prisoners have not yet been released from jail? 
+
+Many of the quasi-experimental methods use time trends to measure and remove the gains that occur independent of the treatment (secular trends), they require measures from at least two points in time. **In contexts where pre-treatment metrics are meaningless the only remaining estimator is the post-test only estimate of program impact.** This estimator is only unbiased if the treatment and control group are identical prior to the treatement. 
+
+In many other circumstances it is *possible* to measure pre-treatment outcomes, but evaluators are only engaged once funding for the program has been secured or the pilot phase is complete, so it is too late to get pre-treatment measures. In these cases the evaluators have to find ways to build a robust post-treatment comparison. 
+
+Matching is a tool that allows us to manually construct groups so that they will approximate the types of groups created through randomization. Instead of using a brute force process like randomization, matching curates a study sample by carefully selecting subjects that create balanced groups. The test for success in the matching process is exactly the same as the test for "happy" randomization in experiments - comparing all of the measured pre-treatment characteristics of study participants to ensure that the groups would have been the same prior to the start of the program. 
+
+The main difference is that randomization will ensure observed **and unobserved** characteristics of study participants are balanced. Since matching uses specialized algorithms to identify subsets of the data that are balanced, it can **only match on observed traits** with no way to test whether important omitted variables or hard-to observe differences in motivation have been mitigated. As a result, matching works best when there is a rich set of covariates describing study participants. In these circumstances it has been shown that in many contexts estimates of treatment effects using groups constructed through matching generate the same results as randomized control studies: 
+
+*Stuart, E. A. (2010). Matching methods for causal inference: A review and a look forward. Statistical science: a review journal of the Institute of Mathematical Statistics, 25(1), 1.*
+
+*Fortson, K., Verbitsky-Savitz, N., Kopa, E., & Gleason, P. (2012). Using an experimental evaluation of charter schools to test whether nonexperimental comparison group methods can replicate experimental impact estimates. Washington, DC: US Department of Education, Institute of Education Sciences, National Center for Education Evaluation and Regional Assistance.*
+
+*Ferraro, P. J., & Miranda, J. J. (2014). The performance of non-experimental designs in the evaluation of environmental programs: A design-replication study using a large-scale randomized experiment as a benchmark. Journal of Economic Behavior & Organization, 107, 344-365.*
+
+And in circumstances where it does not completely replicate effects obtained from experiments it at the very least reduces the size of bias: 
+
+*Glazerman, S., Levy, D. M., & Myers, D. (2003). Nonexperimental versus experimental estimates of earnings impacts. The Annals of the American Academy of Political and Social Science, 589(1), 63-93.*
+
+
+# Matching Models 
+
+This lab is distinct from the replication studies you have done on previous labs because matching is not a model used to estimate and interpret program effects. Rather, matching is a process used to construct a valid counterfactual prior to analyzing the data. Once the data is matched any variety of regression tools can be used to conduct the analysis. It is an imput into the study design process more than a way of estimating the results.
+
+For this reason, the lab is designed to break open the black box of matching models to show you some important features of the algorithms so that you understand what is happening behind the curtain. Like many aspects of modeling, there is an art to the science of matching. It is not a single technique, but a family of techniques that are designed to use a large observational sample that is known to contain selection bias because participants had the choice to opt-in or opt-out of the program under review. As a result, those that chose to participate are different from those that chose not to participate in ways that have a meaningful effect on the outcome of interest. Simply comparing the post-intervention outcomes of the "treated" to those of program non-participants will certainly result in very biased and very misleading inferences. 
+
+**The comparison group is not a valid counterfactual in that it does not present a measure of what the treatment group would have looked like if they had not participated in the program.**
+
+We overcome this problem by restricting the analysis to a subset of the data after we have identified "twins" that are *identical* on all measured pre-treatment characteristics except that one participated in the program and one did not. 
+
+![](img/twins.jpg)
+
+*Does starring in Game of Thrones make you rich and happy? One of these twins received the treatment, while the other now regrets listening to dad and being "pragmatic and realistic about your career".*
+
+More precisely, matching does not ensure that each program participant has an *identical twin*, rather it is an efficient way to ensure that the groups are *statistically identical*, i.e. that group traits are not significantly different. Just like randomization can fail when chance produces dissimilar groups, matching fails when algorithms cannot identify balanced subgroups within the data resulting in observed differences in group means on measured traits. 
+
+This can occur for several reasons. Just like an individual would need a large crowd if they wanted to find their doppelganger, matching typically requires a large pool of candidate twins for each individual in the treatment group. Or alternatively, if the types of people that participate in the program are **completely different** from the rest of the people in the sample then it might be mathematically impossible to create balanced groups. 
+
+
+## Matching Process
+
+Many of the estimation techniques that we use in this program were derived from mathematical theory and represent elegant ways to model data. For example, we might fail to appreciate that the compact formula **b1=cov(x,y)/var(x)** generates the precise regression slope that maximizes model fit and minimizes the residual. A similarly parsimonious formula gives us the standard error of the slope, which allows us to test the primary hypothesis of interest that the program generates meaningful impact and does not produce harm. 
+
+Comparatively, matching is a very mechanical process that requires brute force manipulation of the data to identify statistical doppelgangers. Although they were first developed by statistics methodologists, the current applications draw as much from computer science tools for optimization as they do from statistical theory. 
+
+Early advances in the methodology came from the field of education using a specific approach to matching using propensity scores:
+
+*Rosenbaum, P. R., & Rubin, D. B. (1985). Constructing a control group using multivariate matched sampling methods that incorporate the propensity score. The American Statistician, 39(1), 33-38.*
+
+A more recent wave of work shows that the method is sound, but some of the common approaches to propensity score matching are problematic because of the way they search for "twins" in the data. They have developed better algorithms that improve upon early theory but rely more on computational tools that can more efficiently explore data to create robust group membership. 
+
+*King, G., & Nielsen, R. (2019). Why propensity scores should not be used for matching. Political Analysis, 27(4), 435-454.*
+
+The key problem in matching is balance. The process or algorithm that is used to construct your groups determines which cases are kept in the sample, which determines the overall *quality* of the counterfactual (quality meaning high internal validity in this context). Different algorithms will give you vastly different groups, as you will see. 
+
+As a result, understanding the mechanics of the process will help you tailor the matching procedure to your specific context. 
+
+Unsurprisingly, many of the best tools have been built in R. This lab demonstrates some key features of the **MatchIt** package. 
+
+
+# Packages
+
+The **MatchIt** package was developed by Gary King and colleagues, and contains an entire library of routines for matching. Recall that matching is a family of approaches to constructing a balanced treatment and control group from observational data, not a specific model used to estimate program impact. 
+
+*Ho, D. E., Imai, K., King, G., & Stuart, E. A. (2011). MatchIt: nonparametric preprocessing for parametric causal inference. Journal of Statistical Software, http://gking. harvard. edu/matchit.*
+
+They also provide a nice [**package vignette**](articles/matchit.pdf) with some exaples. 
+
+```{r}
+# install.packages( "MatchIt" )
+# install.packages( "rgenoud" )
+
+library( dplyr )
+library( pander )
+library( stargazer )
+library( MatchIt )
+library( rgenoud )
 ```
-
-
-The lab is loosely based on the research conducted by [Doan & Kirkpatrick (2013)](https://onlinelibrary.wiley.com/doi/10.1111/psj.12018) entitled "Giving Girls a Shot: An Examination of Mandatory Vaccination Legislation" and published on Policy Studies Journal, 41(2), 295-318
-
-There are **4 sets of questions** to be answered. You can get up to 100 points + bonus questions. Points are indicated next to each question. 
-
-Remember to:
-
-* Format your table using stargazer 
-* Submit the r markdown file with all your codes. 
-* Bold your answers. 
-
-
-
-
-
-# The policy problem
-
-> **Research question**: 
-
-> What factors influence a state's decision to introduce a mandatory HPV vaccine legislation for young girls? 
-
-Doan and Kirkpatrick (2013) analyze state's decision to introduce a mandatory vaccine for the human papillomavirus (HPV) for all fifth- and sixth-grade girls in public schools. The vaccine was approved in 2006 and patented by Merck & Co. The two researchers were particularly interested in the influence of competing morality, economic, and public-health determinants on states' decision making. 
-
-With regards to morality, they suggest that state politicians are responsive to the public opinion within their own state, such that they will respond to positive or negative approval of the new legislation. For instance, a high proportion of Evangelics or Catholics within the state might discourage mandatory HPV vaccine legislation as those groups have conservative view regarding sexuality and sexual activity and might disapprove the vaccine at such early age. Similarly, a high rate of negative media attention might decrease politicians' motivation to introduce legislation mandating the HPV vaccine in order to remaining aligned with the electorate's preferences.
-
-By contrast, we could expect politicians to support their party's values. "Social welfare" is generally an issue associated with Democrats, which might have greater incentives to pass a mandatory HPV vaccine regulation to appeal their electoral basis as compared to Republicans. 
-
-Finally, politicians might respond to political interests and support policies in favor of private organizations providing resources for their electoral campaign. We might expect that states were politicians receive more money from Merck & Co will be more likely to adopt such legislation.
-
-In summary: 
-
-> **Hypotheses**
-
-> Media salience is negatively correlated with mandatory legislation.
-
-> Proportion of stage legislature that is Democrat is positively correlated with mandatory legislation.
-
-> Religiosity (percentage of the population that is Catholic or Evangelical) is negatively correlated with mandatory legislation.
-
-> Merck PAC contribution is positively correlated with mandatory legislation.
 
 
 
 # Data
 
-```{r, eval=F}
-data <- read.csv("https://raw.githubusercontent.com/DS4PS/pe4ps-textbook/master/labs/DATA/logit-lab.csv", stringsAsFactors=F)
+Data for this lab comes from an informal survey of MPA students in a program evaluation class in 2012 to generate a simple example of matching scores in action. Students were asked if they have read any of the Harry Potter series, which is a stand-in for the treatment in the study. 
+
+Since reading Harry Potter is a voluntary activity we worry about selection problems - people that read the books are different than those that do not (Harry Potter fans are randomly distributed across the population). Which leads us to ask, could we predict the behavior with some simple demographics. The survey consisted of the following questions precedded by their variable name in the dataset: 
+
+1. **books**: "Have you read some or all of the books from the Harry Potter series (yes/no)?"
+2. **movies**: "Have you seen any of the Harry Potter movies (yes/no)?"                       
+3. **fiction**: "Do you read fiction often for fun (yes/no)?"                                  
+4. **scifi**: "Do enjoy science fiction or fantasy genres (yes/no)?"                         
+5. **children**: "Do you have children over eight years in age (yes/no)?"                       
+6. **male**: "What is your sex (male/female)?"                                                   
+7. **age**: "What is your age (numeric)?"                                                   
+8. **race** "What is your race (white, black, asian, other)?"
+
+Dummy variables have been created for the **white**, **black**, and **asian** categories. 
+
+
+```{r}
+URL <- "https://raw.githubusercontent.com/DS4PS/pe4ps-textbook/master/labs/DATA/harry-potter.csv"
+dat <- read.csv( URL, stringsAsFactors=F )
+head( dat ) %>% pander()
 ```
 
-The following variables are available in your dataset. 
+We have 51 respondents, and 37 percent (19/51) reported that they had read at least one book in the Harry Potter series. 
 
- **Variable name**       | **Description**                                   
------------------------- | -----------------------------------------------------
-Adoption                 | Whether a state legislature has considered a mandatory vaccine law (=1) or not (=0)  
-Democrats                | Percentage of House Democrats in the state legislature      
-Evangelic                | Percentage of Evangelic population       
-Catholics                | Percentage of Catholic population      
-Media                    | Number of articles covering the HPV vaccine issue in major news sources in a state in the past year
-Merck                    | Average total dollar amount of contributions given to candidates for state offices 
+As you can see, the "treatment" and "control" groups of readers are unbalanced. 
 
-Given that the dependent variable is a binary outcome (1/0), a probability model is appropriate. 
+```{r}
+dat %>% 
+  group_by( books ) %>% 
+  summarize( mean.age = mean(age),
+             prop.male = mean(male),
+             prop.fiction = mean(fiction),
+             prop.scifi = mean(scifi),
+             prop.movies = mean(movies),
+             prop.children = mean(children),
+             prop.white = mean( race == "white" ),
+             prop.black = mean( race == "black" ), 
+             prop.asian = mean( race == "asian" ) ) %>% 
+  pander( digits=2 )
+    
+```
 
-Answer the questions below using a linear probability model and a logistic regression model. 
+
+The goal is to create a balanced group with no measured differences between the fan club and non-readers. 
+
+Note that about 2/5 of the full sample read Harry Potter and about 2/5 of white respondents reported the same. However, only 1 of the 5 Asian respondents had NOT read Harry Potter, and only 1 of the 17 Black respondents HAD read Harry Potter. As a result, you will see that race ends up shaping our final matched sample the most. To achieve balanced groups the algorithms will basically drop Black and Asian people from the sample. Thus our understanding of the societal impact of the Harry Potter series will have high internal validity but low generalizability to races other than White. 
+
+Although it is a frivolous example, it actually does a good job of demonstrating how racial bias can work its way into algorithms with absolutely no desire or intent to do so. 
 
 
+# Lab Instructions 
 
-# Robust Standard Errors 
+This lab will use the Harry Potter survey data and a toy optimization dataset to demonstrate some features of algorithms that are designed to "search" for optimal solutions in data. In this case, the optimal solution will be a set of group members in the treatment and control groups that generate no group differences. 
 
-Robust standard errors mitigate the effects of skew or outliers in the residuals to offer a more robust standard error statistic when the data is idiosyncratic for a number of reasons, including binary outcomes. 
+* Part 1 demonstrates the nearest neighbor approach to matching. 
+* Part 2 introduces the challenges with greedy search algorithms. 
+* Part 3 shows how these concepts can be leveraged to improve group construction using the MatchIt package. 
 
-It is harder to add these to Stargazer than it should be. Here is some code to help out: 
+## Propensity Scores
+
+A propensity score in evaluation is simply a measure of the probabilty or likelihood that a specific person particpate (or has participated) in the program. 
+
+We can estimate the propensity score empirically using program participation as our dependent variable in a linear probability model or a logit. 
 
 ```{r, results="asis"}
-x1 <- rnorm(100)
-x2 <- rnorm(100) 
-y <- 3*x1 + x2 + rnorm(100,0,10)
+ps.model <- lm( books ~ movies + fiction + scifi + 
+             children + male + age + factor(race), 
+             data=dat )
 
-m.01 <- lm( y ~ x1 )
-m.02 <- lm( y ~ x2 )
-
-# install.packages( "sandwhich" )
-# install.packages( "lmtest" )
-
-library(sandwich)
-library(lmtest)
-
-# Adjust standard errors
-cov1         <- vcovHC( m.01, type="HC1" )
-robust1      <- sqrt( diag( cov1 ) )
-cov2         <- vcovHC( m.02, type="HC1" )
-robust2      <- sqrt( diag( cov2 ) )
-
-# add to stargazer 
-stargazer( m.01, m.02, type = "html" ,
-           se        = list( robust1, robust2 ) )
+stargazer( ps.model, digits=2, type="html",
+           omit.stat = c("f","ser") )
 ```
 
-
-# Probability Plots
-
-Load some fake data: 
-
-```{r, eval=F, echo=F}
-library( scales )
-x <- rnorm(1000,0,100)
-y <- 20 + x + rnorm(1000,0,100)
-x <- round( rescale( x, c( 0, 100 ) ), 2 )
-y <- rescale( y, c(0,1) )
-y <- round( y, 0 )
-```
+We care less about interpretting results and more about getting the predicted propensity for program participation from the model. Note that the data has been sorted by propensity scores so that twins can be identified.  
 
 ```{r}
-x <-
-c(46.59, 86.78, 45.32, 43.84, 46.21, 65.81, 32.87, 66.48, 70.33, 
-60.67, 46.95, 47.73, 66.35, 43.47, 52.3, 68.96, 29.99, 52.02, 
-41.06, 49.2, 25.25, 83.67, 70.03, 40.11, 58.56, 36.95, 75.59, 
-65.7, 61.71, 31.88, 34.55, 59.54, 65.05, 51.58, 39.99, 74.07, 
-34.52, 71.39, 62.21, 59.58, 50.44, 55.16, 57.27, 39.26, 45.2, 
-79.51, 52.55, 60.19, 54.65, 40.35, 34, 38.52, 42.43, 53.18, 63.25, 
-47.66, 65.05, 56.93, 45.52, 52.52, 50.12, 90.88, 49.37, 75.18, 
-42.12, 73.65, 37.05, 67.82, 83.61, 42.52, 75.39, 30, 68.18, 28.47, 
-70, 65.92, 44.28, 68.76, 26.2, 41.43, 52.42, 41.78, 28.81, 49.69, 
-72.89, 60.7, 42.96, 50.37, 41.42, 45.75, 51.91, 73.37, 39.56, 
-40.46, 61.07, 17.06, 77.2, 53.92, 46.6, 56.79, 56.14, 19.29, 
-50.72, 46.81, 63.36, 51.67, 46.21, 39.67, 49.37, 33.76, 44.53, 
-39.16, 66.31, 50.19, 52.85, 31.35, 65.67, 51.21, 51.17, 68.92, 
-65.74, 45.14, 47.64, 50.57, 58.8, 44.07, 67.51, 35.62, 51.4, 
-41.7, 36.29, 61.57, 39.96, 66.7, 68.16, 59.72, 39.74, 61.38, 
-63.07, 46.73, 7.25, 70.38, 24.06, 47.06, 65.43, 43.34, 98.56, 
-39.76, 44.27, 62.66, 58.9, 53.56, 58.09, 50.46, 55.13, 63.2, 
-31.77, 63.5, 25.31, 76.19, 67.15, 77.16, 69.08, 42.72, 56.07, 
-54.69, 59.37, 43.75, 35.89, 47.94, 60.64, 55.77, 30.65, 58.8, 
-25.82, 41.76, 59.03, 52.64, 56.2, 44.02, 46.65, 93.41, 55.49, 
-77.04, 47.83, 38.24, 38.33, 46.15, 36.63, 34.68, 59.35, 61.9, 
-60.84, 58.63, 43.13, 39.33, 62.84, 34.3, 32.98, 54.86, 55.17, 
-71.94, 85.42, 67.71, 56.8, 87.22, 37.43, 58.75, 55.4, 53.96, 
-39.3, 54.59, 49.27, 72.27, 45.87, 57.76, 52.03, 30.27, 50.09, 
-46.78, 50.87, 36.76, 83.08, 24.62, 57.31, 44.42, 65.81, 61.69, 
-47.37, 50.2, 34.16, 39.32, 23.41, 28.34, 64.48, 58.33, 26.2, 
-32.26, 42.33, 72.26, 53.96, 53.02, 27.95, 39.57, 49.78, 47.67, 
-52.88, 60.14, 43.2, 53.6, 49.51, 61.87, 57.19, 34.14, 45.85, 
-30.48, 25.17, 95.49, 30.49, 67.65, 20.31, 53.2, 59.59, 23.3, 
-69.17, 56.53, 83.15, 82.37, 37.52, 72.91, 53.38, 27.89, 42.35, 
-60.64, 40.15, 46.8, 55.89, 65.34, 26.79, 53.42, 29.32, 59.56, 
-3.58, 26.05, 74.53, 64.33, 56.16, 53.05, 43.58, 65.3, 67.23, 
-51.51, 67.18, 46.52, 67.23, 52.69, 86.47, 26.92, 37.1, 71.38, 
-58.89, 56.78, 45.5, 26.76, 0, 82.8, 40.22, 69.83, 45.74, 48.52, 
-35.19, 54.92, 66.41, 61.22, 66.74, 47.16, 54.76, 50.84, 41.96, 
-59.16, 35.58, 38.05, 67.93, 30.08, 39.57, 41.86, 33.65, 56.86, 
-73.62, 52.85, 47.11, 47.02, 51.98, 90.47, 75.57, 32.55, 64.02, 
-60.36, 38.68, 48.95, 78.61, 17.67, 56.11, 52.56, 80.47, 46.53, 
-48.87, 39.82, 54.52, 43.98, 49.61, 61.64, 35.1, 42.77, 48.54, 
-67.27, 30.81, 51.43, 52.2, 19.42, 6.83, 62.42, 49.41, 76.39, 
-51.36, 57.38, 47.63, 61.48, 38.27, 53.98, 66.16, 61.58, 27.03, 
-54.6, 35.93, 82.12, 66.03, 72.39, 58.67, 70.66, 29.54, 52.64, 
-36.29, 64.7, 71.15, 22.71, 70.2, 59.65, 70.6, 59.81, 38.81, 26.21, 
-43.8, 10.36, 38.88, 33.27, 77.2, 43.78, 61.19, 47.86, 36.31, 
-86.2, 79.23, 55.38, 65.23, 41.6, 22.9, 26.78, 50.09, 52.16, 26.36, 
-35.93, 51.45, 36.25, 91.05, 43.9, 70.46, 53.45, 54.79, 58.6, 
-50.17, 22.2, 49.39, 60.11, 50.86, 46.83, 7.47, 56.35, 26.67, 
-46.84, 66.39, 34.29, 49.96, 67.96, 45.21, 57.54, 39.37, 31.3, 
-72, 80.81, 84.69, 43.15, 71.02, 30.27, 40.58, 55.57, 51.85, 66.1, 
-60.79, 50.84, 50.23, 61.4, 46.26, 29.91, 60.64, 55.38, 73.27, 
-50.31, 46.89, 66.88, 51.5, 53.64, 63.39, 48.53, 53.62, 58.05, 
-46.07, 43.33, 67.29, 70.44, 20.95, 82.71, 46.65, 74.47, 53.57, 
-45.96, 41.27, 59.5, 76.77, 39.18, 70.77, 18.45, 51.57, 67.43, 
-53.43, 65.73, 55.41, 52.69, 48.88, 83.06, 57.47, 58.09, 67.39, 
-58.2, 76.8, 67.06, 58.24, 71.32, 68.09, 38.98, 55.85, 40.83, 
-13.59, 79, 49.27, 63.48, 53.77, 60.99, 59.19, 45.16, 23.05, 24.1, 
-33.74, 50.45, 33.57, 57.68, 72.07, 54.91, 41.82, 62.99, 49.68, 
-31.79, 53.46, 42.46, 30.14, 34.67, 50.81, 82.53, 30.64, 42.87, 
-39.9, 30.56, 59.37, 55.56, 59.39, 39.38, 41.12, 46.27, 22.35, 
-52.44, 76.11, 34.51, 45.43, 46.98, 38.25, 39.22, 48.2, 65.32, 
-34.58, 64.51, 18.57, 76.92, 34.79, 53.16, 46.2, 72.39, 16.22, 
-54.58, 44.95, 36.19, 64.65, 70.24, 65.91, 49.33, 100, 17.87, 
-78.74, 46.5, 71.25, 16.18, 45.79, 32.05, 46.54, 69.03, 53.15, 
-95.06, 78.88, 43.45, 78.92, 17.19, 50.62, 43.02, 73.6, 72.1, 
-55.48, 51.42, 39.79, 34.54, 39.32, 41, 51.89, 53.65, 54.02, 48.34, 
-76.93, 36.35, 70.11, 50.8, 55.88, 34.91, 41.54, 66.54, 66.01, 
-25.42, 61.85, 53.09, 48.4, 40.87, 40.05, 49.92, 54.27, 20.87, 
-32.74, 57.32, 27.76, 65.55, 27.79, 47.98, 48.8, 52.51, 66.62, 
-71.85, 42.78, 55.53, 35.76, 66.94, 27.76, 43.38, 58.9, 46.79, 
-67.39, 35.1, 52.86, 72.29, 80.1, 63.5, 43.01, 48.42, 42.93, 78.74, 
-70.01, 10.08, 84.72, 72.07, 45.04, 45.09, 53.65, 33.58, 54.33, 
-60.01, 88.56, 71.52, 57.4, 50.3, 34.42, 72.12, 63.99, 50.16, 
-67.91, 32.11, 68.76, 28.86, 48.72, 31.77, 37.84, 74.53, 73.01, 
-12.99, 58.78, 32.46, 90.56, 26.74, 50.61, 41.64, 53.02, 62.84, 
-51.09, 65.92, 23.59, 58.59, 24.22, 44.45, 49.74, 66.69, 36.98, 
-53.63, 43.77, 67.64, 45.65, 59.71, 33.17, 81.85, 56.05, 58.13, 
-49.16, 68.47, 67.26, 67.92, 33.15, 76.85, 69.63, 54.41, 43.63, 
-61.44, 51.03, 42.72, 42.96, 11.27, 40.21, 26.23, 44.17, 58.24, 
-56.2, 67.82, 21.25, 32.14, 73.85, 43.48, 65.87, 63.82, 43.03, 
-45.27, 49.63, 38.74, 34.66, 72.93, 45.94, 37.74, 43.57, 56.73, 
-35.83, 69.79, 64.69, 49.72, 55.93, 59.08, 32.97, 40.8, 47.91, 
-31.23, 38.05, 14.63, 62.48, 66.41, 58.11, 74.11, 68.45, 39.95, 
-70.36, 50.13, 78.43, 93.53, 41.47, 67.65, 10.79, 49.32, 40.17, 
-69.8, 57.8, 46.25, 50.02, 61.49, 55.33, 53.25, 46.34, 47.34, 
-59.3, 37.17, 34.9, 50.17, 33.89, 54.34, 28.24, 46.06, 13.57, 
-65.84, 58.16, 17.04, 71.31, 62.06, 54.66, 33.04, 60.73, 57.31, 
-52.64, 17.01, 63.61, 47.86, 46.92, 58.15, 60.82, 43.54, 52.2, 
-30.97, 83, 38.84, 52.4, 65, 68.42, 57.14, 43.11, 49.01, 47.41, 
-37.03, 34.19, 65.04, 51.21, 51.24, 48.47, 42.18, 70.53, 49.28, 
-48.76, 68.59, 57.94, 36.33, 23.17, 61.03, 65.89, 44.34, 65.3, 
-70.95, 58.02, 77.53, 26.52, 43.44, 40.17, 54.94, 70.28, 47.47, 
-62.76, 51.01, 64.28, 43.22, 97.09, 43.17, 94.9, 69.11, 69.03, 
-76.24, 45.37, 62.78, 53.08, 20.19, 40.51, 65.5, 78.57, 37.38, 
-41.3, 62.39, 42.98, 66.75, 12.68, 75.03, 64.64, 54.92, 52.46, 
-34.14, 42.77, 21.84, 52.6, 46.26, 44.16, 74.93, 32.57, 60.42, 
-34.39, 63.61, 54.7, 60.31, 33.65, 42.97, 60.45, 32.99, 59.36, 
-71.69, 29.31, 66.35, 63.79, 47.75, 48.45, 38.57, 75.52, 20.06, 
-45.72, 51.88, 64.33, 82.36, 81.54, 43.05, 56.55, 37.79, 51.85, 
-35.45, 38.96, 63.71, 43.54, 53.77, 58.93, 66.12, 81.99, 48.6, 
-66.51, 44.99, 29.98, 72.54, 18.65, 76.13, 66.46, 55.77, 65.34, 
-31.7, 33.84, 82.54, 48.45, 57.26, 49.9, 35.66, 31.75, 73.11, 
-59.83, 43.91, 53.12, 64.39, 64.73, 58.63, 41.66, 33.09, 58.08, 
-29.92, 55.21, 45.22, 41.17, 67.57, 73.68, 43.77, 49.23, 46.62, 
-41.92, 49.95, 46.88, 68.31, 67.1, 60.99, 52.08, 42.65, 33.76, 
-36.32, 20.72, 72.53, 30.22, 61.42, 54.38, 82.5, 43.32, 82.3, 
-79.13, 71.48, 50.17, 66.64, 70.75, 57.04, 63.79, 35.4, 26.29, 
-66.53, 36.76, 49.02, 58.08, 62.02, 32.44, 61.13, 41.19, 64.6, 
-33.81, 55.69, 55.01, 24.18, 15.66, 48.19, 46.56, 36.22, 33.67, 
-47.65, 21.15, 42.68, 49.56, 55.57, 41.45, 38.88, 74.98, 30.51, 
-37.75, 64.2, 50.62, 46.44, 68.58, 61.24, 59.64, 50.33)
+dat$p.score <- ps.model$fitted.values %>% round(3)
 
-y <-
-c(1, 1, 1, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 0, 
-0, 1, 1, 0, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 0, 1, 1, 0, 0, 
-1, 0, 0, 0, 1, 0, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 1, 1, 
-0, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 0, 
-1, 0, 1, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 
-1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 
-1, 1, 0, 1, 0, 1, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 1, 1, 
-1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 
-1, 0, 1, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 1, 0, 1, 1, 0, 1, 1, 
-0, 1, 1, 1, 1, 0, 1, 0, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 
-0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 0, 0, 
-1, 0, 0, 0, 1, 1, 0, 0, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 0, 
-1, 1, 0, 0, 0, 0, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 1, 0, 1, 0, 0, 
-1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 
-0, 1, 1, 1, 0, 1, 1, 1, 1, 0, 0, 0, 1, 0, 1, 0, 1, 1, 0, 1, 0, 
-1, 1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1, 
-0, 1, 0, 0, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 0, 1, 1, 0, 0, 0, 1, 
-0, 0, 1, 0, 0, 1, 1, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 1, 0, 1, 0, 
-1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 
-1, 1, 0, 1, 1, 1, 1, 0, 1, 0, 1, 1, 0, 0, 0, 1, 1, 1, 1, 0, 1, 
-1, 1, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 1, 
-1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 0, 0, 1, 0, 1, 1, 1, 0, 1, 1, 0, 
-0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1, 0, 
-1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 0, 1, 1, 0, 1, 1, 0, 0, 0, 0, 
-1, 0, 1, 1, 1, 0, 1, 0, 0, 0, 1, 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 
-0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 
-0, 0, 0, 0, 1, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 
-1, 1, 0, 0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 0, 0, 
-0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 1, 1, 0, 0, 1, 0, 1, 1, 1, 0, 
-0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 0, 0, 1, 0, 0, 1, 
-0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 
-1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 0, 1, 0, 0, 1, 1, 0, 1, 0, 1, 
-0, 0, 1, 0, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 1, 
-1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 1, 1, 1, 
-1, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 1, 1, 0, 1, 1, 1, 
-1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 1, 1, 0, 1, 0, 
-1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 0, 1, 0, 1, 0, 1, 
-1, 0, 1, 1, 1, 0, 1, 1, 0, 0, 1, 0, 0, 1, 1, 0, 1, 0, 1, 0, 0, 
-1, 1, 1, 1, 1, 0, 0, 0, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 0, 0, 1, 
-0, 0, 1, 1, 0, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 
-1, 0, 1, 0, 0, 1, 1, 1, 0, 1, 1, 0, 1, 0, 1, 1, 1, 1, 0, 1, 0, 
-0, 0, 0, 1, 0, 1, 0, 1, 1, 1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 0, 1, 
-0, 1, 0, 0, 1, 1, 1, 1, 0, 1, 0, 1, 0, 0, 1, 1, 1, 1, 0, 1, 1, 
-1, 0, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 0, 1, 
-1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 
-1, 0, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 0, 
-1, 1, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
-1, 1, 0, 0, 1, 0, 0, 1, 1, 0, 1, 1, 1, 1)
+col.order <- c( "id", "p.score", "books", "movies", "fiction", 
+                   "scifi", "children", "male", "age", "race",
+                "white","black","asian")
+
+dat <- dat[ col.order ]
+
+head( dat, 15 ) %>% pander()
 ```
 
 
-Basic plot:
+## Part 1 - Neighest Neighbors
+
+We have estimated each individual's propensity score based upon whether or not they participated in the program (read Harry Potter). 
+
+For Part 1 open your dataset in the viewer or Excel. You can use the clipboard to paste the data into Excel: 
 
 ```{r}
-plot( x, y, pch=19, col=gray(0.5,0.3) )
+write.table( dat, "clipboard", row.names=F, sep='\t' )
 ```
+
+### Q1 
+
+Using a *simplified* nearest neighbor heuristic, identify all of the "twins" in your dataset, i.e. the near identical cases that serve as a strong counterfactual. 
+
+TO achieve this, apply the following heuristic: 
+
+1. For each individual in the treated group (**books**) check whether a control group neighbor exists by looking one line up and one line down for a neighbor that has not read the books. If there is no good comparison ignore the case. 
+2. If the individual has an untreated neighbor, add both IDs to your study set. 
+3. After a match occurs do not consider the matched pair for future matches (matching WITHOUT replacement). 
+
+For example, individual 10 here does not have a candidate neighbor in the control group. Case 12 is closer to 11 than to 13, so they become a match.
+
+This is called a **nearest neighbor** approach because each observation in the treatment group is compared to its close neighbors to identify potential matches. The real algorithm would use a distance threshold, not the one row up and one row down rule, but the basic process is instructive. 
+
+Note how well the propensity score does at identifying twins in this case. They are exactly the same except for one likes science fiction and one does not. 
+
+![](img/example-match.png)
+
+**Print your matched sample as your solution to Q1.**
+
+```{r}
+# add ids of all matched 'twins' 
+ids <- c(11,12)  
+dat[ ids, ] %>% pander()
+```
+
+
+
+## Q2 
+
+Now check the balance on your original dataset and on your new matched dataset. You can use the following function to compare all means at once. 
+
+```{r}
+
+compare_means <- function( df )
+{
+  
+  options( scipen=8 )
+  
+  vars <- c("movies", "fiction", "scifi", "children", 
+            "male", "age", "white", "black", "asian")
+  
+  results <- NULL
+  loop.count <- 1
+  
+  for( i in vars )
+  {
+    x <- i
+    ttest <- t.test( get(x) ~ books, data=df )
+    
+    control    <- as.numeric( ttest$estimate[1] ) %>% round(2)
+    treatment  <- as.numeric( ttest$estimate[2] ) %>% round(2)
+    diff       <- ( treatment - control ) %>% round(2)
+    ci.lower   <- ttest$conf.int[1] %>% round(2)
+    ci.upper   <- ttest$conf.int[2] %>% round(2) 
+    p.value    <- ttest$p.value %>% round(5)
+    
+    new.row <- cbind( variable=i, treatment, control, diff, ci.lower, ci.upper, p.value ) 
+    results <- rbind( results, new.row )
+  
+  }
+  
+  t <- table( df$books )
+  results <- rbind( results, c("n",as.numeric( t[2] ), as.numeric( t[1] ), "","","","" ) )
+  return( as.data.frame( results ) )
+
+}
+
+compare_means( df=dat ) %>% pander()
+
+```
+
+
+
+
+**Q2a**
+
+Print the balance table (comparison of means) for your original dataset and your matched sample. 
+
+```{r, eval=F}
+compare_means( df=dat         ) %>% pander()
+compare_means( df=dat.matched ) %>% pander()
+```
+
+
+**Q2b**
+
+Did balance improve? Explain your reasoning. 
+
+
+
+### Q3
+
+Explain how a match like this might occur? 
 
 
 ```{r}
-# create bins
-min.x <- min(x)
-max.x <- max(x)
-bins <- seq( from=min.x, to=max.x, length.out=50 )
-
-# preview bins 
-plot( x, y, pch=19, col=gray(0.5,0.2), cex=1.5, bty="n" )
-abline( v=bins, col="steelblue", lty=3 )
+these <- c("id", "p.score", "books", "movies", "fiction", "scifi", "children", 
+           "male", "age", "race")
+dd <- dat[ 26:27, these ]
+rownames( dd ) <- NULL
+dd %>% pander()
 ```
 
-Average X and Y values within each bin:
+
+
+
+## Part 2 - Greedy Search 
+
+The computer program needs rules to determine which cases are matched pairs and which cases are dropped from the original sample. In Part 1 you used a simple heuristic of sorting the dataset by propensity scores then comparing each case to the row above and row below, keeping the pair if one was in the treatment group and the other was in the control. 
+
+The lecture introduced a slightly-different heuristic, which was to simply keep all cases there a treated observation (paid for admissions coaching) overlapped with a non-treated observation. Those cases were kept, and the rest of the data was thrown out. This is an exaple where the study includes two continous numeric covariates only, so its easy to represent matches on the two dimensional grid by finding overlapping dots. In the example above the propensity scores represent the likelihood of participating in a program, so people with high likelihood of participation are only matched with other people that are highly likely to participate in the program but did not for some reason. 
+
+![](img/law-school-03.png) 
+
+Matching programs will use slightly more complex heuristics for determining matches. Note though, that they are still heuristics because they are apply simple sets of rules to generate reasonable results. A small matched sample is retained and the rest of the data is discarded. 
+
+The **optimal** solution to the matching problems is to return the IDs of people in the dataset that generate the highest degree of balance in the dataset on measured covariates. It turns out to be a very hard mathematical problem because there is no closed-form solution to identify the best set of twins (closed form solution = a formula that can be proven to produce the highest score). And it also turns out to be a hard problem computationally because even with small datasets it would take thousands of years to explore all possible combinations of pairs in the dataset to find the best combinations. 
+
+As a result, many algorithms use something called **greedy search**, which means simply identifying the best solutions for each individual observation, and iterating through all of the observations in the treatment group searching for the best twin for each case. It is called a **greedy** algorithm because it only considers each observation in isolation, and does not consider how each individual match might make the global score worse (i.e. weaken the balance of the matched dataset). The term **impatient** might be a better description of how the algorithm operates. 
+
+For Part 2 of the lab you will work with a small dataset of 22 observations and create your own greedy matches following a couple of simple rules. Orange circles repreent program participants, and blue squares represent the candidates for our control group. 
+
+The horizontal axis represents where observation fall along some propensity measure, but instead of reporting the score itself the numbers report the distance between clusters of observations on the propensity measure. True propensity scores range from 0 to 1, but this hypothetical case uses larger numbers to make addition easier. 
+
+The basic goal of a greedy algorithm is to find the closest match for each observation in the treatment group. In this chart the example allows for matching with replacement, so one untreated case can be used as the control group reference for multiple treated case. It is more common to use matching without replacement. 
+
+
+
+![](img/greedy-algorithms.png)
+
+
+**Instructions:**
+
+You will be given four different start points, and your job is to create the matched dataset by hand using a greedy search heuristic and matching WITHOUT replacement. Once you have added observations to a pair, remove them from the data. 
+
+For example, the diagram below shows a case where the search start with observation #1 in the dataset. After #1 is matched then the nearest neighbor for #2 is found. 
+
+In this example the algorithm is following some ordering of the dataset, like first ID to last ID. 
+
+The fitness score or objective function that we are seeking to minimize is the average distance between all paired observations in the matched set. Smaller distances between pairs means they are more similar on measured traits. A smaller average score translates to better model balance. 
+
+The goal of this exercise is to show how small changes to a greedy search heuristic can results in very different results. 
+
+
+![](img/greedy-search.png)
+
+
+### Q1 
+
+Using the diagram below create four different sets of matched pairs and report their average distance scores. 
+
+**Q1a:** Start with observation #1 in the treatment group, and go in order until you finish with observation #10. For each observation use a nearest neighbor rule to create the match and remove matched pairs from the list.
+
+Create a spreadsheet with your matched pairs listed as "1-C", "2-D", etc. Record the distance measure for each matched pair, and tabulate the average distance between all matched pairs at the end. If two observations are stacked vertially in the diagram and they are matched the distance between them is zero.
+
+**Q1b:** Repeat the same operations, but now start with individual #10 and work backwards through the list until you have results for all 10 cases in the treatment group. 
+
+**Q1c:** Now instead of starting with an arbitrary participant and following the order of IDs, go in order from those cases that have the smallest distance to their neighbors to those that have the largest. For example, you could start with **3-C**, **4-D**, and **7-I** since they all have distance scores of 0. Once all of the zero distance cases are gone, start with the next case that has the shortest distance to a non-matched neighbor. Repeat for all observations. 
+
+**Q1d:** We are forcing you to match every observation in the treatment group, even if their nearest neighbor is located far away. What happens if you only need to retain 60% of your sample for analysis. How does that change your fitness statistic?
+
+![](img/greedy-lab-setup.png)
+
+
+**Report your results to Q1a to Q1d as a table with each matched pair, the distance between observations in the matched pair (like the example above), and the globalaverage distance measure across all 10 cases.**
+
+
+### Bonus 
+
+Continue using the greedy search rule (find the nearest neighbor), but you are free to choose the order of observations that you match as long as you match all 10 program participants and do not use replacement. Can you beat the lowest score from Q1a to Q1c? 
+
+
+
+## Part 3 - MatchIt Package 
+
+Now that you have some intuition about the algorithms underneath the hood try out the **MatchIt** package. 
+
+In practice it can be hard to predict which options work well with specific datasets. Each data set has its own unique internal structure and dimensionality that is suitable for one heuristic and not another. You will use the concept of balance to guide your choices. 
+
+The syntax is close to regression syntax, so fairly simple. The default search method a greedy nearest neighbor approach: 
 
 ```{r}
-groups <- cut( x, breaks=bins )
-group.x <- tapply( x, groups, mean )
-ave.y <- tapply( y, groups, mean )
+# nearest neighbor is the default method
 
-# fix couple of empty bins in lower tail
-ave.y[ is.na( ave.y ) ] <- 0
+m.out <- matchit( books ~ movies + fiction + scifi + children + 
+                  male + age + white + black + asian, data=dat,
+                  method = "nearest" )
 
-plot( x, y, pch=19, col=gray(0.5,0.3), bty="n" )
-points( group.x, ave.y, pch=19, col="steelblue", cex=1.2, type="b" )
+# view match statistics 
+m.out
 ```
 
+### Q1: 
+
+If you are happy with the new sample balance you can create a subset of your data using the **match.data()** function. With this default method we ended up dropping 13 observations from the control group. Did it improve the balance in our data? How can you tell? 
 
 ```{r}
-# add a smoothed prob estimate 
-# averages 3 points together to smooth out noise:
-smooth.y <- smooth( ave.y )
+# create a new dataset from the matches
+d.matched <- match.data( m.out )
+compare_means( df=d.matched  ) %>% pander()
+```
 
-plot( x, y, pch=19, col=gray(0.5,0.1), bty="n", cex=1.5,
-      ylab="Prob( Y=1 for bin of X )", xlab="Independent Variable" )
-abline( h=seq(0,1,0.1), lty=3, col=gray(0.5,0.5) )
-abline( v=seq(0,100,5), lty=3, col=gray(0.5,0.5) )
-points( group.x, ave.y, pch=19, col=adjustcolor( "steelblue", alpha=0.5), cex=1.5 )
-points( group.x, smooth.y, pch=19, col="firebrick", cex=1.2, type="b" )
+
+### Q2
+
+In the printout above of sample statistics it reports that 13 cases in the control group were unmatched at the end. The **discard=** argument allows he program to drop observations prior to matching. This is helpful when some cases fall outside of the region of common support. 
+
+How does relaxing this contraint change the final sample size? 
+
+Does it generate more or less balance than the defaul method reported in Q1? Is this consistent with Q1d in Part 2? 
+
+
+
+```{r, eval=F}
+m.out <- matchit( books ~ movies + fiction + scifi + children + 
+                  male + age + white + black + asian, data=dat,
+                  discard="both" )
+
+m.out 
+d.matched <- match.data( m.out )
+# compare_means( df=d.matched ) %>% pander()
+```
+
+You might need to remove the movies variable from your table of contrasts if everyone saw the films in the matched sample. A column of ones has no variance, so the t-test will report an error. Just comment out movies in the variable list. 
+
+```{r, eval=F}
+compare_means <- function( df )
+{
+  
+  options( scipen=8 )
+  
+  vars <- c("fiction", "scifi", "children",   # "movies", 
+            "male", "age", "white", "black", "asian")
+  
+  results <- NULL
+  loop.count <- 1
+  
+  for( i in vars )
+  {
+    x <- i
+    ttest <- t.test( get(x) ~ books, data=df )
+    
+    control    <- as.numeric( ttest$estimate[1] ) %>% round(2)
+    treatment  <- as.numeric( ttest$estimate[2] ) %>% round(2)
+    diff       <- ( treatment - control ) %>% round(2)
+    ci.lower   <- ttest$conf.int[1] %>% round(2)
+    ci.upper   <- ttest$conf.int[2] %>% round(2) 
+    p.value    <- ttest$p.value %>% round(5)
+    
+    new.row <- cbind( variable=i, treatment, control, diff, ci.lower, ci.upper, p.value ) 
+    results <- rbind( results, new.row )
+  
+  }
+  
+  t <- table( df$books )
+  results <- rbind( results, c("n",as.numeric( t[2] ), as.numeric( t[1] ), "","","","" ) )
+  return( as.data.frame( results ) )
+
+}
+
+compare_means( df=d.matched ) %>% pander()
+```
+
+
+### Q3
+
+Q1 and Q2 both use greedy search routines. Some of the other search methods borrow from optimization to do a more thorough search for sets of pairs that lowers the average distance in the matched set. Compare the sample created by this type of search to the samples generated from Q1 and Q1. 
+
+* Is the sample size larger or smaller than each?   
+* Is the balance better or worse than each?  
+
+*Please use the chunk argument **results="hide"** when running the genetic search method so you don't include a dozen pages of genetic search iteration output. 
+
+```{r, message=FALSE, results="hide", eval=F}
+m.out <- matchit( books ~ movies + fiction + scifi + children + 
+                  male + age + white + black + asian, data=dat,
+                  method="genetic" )
+```
+
+
+```{r, eval=F}
+m.out 
+d.matched <- match.data( m.out )
+compare_means( df=d.matched ) %>% pander()
 ```
 
 
 
-```{r}
-# show model fit of linear prob and logit
-m1 <- lm( y ~ x )
-m2 <- glm( y ~ x, family="binomial" )
-plot.order <- order(x)
-
-plot( x, y, pch=19, col=gray(0.5,0.1), bty="n", cex=1.5,
-      ylab="Prob( Y=1 for bin of X )", xlab="Independent Variable" )
-abline( h=seq(0,1,0.1), lty=3, col=gray(0.5,0.5) )
-abline( v=seq(0,100,5), lty=3, col=gray(0.5,0.5) )
-points( group.x, ave.y, pch=19, col=adjustcolor( "steelblue", alpha=0.5), cex=1.5 )
-lines( x, m1$fitted.values, col="firebrick", lwd=1.5 )
-lines( x[ plot.order ], m2$fitted.values[ plot.order ], col="firebrick", lwd=1.5 )
-```
 
 
-# Questions
-
-## Q1
-
-**First, let's run a linear probability model.**
-
-* **Q1a:** Run a linear probability model and report results. Remember to use robust standard errors (you might need to install lmtest and sandwich packages) (5 + 5 points)
-* **Q1b:** Which variables affect the probability that a state considers mandatory vaccine legislation? (5 points)
-* **Q1c:** What is the impact of Media coverage on the probability that a state considers mandatory vaccine legislation? (5 points)
-* **Q1d:** Robust standard errors solve heteroskedasticity problems. What other two issues are problematic in the linear probability models? (5 + 5 points)
-
-## Q2
-
-**Alternatively we can use a logit model.** 
-
-* **Q2a:** Which estimator do we use in a logit model? What is the function shape? (5 + 5 points)
-* **Q2b:** Run the logit model and report results in a stargazer table (5 + 5 points)
-
-## Q3: 
-
-**Interpretation of the coefficient in a logit model can be tricky.**
-
-* **Q3a:** Transform the model coefficient in odd ratios. (5 points)
-* **Q3b:** As the evangelic population increases of one unit, how does the log odds of adopting a mandatory vaccine legislation change? (5 points)
-* **Q3c:** Use the probability formula to calculate the probability of adopting a mandatory vaccine legislation for an average state (i.e., a state where all variables are equal to the mean) (5 points)
-* **Q3d:** Compared to the average state, how much does the probability change if a state that has a particularly high media coverage, equal to the 95% quantile? You can use the probability formula or the predict function, as you prefer. (5 points)
-* **Q3e:** Compared to the average state, how much does the probability change if a state that has a particularly low percentage of Evangelics, equal to the 25% quantile? You can use the probability formula or the predict function, as you prefer. (5 points)
-* **Q3f:** Now create a graph plotting how probabilities change as the percentage of Evangelics goes from 0 to 100 (just consider values every 10 percentage points, e.g., 0, 10, 20...) (5 points)
-
-## Q4
-
-**Another way to interpret the coefficients is using marginal effect**
-
-**Q4a:** Which variable has the highest marginal effect between Media and Evangelics? (5 points)  
-**Q4b** Does an increase in Evangelic population have a greater effect in a state where the current % is equal to 20% or 40%? (5 points)  
-**Q4c:** Imagine to work for an advocacy group that is trying to promote the adoption of mandatory HPV vaccine legislation across states. Part of your effort is to decrease negative media coverage. Would you rather invest in a state where the media coverage is equal to 200 or in a state where the media coverage is equal to 400?  (10 points)  
 
 
