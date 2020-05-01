@@ -58,7 +58,7 @@ We overcome this problem by restricting the analysis to a subset of the data aft
 
 ![](img/twins.jpg)
 
-*Does starring in Game of Thrones make you rich and happy? One of these twins received the treatment, while the other now regrets listening to dad and being "pragmatic and realistic about your career".*
+> *Does starring in Game of Thrones make you rich and happy? One of these twins received the treatment, while the other now regrets listening to dad and being "pragmatic and realistic" about his career.*
 
 More precisely, matching does not ensure that each program participant has an *identical twin*, rather it is an efficient way to ensure that the groups are *statistically identical*, i.e. that group traits are not significantly different. Just like randomization can fail when chance produces dissimilar groups, matching fails when algorithms cannot identify balanced subgroups within the data resulting in observed differences in group means on measured traits. 
 
@@ -260,11 +260,11 @@ compare_means <- function( df )
     control    <- as.numeric( ttest$estimate[1] ) %>% round(2)
     treatment  <- as.numeric( ttest$estimate[2] ) %>% round(2)
     diff       <- ( treatment - control ) %>% round(2)
+    p.value    <- ttest$p.value %>% round(5)
     ci.lower   <- ttest$conf.int[1] %>% round(2)
     ci.upper   <- ttest$conf.int[2] %>% round(2) 
-    p.value    <- ttest$p.value %>% round(5)
     
-    new.row <- cbind( variable=i, treatment, control, diff, ci.lower, ci.upper, p.value ) 
+    new.row <- cbind( variable=i, treatment, control, diff, p.value, ci.lower, ci.upper ) 
     results <- rbind( results, new.row )
   
   }
@@ -374,6 +374,9 @@ Create a spreadsheet with your matched pairs listed as "1-C", "2-D", etc. Record
 
 **Report your results to Q1a to Q1d as a table with each matched pair, the distance between observations in the matched pair (like the example above), and the globalaverage distance measure across all 10 cases.**
 
+How sensitive are greedy search arguments to small changes like which data point you start with? 
+
+
 
 ### Bonus 
 
@@ -479,7 +482,7 @@ Q1 and Q2 both use greedy search routines. Some of the other search methods borr
 * Is the sample size larger or smaller than each?   
 * Is the balance better or worse than each?  
 
-*Please use the chunk argument **results="hide"** when running the genetic search method so you don't include a dozen pages of genetic search iteration output. 
+_Please use the chunk argument **results="hide"** when running the genetic search method so you don't include a dozen pages of genetic search iteration output._ 
 
 ```{r, message=FALSE, results="hide", eval=F}
 m.out <- matchit( books ~ movies + fiction + scifi + children + 
