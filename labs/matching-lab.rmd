@@ -407,6 +407,9 @@ m.out
 
 If you are happy with the new sample balance you can create a subset of your data using the **match.data()** function. With this default method we ended up dropping 13 observations from the control group. Did it improve the balance in our data? How can you tell? 
 
+
+Which variables are balanced, and which variables remain unbalanced? 
+
 ```{r}
 # create a new dataset from the matches
 d.matched <- match.data( m.out )
