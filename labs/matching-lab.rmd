@@ -171,18 +171,25 @@ This lab will use the Harry Potter survey data and a toy optimization dataset to
 
 A propensity score in evaluation is simply a measure of the probabilty or likelihood that a specific person particpate (or has participated) in the program. 
 
-We can estimate the propensity score empirically using program participation as our dependent variable in a linear probability model or a logit. 
+We can generate the propensity score empirically using program participation as our dependent variable in a linear probability model or a logit model. 
+
+*Note that the propensity scores themselves are important constructs and there are more formal approaches modeling them. This is a very simplistic model used for pedagogical purposes.* 
 
 ```{r, results="asis"}
 ps.model <- lm( books ~ movies + fiction + scifi + 
-             children + male + age + factor(race), 
+             children + male + age + asian + black + white, 
              data=dat )
 
 stargazer( ps.model, digits=2, type="html",
            omit.stat = c("f","ser") )
 ```
 
-We care less about interpretting results and more about getting the predicted propensity for program participation from the model. Note that the data has been sorted by propensity scores so that twins can be identified.  
+The coefficients can help us identify predictors of participation in the treatment (a book club member in this case). 
+
+We care less about interpretting results and more about getting the predicted propensity for program participation from the model and how is organizes the data. Note that the data had previously been sorted by propensity scores and IDs correspond to the rank of propensity scores. Data is sorted by propensity to visually display the idea of data "neighbors" using row adjacency in the dataset. 
+
+
+Since the data is sorted from high propensity scores to low scores the majority of 
 
 ```{r}
 dat$p.score <- ps.model$fitted.values %>% round(3)
@@ -341,7 +348,7 @@ The basic goal of a greedy algorithm is to find the closest match for each obser
 
 **Instructions:**
 
-You will be given four different start points, and your job is to create the matched dataset by hand using a greedy search heuristic and matching WITHOUT replacement. Once you have added observations to a pair, remove them from the data. 
+You will be given four different start points, and your job is to create the matched dataset by hand using a greedy search heuristic and **matching WITHOUT replacement**. Once you have added observations to a pair, remove them from the data. 
 
 For example, the diagram below shows a case where the search start with observation #1 in the dataset. After #1 is matched then the nearest neighbor for #2 is found. 
 
@@ -365,14 +372,18 @@ Create a spreadsheet with your matched pairs listed as "1-C", "2-D", etc. Record
 
 **Q1b:** Repeat the same operations, but now start with individual #10 and work backwards through the list until you have results for all 10 cases in the treatment group. 
 
+You have used the same heuristic in Q1a and Q1b. Did your results change? 
+
 **Q1c:** Now instead of starting with an arbitrary participant and following the order of IDs, go in order from those cases that have the smallest distance to their neighbors to those that have the largest. For example, you could start with **3-C**, **4-D**, and **7-I** since they all have distance scores of 0. Once all of the zero distance cases are gone, start with the next case that has the shortest distance to a non-matched neighbor. Repeat for all observations. 
+
+Did starting with low-distance cases first improve your global fit score (low average distance between pairs)? 
 
 **Q1d:** We are forcing you to match every observation in the treatment group, even if their nearest neighbor is located far away. What happens if you only need to retain 60% of your sample for analysis. How does that change your fitness statistic?
 
 ![](img/greedy-lab-setup.png)
 
 
-**Report your results to Q1a to Q1d as a table with each matched pair, the distance between observations in the matched pair (like the example above), and the globalaverage distance measure across all 10 cases.**
+**Report your results to Q1a to Q1d as a table with each matched pair (written "1-C", the distance between observations in the matched pair (like the example above), and the global average distance measure across all cases (10 pairs in Q1a-c, and 6 pairs in Q1d).**
 
 
 ### Q2 
@@ -385,6 +396,8 @@ Answer the following questions:
 
 **Q2c:** How sensitive are greedy search arguments to small changes like which data points you start with? 
 
+
+*Note, optimization algorithms that utilize heuristics will often use random starting points. We selected IDs for the starting points in Q1a and Q1b, but in practice the starting point could be any ID. The randomization algorithm relies upon a "seed" value, which can be set explicitly using `set.seed( 123 )`, but if no seed is given the the user the algorithm will use a numeric representation of the time and date the algorithm was initiated. If you want your results to be reproducible set the seed yourself." 
 
 
 ### Bonus 
