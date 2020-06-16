@@ -28,13 +28,13 @@ install.packages( "scales" )
 
 
 ```{r, echo=TRUE, results="hide"}
-library( "stargazer" )
-library( "car" )
-library( "wooldridge" )
-library( "sandwich" )
-library( "lmtest" )
-library( "margins" )
-library( "scales" )
+library( stargazer )
+library( car )
+library( wooldridge )
+library( sandwich )
+library( lmtest )
+library( margins )
+library( scales )
 library( pander )
 ```
 

@@ -1,11 +1,10 @@
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
 
 <head>
 
 <meta charset="utf-8" />
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
 <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
@@ -236,6 +235,7 @@ $(document).ready(function () {
   border: none;
   display: inline-block;
   border-radius: 4px;
+  background-color: transparent;
 }
 
 .tabset-dropdown > .nav-tabs.nav-tabs-open > li {
@@ -283,6 +283,21 @@ $(document).ready(function () {
 </li>
 <li>
   <a href="p-030-diff-in-diff.html">Diff-in-Diff</a>
+</li>
+<li>
+  <a href="p-040-fixed-effects.html">FixedEffects</a>
+</li>
+<li>
+  <a href="p-050-instrumental-variables.html">InstrumentalVariables</a>
+</li>
+<li>
+  <a href="p-060-reg-discontinuity.html">Regression Discontinuity</a>
+</li>
+<li>
+  <a href="p-070-logistic-regression.html">Logistic Regression</a>
+</li>
+<li>
+  <a href="p-080-matching">Matching</a>
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
@@ -1422,7 +1437,7 @@ data = CountyMonthBirthRate2014Version </code></pre>
 oklahoma &lt;- subset(data, data$CountyName == &quot;oklahoma&quot;) </code></pre>
 <p>To get a first sense of the data we can look at this plot that Rodgers and colleagues used to represent birth rate over time in Oklahoma county:</p>
 <div class="figure"><span id="fig:f13"></span>
-<img src="FIGURE/TimeSeries/PictureRodgers.png" alt="Oklahoma county, Birth rate over time (Source: Rodgers et al., 2005)" width="800" />
+<img src="FIGURE/TimeSeries/PictureRodgers.png" alt="Oklahoma county, Birth rate over time (Source: Rodgers et al., 2005)"  />
 <p class="caption">
 Figure 3.1: Oklahoma county, Birth rate over time (Source: Rodgers et al., 2005)
 </p>

@@ -12,6 +12,12 @@ navbar:
       href: p-040-fixed-effects.html
     - text: "InstrumentalVariables"
       href: p-050-instrumental-variables.html
+    - text: "Regression Discontinuity"
+      href: p-060-reg-discontinuity.html 
+    - text: "Logistic Regression" 
+      href: p-070-logistic-regression.html 
+    - text: "Matching"  
+      href: p-080-matching 
   right:
     - icon: fa-github fa-2x
       href: https://github.com/DS4PS/pe4ps-textbook

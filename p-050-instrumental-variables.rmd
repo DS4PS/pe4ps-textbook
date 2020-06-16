@@ -30,9 +30,9 @@ library( "stargazer" )
 * Understanding key mechanisms behind an instrumental variable model
 
 ```{r, echo=FALSE, eval=F, results="hide", cache=F}
-install.packages("AER", repos="https://cran.cnr.berkeley.edu")
-install.packages("stargazer", repos="https://cran.cnr.berkeley.edu")
-install.packages("scales", repos="https://cran.cnr.berkeley.edu")
+install.packages( "AER", repos="https://cran.cnr.berkeley.edu")
+install.packages( "stargazer", repos="https://cran.cnr.berkeley.edu")
+install.packages( "scales", repos="https://cran.cnr.berkeley.edu")
 install.packages( "wooldridge", repos="https://cran.cnr.berkeley.edu" )
 ```
 

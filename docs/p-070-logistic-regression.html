@@ -1,11 +1,10 @@
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
 
 <head>
 
 <meta charset="utf-8" />
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
 <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
@@ -236,6 +235,7 @@ $(document).ready(function () {
   border: none;
   display: inline-block;
   border-radius: 4px;
+  background-color: transparent;
 }
 
 .tabset-dropdown > .nav-tabs.nav-tabs-open > li {
@@ -289,6 +289,15 @@ $(document).ready(function () {
 </li>
 <li>
   <a href="p-050-instrumental-variables.html">InstrumentalVariables</a>
+</li>
+<li>
+  <a href="p-060-reg-discontinuity.html">Regression Discontinuity</a>
+</li>
+<li>
+  <a href="p-070-logistic-regression.html">Logistic Regression</a>
+</li>
+<li>
+  <a href="p-080-matching">Matching</a>
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
@@ -361,13 +370,13 @@ install.packages( &quot;sandwich&quot; )
 install.packages( &quot;lmtest&quot; )
 install.packages( &quot;margins&quot; )
 install.packages( &quot;scales&quot; )</code></pre>
-<pre class="r"><code>library( &quot;stargazer&quot; )
-library( &quot;car&quot; )
-library( &quot;wooldridge&quot; )
-library( &quot;sandwich&quot; )
-library( &quot;lmtest&quot; )
-library( &quot;margins&quot; )
-library( &quot;scales&quot; )
+<pre class="r"><code>library( stargazer )
+library( car )
+library( wooldridge )
+library( sandwich )
+library( lmtest )
+library( margins )
+library( scales )
 library( pander )</code></pre>
 <p><strong>What you will learn</strong></p>
 <ul>
@@ -506,13 +515,13 @@ LSAT
 152.19
 </td>
 <td>
-9.90
+9.91
 </td>
 <td>
-120.00
+120
 </td>
 <td>
-180.00
+180
 </td>
 </tr>
 <tr>
@@ -526,13 +535,13 @@ Essay
 53.16
 </td>
 <td>
-16.54
+16.55
 </td>
 <td>
-1.00
+1
 </td>
 <td>
-100.00
+100
 </td>
 </tr>
 <tr>
@@ -609,14 +618,14 @@ Admission
 Constant
 </td>
 <td>
--3.166<sup>***</sup>
+-3.170<sup>***</sup>
 </td>
 </tr>
 <tr>
 <td style="text-align:left">
 </td>
 <td>
-(0.209)
+(0.208)
 </td>
 </tr>
 <tr>
@@ -756,10 +765,10 @@ coeftest( LPM, vcov = vcovHC(LPM, type=&quot;HC1&quot;) )</code></pre>
 ## t test of coefficients:
 ## 
 ##                Estimate  Std. Error  t value  Pr(&gt;|t|)    
-## (Intercept) -3.16600667  0.17342135 -18.2562 &lt; 2.2e-16 ***
-## LSAT         0.01936839  0.00114585  16.9031 &lt; 2.2e-16 ***
-## Essay        0.00968187  0.00071566  13.5286 &lt; 2.2e-16 ***
-## GPA          0.13214028  0.01498497   8.8182 &lt; 2.2e-16 ***
+## (Intercept) -3.16971981  0.17294922 -18.3275 &lt; 2.2e-16 ***
+## LSAT         0.01939855  0.00114302  16.9713 &lt; 2.2e-16 ***
+## Essay        0.00965468  0.00071493  13.5043 &lt; 2.2e-16 ***
+## GPA          0.13235103  0.01497754   8.8366 &lt; 2.2e-16 ***
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
 <p>In the previous example, the standard errors change little after we use a robust estimator. For GPA, the standard error decreases from 0.016 to 0.0149. The essay standard error decreases from 0.001 to 0.0006.</p>
@@ -774,17 +783,17 @@ df &lt;- df[ order( df$LSAT ), ]
 
 # We can calculate the LSAT mean for the 50 students with the lowest score. 
 mean( df$LSAT[ 1:50 ] )</code></pre>
-<pre><code>## [1] 131.4376</code></pre>
+<pre><code>## [1] 131.44</code></pre>
 <pre class="r"><code># We calculate the mean of Admission, which represents the probability of being admitted to law school for the 50 students with the lowest LSAT score. 
 mean( df$Admission[ 1:50 ] )</code></pre>
 <pre><code>## [1] 0.26</code></pre>
 <p>We can repeat the process and take the average probability for the 51st observation to the 100th observations. The probability of being admitted to law school is equal to 0.34, while the average LSAT score has also increased to 137.54. This suggests a positive relationship between LSAT and Admission.</p>
 <pre class="r"><code># We can calculate the LSAT mean for the 51st-100th students in the LSAT score ranking. 
 mean( df$LSAT[ 51:100 ] )</code></pre>
-<pre><code>## [1] 137.5416</code></pre>
+<pre><code>## [1] 137.52</code></pre>
 <pre class="r"><code># We calculate the mean of Admission, which represents the probability of being admitted to law school for the 51st-100th students in the LSAT score ranking. 
 mean( df$Admission[ 51:100 ] )</code></pre>
-<pre><code>## [1] 0.2</code></pre>
+<pre><code>## [1] 0.18</code></pre>
 <p>We can apply the same process for all groups of 50 observations (101st-150th, 151st-200th, and so on) and plot the average LSAT score of each group against the admission probability for that same group. We also add the regression line for a linear probability model including only the LSAT score.</p>
 <pre class="r"><code># We order our observation by LSAT score
 df &lt;- df[order(df$LSAT),] 
@@ -821,7 +830,7 @@ abline(lm(df$Admission ~ df$LSAT), col = &quot;darkred&quot;, lwd = 3) #Add a re
 <p>Values range from -0.015 to 1.30. But a probability greater than 1 is not realistic. This is another reason why most people prefer a logit model. A logit model will contraint the outcome variable to range from 0 to 1.</p>
 <pre class="r"><code>summary(yhat)</code></pre>
 <pre><code>##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-## -0.1975  0.4331  0.5960  0.6090  0.7935  1.3678</code></pre>
+## -0.1889  0.4306  0.5970  0.6090  0.7909  1.3693</code></pre>
 </div>
 </div>
 <div id="the-logit-model" class="section level1">
@@ -912,7 +921,7 @@ Admission
 Constant
 </td>
 <td>
--23.059<sup>***</sup>
+-23.088<sup>***</sup>
 </td>
 </tr>
 <tr>
@@ -954,7 +963,7 @@ LSAT Score
 Essay
 </td>
 <td>
-0.061<sup>***</sup>
+0.060<sup>***</sup>
 </td>
 </tr>
 <tr>
@@ -975,7 +984,7 @@ Essay
 GPA
 </td>
 <td>
-0.825<sup>***</sup>
+0.828<sup>***</sup>
 </td>
 </tr>
 <tr>
@@ -1008,7 +1017,7 @@ Observations
 Log Likelihood
 </td>
 <td>
--487.976
+-487.499
 </td>
 </tr>
 <tr>
@@ -1016,7 +1025,7 @@ Log Likelihood
 Akaike Inf. Crit.
 </td>
 <td>
-983.951
+982.999
 </td>
 </tr>
 <tr>
@@ -1106,14 +1115,14 @@ plot( data$OR, data$LogsO,
 <p>To get more meaningful information, we can start by transforming the coefficients into logs ratio. We reverse the log transformation by exponentiating the coefficients.</p>
 <pre class="r"><code>exp( coef( log ) )</code></pre>
 <pre><code>##  (Intercept)         LSAT        Essay          GPA 
-## 9.671261e-11 1.129732e+00 1.062380e+00 2.282129e+00</code></pre>
+## 9.396176e-11 1.129936e+00 1.062257e+00 2.289187e+00</code></pre>
 <p>We can also combine them with the confidence intervals.</p>
 <pre class="r"><code>exp( cbind( OR = coef(log), confint(log) ) )</code></pre>
 <pre><code>##                       OR        2.5 %       97.5 %
-## (Intercept) 9.671261e-11 2.929856e-12 2.576964e-09
-## LSAT        1.129732e+00 1.108151e+00 1.153055e+00
-## Essay       1.062380e+00 1.051070e+00 1.074374e+00
-## GPA         2.282129e+00 1.864247e+00 2.814786e+00</code></pre>
+## (Intercept) 9.396176e-11 2.846439e-12 2.502913e-09
+## LSAT        1.129936e+00 1.108359e+00 1.153253e+00
+## Essay       1.062257e+00 1.050960e+00 1.074238e+00
+## GPA         2.289187e+00 1.869463e+00 2.824405e+00</code></pre>
 <p>Let’s read some results.</p>
 <ul>
 <li>As the LSAT score increases of one point, the odds ratios of being admitted to law school increase of 1.13</li>
@@ -1136,11 +1145,11 @@ plot( data$OR, data$LogsO,
 <p>We noted before that the relationship between X and Y changes depending on the value of X (graph <a href="#fig:binaryfunction">3.1</a>). Because of that, we need to fix values for each of our coefficient.</p>
 <p>Ideally, you want to pick values that make sense for the variables. It is common to take the mean. For instance, we can look at the probability to be admitted to college for an average student (i.e., average LSAT, essay score and GPA).</p>
 <pre class="r"><code>mean(LSAT)</code></pre>
-<pre><code>## [1] 152.186</code></pre>
+<pre><code>## [1] 152.187</code></pre>
 <pre class="r"><code>mean(Essay)</code></pre>
-<pre><code>## [1] 53.15828</code></pre>
+<pre><code>## [1] 53.162</code></pre>
 <pre class="r"><code>mean(GPA)</code></pre>
-<pre><code>## [1] 2.366707</code></pre>
+<pre><code>## [1] 2.36682</code></pre>
 <p>We can plug this number into our formula <a href="#eq:probabilities">(3.1)</a>.</p>
 <p><span class="math display" id="eq:probabilities">\[\begin{equation} 
 \begin{split}
@@ -1168,7 +1177,7 @@ data2 &lt;- with( data,
 data2$Admission_Prop &lt;- predict( log, newdata = data2, type = &quot;response&quot; )
 
 data2$Admission_Prop</code></pre>
-<pre><code>## [1] 0.662384</code></pre>
+<pre><code>## [1] 0.662429</code></pre>
 <p>Again, the probability is equal to 0.66.</p>
 <p>You can create several probabilities. For instance, let’s see what happens if we assume our student has a GPA of 4.</p>
 <pre class="r"><code># We first create a new dataset where our 
@@ -1186,7 +1195,7 @@ data2 &lt;- with(data, data.frame(LSAT = mean(LSAT), Essay = mean(Essay), GPA = 
 data2$Admission_Prop &lt;- predict(log, newdata = data2, type = &quot;response&quot;)
 
 data2$Admission_Prop</code></pre>
-<pre><code>## [1] 0.8830444</code></pre>
+<pre><code>## [1] 0.8835753</code></pre>
 <p>In this case, the probability increases to 0.88.</p>
 <p>We can also look at our the probability changes across multiple values of GPA and plot results on a graph.</p>
 <p>The graph shows that the higher the GPA, the higher the probability to get into college.</p>
@@ -1199,7 +1208,7 @@ data2$Admission_Prop</code></pre>
 data2$Admission_Prop &lt;- predict(log, newdata = data2, type = &quot;response&quot;)
 
 data2$Admission_Prop</code></pre>
-<pre><code>## [1] 0.3884707 0.5917884 0.7678966 0.8830444 0.9451473</code></pre>
+<pre><code>## [1] 0.3874941 0.5915407 0.7682641 0.8835753 0.9455729</code></pre>
 <pre class="r"><code>plot(data2$GPA, data2$Admission_Prop, 
      xlab = &quot;GPA&quot;, 
      ylab = &quot;Probabilities of being admitted to college&quot;, 
@@ -1220,7 +1229,7 @@ Figure 3.4: Probability of being admit based on GPA
 data2$Admission_Prop &lt;- predict(log, newdata = data2, type = &quot;response&quot;)
 
 data2$Admission_Prop</code></pre>
-<pre><code>## [1] 0.8104688 0.9070527 0.9570277 0.9807042 0.9914522</code></pre>
+<pre><code>## [1] 0.8130873 0.9087439 0.9579763 0.9811975 0.9916985</code></pre>
 <pre class="r"><code>plot(data2$GPA, data2$Admission_Prop, 
      xlab = &quot;GPA&quot;, 
      ylab = &quot;Probabilities of being admitted to college&quot;, 
@@ -1248,15 +1257,15 @@ Figure 3.5: Variable transformation
 
 margins(log, at = list(GPA = mean(GPA)), variable = &quot;GPA&quot;)</code></pre>
 <pre><code>##  at(GPA)    GPA
-##    2.367 0.1373</code></pre>
+##    2.367 0.1376</code></pre>
 <p>When GPA is at its mean, an increas in GPA will increase the probability of being admitted of 0.1373.</p>
 <p>This might get more clear if we look at the example we discussed in graph (<a href="#fig:GPAplot">3.4</a>). We noted that the marginal effect is greater for a student with a GPA of 3 than for a student with a GPA of 4. The margins function allows to quantify this.</p>
 <pre class="r"><code>## In this function we fix our GPA to 3 and 4.
 
 margins(log, at = list(GPA = c(3,4)), variable = &quot;GPA&quot;)</code></pre>
 <pre><code>##  at(GPA)     GPA
-##        3 0.12447
-##        4 0.09552</code></pre>
+##        3 0.12468
+##        4 0.09564</code></pre>
 <p>For a student with a GPA of 3 the marginal effect of increasing its GPA is 0.12. But for a student with a GPA of 4 the increase in probability is only equal to 0.09. It’s more convenient to invest on GPA for a student with a low GPA.</p>
 <p>In general, we can look at the marginal effects for significant values - for instance, the first and third quantile (25% and 75%, respectively).</p>
 <pre class="r"><code>## In this function we fix our GPA to 3 and 4.
@@ -1267,18 +1276,18 @@ GPA_75 = margins(log, at = list(GPA = quantile(GPA, 0.75)), variable = &quot;GPA
 
 margins(log, at = list(LSAT = quantile(LSAT, 0.25)), variable = &quot;LSAT&quot;)</code></pre>
 <pre><code>##  at(LSAT)    LSAT
-##     145.5 0.02361</code></pre>
+##       145 0.02357</code></pre>
 <pre class="r"><code>margins(log, at = list(LSAT = quantile(LSAT, 0.75)), variable = &quot;LSAT&quot;)</code></pre>
 <pre><code>##  at(LSAT)    LSAT
-##     159.2 0.01764</code></pre>
+##       159 0.01779</code></pre>
 <pre class="r"><code>## In this function we fix our GPA to 3 and 4.
 
 margins(log, at = list(Essay = quantile(Essay, 0.25)), variable = &quot;Essay&quot;)</code></pre>
 <pre><code>##  at(Essay)   Essay
-##      41.41 0.01119</code></pre>
+##         41 0.01115</code></pre>
 <pre class="r"><code>margins(log, at = list(Essay = quantile(Essay, 0.75)), variable = &quot;Essay&quot;)</code></pre>
 <pre><code>##  at(Essay)    Essay
-##      64.63 0.008977</code></pre>
+##         65 0.008894</code></pre>
 <p>GPA provides the greatest marginal effect for students both at 25th and 75th percentile.</p>
 <p>Margins is also used to calucalte the <em>average marginal effect</em>, which represent the average slope of all tangents for all values of a variable.</p>
 <pre class="r"><code>#Calculate margins
@@ -1287,9 +1296,9 @@ m &lt;- margins(log)
 # Add p-value, standard errors, and confidence intervals.
 summary(m)</code></pre>
 <pre><code>##  factor    AME     SE       z      p  lower  upper
-##   Essay 0.0098 0.0007 14.0744 0.0000 0.0084 0.0111
-##     GPA 0.1334 0.0151  8.8591 0.0000 0.1039 0.1629
-##    LSAT 0.0197 0.0012 17.0133 0.0000 0.0175 0.0220</code></pre>
+##   Essay 0.0098 0.0007 14.0506 0.0000 0.0084 0.0111
+##     GPA 0.1338 0.0151  8.8825 0.0000 0.1043 0.1633
+##    LSAT 0.0197 0.0012 17.0798 0.0000 0.0175 0.0220</code></pre>
 <p>The average marginal effect for GPA is 0.13, for Essay is 0.0098 and for LSAT is 0.0197.</p>
 </div>
 </div>
