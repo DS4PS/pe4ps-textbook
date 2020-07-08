@@ -18,7 +18,7 @@ Federica Fusi, PhD <br>
 <h2> Table of Contents  </h2>
 
 1. [Interrupted Time Series](https://ds4ps.org/pe4ps-textbook/docs/p-020-time-series.html)
-1. [Instrumental Variables](p-050-instrumental-variables/)
+1. [Instrumental Variables](p-050-instrumental-variables.html)
 1. Matching
 1. Regression Discontinuity
 1. Difference-in-Difference
