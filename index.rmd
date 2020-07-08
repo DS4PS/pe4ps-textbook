@@ -36,7 +36,7 @@ Federica Fusi, PhD <br>
 <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">Attribution · NonCommercial · ShareAlike</a>
 
 
-This textbook is being developed for a graduate-level course covering regression tools commonly used in program evaluation or applied research contexts. Errors, comments or suggestions are welcome: <a href="https://github.com/DS4PS/PROG-EVAL-III/issues/new">
+This textbook is being developed for a graduate-level course covering regression tools commonly used in program evaluation or applied research contexts. Errors, comments or suggestions are welcome: <a href="https://github.com/DS4PS/pe4ps-textbook/issues/new/">
 <img src="https://image.flaticon.com/icons/png/512/813/813419.png" alt="new issue" style="width:50px;"></a>
 
 
