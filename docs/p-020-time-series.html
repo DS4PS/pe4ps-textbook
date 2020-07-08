@@ -603,7 +603,7 @@ Figure 1.13: Time series counterfactual, T=18
 <p>We are going to have a look at a simulated dataset describing the wellbeing of a class of students. Students’ wellbeing is an increasingly discussed topic in <a href="http://oecdeducationtoday.blogspot.com/2018/03/mental-health-students-school.html">policy debates</a> and some states are introducing <a href="https://www.nbcnews.com/better/health/fall-all-new-york-students-will-be-learning-about-mental-ncna911031">mental health education classes</a> (even some <a href="https://www.nytimes.com/2018/01/26/nyregion/at-yale-class-on-happiness-draws-huge-crowd-laurie-santos.html">universities</a>).</p>
 <p>The dataset contains 365 daily observations of the wellbeing of a class of students. Wellbeing is measured by a index from 0 to 300. At t = 201 students will start attend a mental health education class. We want to understand how (and if) their wellbeing improves.</p>
 <pre class="r"><code># load data from GitHub
-URL &lt;- &quot;https://github.com/DS4PS/PROG-EVAL-III/blob/master/LECTURES/data/time-series-example.rds?raw=true&quot;
+URL &lt;- &quot;https://github.com/DS4PS/pe4ps-textbook/blob/master/data/time-series-example.rds?raw=true&quot;
 dataTS &lt;- readRDS(gzcon(url( URL )))</code></pre>
 <p>First, we have a look at how the dataset is structured using the <em>head</em> and <em>tail</em> function. We can also look at rows 198-204 where the interruption occurs.</p>
 <pre class="r"><code>dataTS$Y &lt;- round(dataTS$Y,1)
@@ -1376,7 +1376,7 @@ Figure 2.6: The effect of the policy changes over time
 data( CountyMonthBirthRate2014Version )
 
 # We rename the data set to avoid the long name!
-data = CountyMonthBirthRate2014Version </code></pre>
+data &lt;- CountyMonthBirthRate2014Version </code></pre>
 <p>These are the variables contained in the dataset.</p>
 <table>
 <thead>
@@ -1437,7 +1437,7 @@ data = CountyMonthBirthRate2014Version </code></pre>
 oklahoma &lt;- subset(data, data$CountyName == &quot;oklahoma&quot;) </code></pre>
 <p>To get a first sense of the data we can look at this plot that Rodgers and colleagues used to represent birth rate over time in Oklahoma county:</p>
 <div class="figure"><span id="fig:f13"></span>
-<img src="FIGURE/TimeSeries/PictureRodgers.png" alt="Oklahoma county, Birth rate over time (Source: Rodgers et al., 2005)"  />
+<img src="FIGURE/TimeSeries/PictureRodgers.png" alt="Oklahoma county, Birth rate over time (Source: Rodgers et al., 2005)" width="800" />
 <p class="caption">
 Figure 3.1: Oklahoma county, Birth rate over time (Source: Rodgers et al., 2005)
 </p>

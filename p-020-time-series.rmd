@@ -285,7 +285,7 @@ The dataset contains 365 daily observations of the wellbeing of a class of stude
 
 ```{r, eval=F}
 # load data from GitHub
-URL <- "https://github.com/DS4PS/PROG-EVAL-III/blob/master/LECTURES/data/time-series-example.rds?raw=true"
+URL <- "https://github.com/DS4PS/pe4ps-textbook/blob/master/data/time-series-example.rds?raw=true"
 dataTS <- readRDS(gzcon(url( URL )))
 ```
 
@@ -647,7 +647,7 @@ library( "Wats" )
 data( CountyMonthBirthRate2014Version )
 
 # We rename the data set to avoid the long name!
-data = CountyMonthBirthRate2014Version 
+data <- CountyMonthBirthRate2014Version 
 
 ```
 
