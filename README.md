@@ -1,8 +1,8 @@
 # Program Eval for Public Service Organizations 
 
-![](https://raw.githubusercontent.com/DS4PS/pe4ps/master/docs/images/logo-red.png)
-
 An open-source textbook covering program evaluation regression tools commonly used for the estimation of program or policy impact in the public and nonprofit sectors. 
+
+![](https://raw.githubusercontent.com/DS4PS/pe4ps/master/docs/images/logo-red.png)
 
 The book was designed around several core principles: 
 
@@ -23,7 +23,7 @@ The book was designed around several core principles:
 1. [Logistic Regression](https://ds4ps.org/pe4ps-textbook/docs/p-070-logistic-regression.html) 
 1. [Matching](https://ds4ps.org/pe4ps-textbook/docs/p-080-matching) 
 
-[Data used in replication examples in the chapters](https://github.com/DS4PS/pe4ps-textbook/tree/master/data)   
+[DATA](https://github.com/DS4PS/pe4ps-textbook/tree/master/data) used in replication examples in the chapters.  
 
 <br>
 
@@ -37,8 +37,9 @@ The book was designed around several core principles:
 1. [Logistic Regression Lab](https://ds4ps.org/pe4ps-textbook/labs/logit-lab.html)  
 1. [Matching Lab](https://ds4ps.org/pe4ps-textbook/labs/matching-lab.html) 
 
-[Data used in the labs](https://github.com/DS4PS/pe4ps-textbook/tree/master/labs/DATA)
+[DATA](https://github.com/DS4PS/pe4ps-textbook/tree/master/labs/DATA) used in labs.  
 
+<br>
 
 
 #### Source Code  
