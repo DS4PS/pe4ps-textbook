@@ -17,13 +17,14 @@ Federica Fusi, PhD <br>
 
 <h2> Table of Contents  </h2>
 
-1. [Interrupted Time Series](https://ds4ps.org/pe4ps-textbook/docs/p-020-time-series.html)
-1. [Instrumental Variables](p-050-instrumental-variables.html)
-1. Matching
-1. Regression Discontinuity
-1. Difference-in-Difference
-1. Logistic Regression
-1. Duration Analysis
+1. [Interrupted Time Series](https://ds4ps.org/pe4ps-textbook/docs/p-020-time-series.html) 
+1. [Difference-in-Difference Models](https://ds4ps.org/pe4ps-textbook/docs/p-030-diff-in-diff.html) 
+1. [Instrumental Variables](https://ds4ps.org/pe4ps-textbook/docs/p-050-instrumental-variables.html) 
+1. [Fixed Effect Models](https://ds4ps.org/pe4ps-textbook/docs/p-040-fixed-effects.html) 
+1. [Regression Discontinuity Design](https://ds4ps.org/pe4ps-textbook/docs/p-060-reg-discontinuity.html) 
+1. [Logistic Regression](https://ds4ps.org/pe4ps-textbook/docs/p-070-logistic-regression.html) 
+1. [Matching](https://ds4ps.org/pe4ps-textbook/docs/p-080-matching) 
+
 
 <br>
 
