@@ -51,7 +51,7 @@ Textbook chapters are located in the **docs** folder.
 
 https://ds4ps.org/pe4ps-textbook/docs/index.html
 
-The R Markdown files used to create each chapter are in the root project folder: 
+The R Markdown (RMD) files used to create each chapter are in the root project folder: 
 
 https://github.com/DS4PS/pe4ps-textbook
 
