@@ -1,7 +1,5 @@
 # Program Eval for Public Service Organizations 
 
-[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
-
 An open-source textbook covering program evaluation regression tools commonly used for the estimation of program or policy impact in the public and nonprofit sectors. 
 
 ![](https://raw.githubusercontent.com/DS4PS/pe4ps/master/docs/images/logo-red.png)
@@ -45,6 +43,9 @@ The book was designed around several core principles:
 
 
 #### Source Code  
+
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+
 
 Textbook chapters are located in the **docs** folder.
 
