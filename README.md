@@ -65,6 +65,3 @@ https://github.com/DS4PS/pe4ps-textbook/blob/master/_site.yml
 
 
 
-TOPIC               |    LECTURE NOTES    |  LAB          |
---------------------| :-----------------: | :-----------: |
-Interrupted Time Series  |  [chapter](https://ds4ps.org/pe4ps-textbook/docs/p-020-time-series.html)  |  [lab](https://ds4ps.org/pe4ps-textbook/labs/time-series-lab.html)  
