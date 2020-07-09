@@ -8,8 +8,8 @@ The book was designed around several core principles:
 
 * Chapters emphasize intuition over mathematical precision. 
 * Instead of highlighting traditional econometrics concepts of endogeneity, efficiency, and parametric assumptions the chapters focus on the counterfactual embedded in each estimator and whether the comparison adequately captures unbiased program effects. 
-* Concepts are explained with examples, data and code so that students can replicate any examples. 
-* All analysis is done in R so that students can use the code after graduating without worrying about expensive licenses. 
+* Concepts are explained with examples, data and code so that students can replicate analysis in the chapters. 
+* All analysis is done in R so that students can use the software after graduating without the burden of expensive licenses. 
 
 <br>
 
