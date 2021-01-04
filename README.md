@@ -1,7 +1,8 @@
 # Program Eval for Public Service Organizations 
 
-_**Counterfactual Analysis with Regression Models**_ 
-Open source course notes and labs by Jesse Lecy and Federica Fusi
+_**Counterfactual Analysis with Regression Models**_   
+Open source course notes and labs for Program Evaluation   
+Authors: Jesse Lecy and Federica Fusi  
 
 
 An open-source textbook covering program evaluation regression tools commonly used for the estimation of program or policy impact in the public and nonprofit sectors. 
